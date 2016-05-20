@@ -1,0 +1,19 @@
+{
+  "name": "node",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app.js",
+    "test": "mocha"
+  },
+  "dependencies": {
+    "koa": "^1.2.0",
+    "koa-logger": "^1.2.0",
+    "koa-route": "^2.4.2",
+    "node-ssdp": "^2.7.1"
+  },
+  "devDependencies": {
+    "supertest": "^0.12.1",
+    "mocha": "^2.4.5"
+  }
+}
