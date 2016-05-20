@@ -3,8 +3,8 @@ Javascript version of a java software that emulates philips hue api to other hom
 See https://github.com/armzilla/amazon-echo-ha-bridge
 
 ## current status
-(This is a WIP until further notice)   
-On npm start, responds properly to "Echo/Alexa, discover devices." Will add devices to the Echo with the caveat that devices discovered are hard-coded and fake.
+On npm start, responds properly to "Echo/Alexa, discover devices." Will add devices to the Echo with the caveat that devices discovered are hard-coded and fake.   
+(This is a WIP until further notice) 
 
 ## todo
 - controllers (emulator and devices, upnp is mostly done)
