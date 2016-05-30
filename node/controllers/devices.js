@@ -1,4 +1,6 @@
 'use strict';
+// see http://blog.stevensanderson.com/2013/12/21/experiments-with-koa-and-javascript-generators/
+
 var db = require('../database')();
 
 function createThunk(device) {
