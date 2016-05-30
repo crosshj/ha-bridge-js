@@ -5,7 +5,7 @@ this is more an integration test for this app and SQLLite DB
 var chai = require('chai');
 var expect = chai.expect;
 
-describe('SQLLite Database', function () {
+describe('SQLite Database', function () {
   var db;
   var dbFileName;
 
@@ -20,7 +20,7 @@ describe('SQLLite Database', function () {
   it('creates a device', function (done) {
     //arrange
     var device = {
-      deviceId: '234',
+      deviceId: 234,
       name: 'foo',
       level: '100',
       deviceType: 'light',
@@ -38,7 +38,34 @@ describe('SQLLite Database', function () {
     function callback(err) {
       db.instance.all("select * from devices", function(err, rows){
         var lastItem = rows[rows.length-1];
+        ///lastItem.deviceId = lastItem.deviceId.toString();
         expect(lastItem).to.deep.equal(device);
+        done();
+      })
+    }
+  });
+
+  it('creates a device with automatic Id', function (done) {
+    //arrange
+    var device = {
+      name: 'fooAuto',
+      level: '100',
+      deviceType: 'light',
+      offUrl: 'http://www.foo.com/off',
+      onUrl: 'http://www.foo.com/on',
+      httpVerb: 'GET',
+      contentType: 'foo',
+      contentBody: 'foo'
+    };
+
+    //act
+    db.createDevice(device, callback);
+
+    //assert
+    function callback(err) {
+      db.instance.all("select * from devices where name = 'fooAuto'", function(err, rows){
+        var lastItem = rows[rows.length-1];
+        expect(rows.length).to.equal(1);
         done();
       })
     }
@@ -47,7 +74,7 @@ describe('SQLLite Database', function () {
   it('reads device(s) by id', function (done) {
     //arrange
     var device = {
-      deviceId: '234',
+      deviceId: 234,
       name: 'foo',
       level: '100',
       deviceType: 'light',
@@ -74,7 +101,7 @@ describe('SQLLite Database', function () {
     // use inserted item from previous step
     var fieldName = 'name';
     var fieldValue = 'newfoo';
-    var deviceId = '234';
+    var deviceId = 234;
 
     //act
     db.updateDevice(deviceId, fieldName, fieldValue, callback);

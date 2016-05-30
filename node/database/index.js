@@ -5,7 +5,7 @@ var db;
 var dbClosed = false;
 
 var deviceModel = [
-  "deviceId TEXT",
+  "deviceId INTEGER PRIMARY KEY",
   "name TEXT",
   "level TEXT",
   "deviceType TEXT",
@@ -37,7 +37,7 @@ function exitHandler(quiet) {
 
 function createDevice(device, callback) {
   var values = [
-    device.deviceId || '',
+    device.deviceId || null,
     device.name || '',
     device.level || '',
     device.deviceType || '',
