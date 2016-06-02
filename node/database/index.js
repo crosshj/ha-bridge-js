@@ -70,6 +70,7 @@ function deleteDevice(deviceId, callback) {
 }
 
 function initDatabase(config, callback) {
+  config = config || {};
   var file = config.fileName || require('path').join(__dirname, "database.db");
   var exists = false;
   if (file !== ':memory:') {
@@ -96,9 +97,11 @@ function initDatabase(config, callback) {
       callback();
     });
   } else {
-    setTimeout(function(){
-      callback();
-    }, 1);
+    if (callback) {
+      setTimeout(function(){
+        callback();
+      }, 1);
+    }
   }
 
   return {
