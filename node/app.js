@@ -1,7 +1,7 @@
 'use strict';
-require('./win-die'); //lame, lame, lame
 const route = require('koa-route');
 const koa = require('koa');
+let bodyParser = require('koa-bodyparser');
 const app = module.exports = koa();
 const upnpListener = require('./lib/upnpListener');
 
@@ -10,10 +10,12 @@ const devices = require('./controllers/devices');
 const emulator = require('./controllers/emulator');
 const upnp = require('./controllers/upnp');
 
+app.use(bodyParser());
+
 // to modify devices stored internally
 // See DeviceResource.java
 app.use(route.post('/api/devices', devices.create));
-app.use(route.get('/api/devices', devices.findAll));
+app.use(route.get('/api/devices', devices.find));
 app.use(route.put('/api/devices/:lightId', devices.update));
 app.use(route.del('/api/devices/:lightId', devices.remove));
 app.use(route.get('/api/devices/:lightId', devices.find));
@@ -31,6 +33,7 @@ app.use(route.put('/api/:userId/lights/:lightId/state', emulator.update));
 app.use(route.get('/upnp/:deviceId/setup.xml', upnp.setup));
 
 if (!module.parent) {
-  app.listen(80);
+  var server = app.listen(80);
+  require('./win-die')(server); //lame, lame, lame
   console.log('listening on port 80');
 }

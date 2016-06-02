@@ -36,10 +36,11 @@ function exitHandler(quiet) {
 }
 
 function createDevice(device, callback) {
+  device = device || {};
   var values = [
     device.deviceId || null,
     device.name || '',
-    device.level || '',
+    device.level || 100,
     device.deviceType || '',
     device.offUrl || '',
     device.onUrl || '',
@@ -49,14 +50,23 @@ function createDevice(device, callback) {
   ];
   var template = values.map(function(){return '?'}).join(',');
   var statement = 'INSERT INTO devices ' + 'VALUES (' + template + ')';
-  var stmt = db.prepare(statement, callback);
-  stmt.all(values);
+  //TODO: would be nice to return id of just created device, as below
+  //statement += "; SELECT last_insert_rowid() AS rowid FROM devices LIMIT 1";
+  var stmt = db.prepare(statement);
+  stmt.run(values, callback);
   stmt.finalize();
 }
 
 function readDevice(deviceId, callback) {
-  var statement = 'SELECT * FROM devices WHERE deviceId = (?)';
-  db.all(statement, [deviceId], callback);
+  var statement = 'SELECT * FROM devices'
+  const deviceIdValid = !!deviceId && !isNaN(deviceId);
+  statement += deviceIdValid
+    ? ' WHERE deviceId = (?)'
+    : '';
+  const args = deviceIdValid
+    ? [deviceId]
+    : [];
+  db.all(statement, args, callback);
 }
 
 function updateDevice(deviceId, fieldName, fieldValue, callback) {

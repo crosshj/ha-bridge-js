@@ -29,24 +29,48 @@ function removeThunk(deviceId) {
 
 module.exports.create = function *create() {
   var device = this.request.body;
-  var createResult = yield createThunk(device);
-  this.body = createResult;
+  try {
+    yield createThunk(device);
+    this.body = "device created";
+  } catch (error) {
+    this.body = "error creating device:\n" + JSON.stringify(error, null, '\t');
+  }
 };
 
-
-module.exports.find= function *find(lightId) {
-  var findResult = yield findThunk(lightId);
-  this.body = findResult;
+module.exports.find = function *find(lightId) {
+  try {
+    var findResult = yield findThunk(lightId);
+    this.body = findResult;
+  } catch (error) {
+    this.body = "error finding device:\n" + JSON.stringify(error, null, '\t');
+  }
 };
 
 module.exports.update = function *update(lightId) {
-  var fieldName = this.request.body.fieldName || '';
-  var fieldValue = this.request.body.fieldValue || '';
-  var updateResult = yield updateThunk(lightId, fieldName, fieldValue);
-  this.body = updateResult;
+  try {
+    if (!this.request.body.fieldName) {
+      throw "request body must include fieldName";
+    }
+    if (!this.request.body.fieldValue) {
+      throw "request body must include fieldValue";
+    }
+    var fieldName = this.request.body.fieldName;
+    var fieldValue = this.request.body.fieldValue;
+    yield updateThunk(lightId, fieldName, fieldValue);
+    this.body = "device updated successfully";
+  } catch (error) {
+    this.body = "error updating device:\n" + JSON.stringify(error, null, '\t');
+  }
 };
 
 module.exports.remove = function *remove(lightId) {
-  var removeResult = yield removeThunk(lightId);
-  this.body = removeResult;
+  try {
+    if (!lightId) {
+      throw "no deviceId specified in URL"
+    }
+    yield removeThunk(lightId);
+    this.body = "device deleted successfully";
+  } catch(error) {
+    this.body = "error deleting device:\n" + JSON.stringify(error, null, '\t');
+  }
 };

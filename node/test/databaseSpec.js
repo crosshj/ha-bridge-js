@@ -96,6 +96,20 @@ describe('SQLite Database', function () {
     }
   });
 
+  it('reads all devices when id not specified', function (done) {
+    //arrange
+
+    //act
+    db.readDevice(null, callback);
+
+    //assert
+    function callback(err, rows) {
+      console.log(rows)
+      expect(rows.length).to.equal(2);
+      done();
+    }
+  });
+
   it('updates device(s) by id', function (done) {
     //arrange
     // use inserted item from previous step
