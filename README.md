@@ -1,4 +1,4 @@
-> Javascript version of a java software that emulates philips hue api to other home automation gateways.   
+> Javascript version of a "java software that emulates philips hue api to other home automation gateways."   
 > See java version at https://github.com/armzilla/amazon-echo-ha-bridge
 
 ## current status
