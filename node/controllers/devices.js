@@ -27,6 +27,11 @@ function removeThunk(deviceId) {
   };
 }
 
+module.exports.createThunk = createThunk;
+module.exports.findThunk = findThunk;
+module.exports.updateThunk = updateThunk;
+module.exports.removeThunk = removeThunk;
+
 module.exports.create = function *create() {
   var device = this.request.body;
   try {

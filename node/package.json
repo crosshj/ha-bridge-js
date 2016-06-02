@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "chai": "^3.5.0",
+    "guid": "0.0.12",
     "koa": "^1.2.0",
     "koa-bodyparser": "^2.2.0",
     "koa-logger": "^1.2.0",

@@ -1,4 +1,5 @@
 var fs = require("fs");
+const Guid = require('guid');
 const sqlite3 = require("sqlite3").verbose();
 
 var db;
@@ -6,6 +7,7 @@ var dbClosed = false;
 
 var deviceModel = [
   "deviceId INTEGER PRIMARY KEY",
+  "uuid TEXT",
   "name TEXT",
   "level TEXT",
   "deviceType TEXT",
@@ -18,6 +20,7 @@ var deviceModel = [
 
 var deviceFields = [
   "deviceId",
+  "uuid",
   "name",
   "level",
   "deviceType",
@@ -36,9 +39,12 @@ function exitHandler(quiet) {
 }
 
 function createDevice(device, callback) {
+  //TODO: validate device before creating
   device = device || {};
+  device.uuid = Guid.raw();
   var values = [
     device.deviceId || null,
+    device.uuid,
     device.name || '',
     device.level || 100,
     device.deviceType || '',
@@ -104,7 +110,9 @@ function initDatabase(config, callback) {
     var statement = "CREATE TABLE devices (" + deviceModel.join(', ') + ")";
     db.run(statement, [], function(err){
       if (err){ console.log(err); }
-      callback();
+      if (callback) {
+        callback();
+      }
     });
   } else {
     if (callback) {
