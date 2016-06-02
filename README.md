@@ -2,7 +2,7 @@
 > See java version at https://github.com/armzilla/amazon-echo-ha-bridge
 
 ## current status
-On npm start, responds properly to "Echo/Alexa, discover devices."   
+On ```npm start```, responds properly to "Echo/Alexa, discover devices."   
 Will add devices to the Echo which have been added to DB through devices API.   
 Does NOT update discovered devices properly.   
 (This is a WIP until further notice)    
