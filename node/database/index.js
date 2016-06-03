@@ -1,5 +1,5 @@
 var fs = require("fs");
-const Guid = require('guid');
+const Guid = require('node-uuid');
 const sqlite3 = require("sqlite3").verbose();
 
 var db;
@@ -41,7 +41,7 @@ function exitHandler(quiet) {
 function createDevice(device, callback) {
   //TODO: validate device before creating
   device = device || {};
-  device.uuid = Guid.raw();
+  device.uuid = Guid.v1();
   var values = [
     device.deviceId || null,
     device.uuid,
