@@ -8,10 +8,10 @@ Does NOT update discovered devices properly.
 (This is a WIP until further notice)    
 
 ## todo
-- controllers (only Update API for emulation left)
-- configurator UI
-- project config
-- documentation / video
+- [ ] controllers (only Update API for emulation left)
+- [ ] configurator UI
+- [ ] project config
+- [ ] documentation / video
 
 ## goals
 - emulation running on a computer
