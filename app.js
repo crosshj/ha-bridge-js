@@ -38,6 +38,6 @@ app.use(route.get('/upnp/:deviceId/setup.xml', upnp.setup));
 
 if (!module.parent) {
   var server = app.listen(80);
-  require('./win-die')(server); //lame, lame, lame
+  require('./lib/win-die')(server); //lame, lame, lame
   console.log('listening on port 80');
 }
