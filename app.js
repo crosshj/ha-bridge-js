@@ -16,8 +16,7 @@ app.use(koaBodyParser());
 // serve files in public folder (css, js etc)
 app.use(koaStatic(__dirname + '/public'));
 
-// to modify devices stored internally
-// See DeviceResource.java
+// user interface to modify devices stored internally
 app.use(route.post('/api/devices', devices.create));
 app.use(route.get('/api/devices', devices.find));
 app.use(route.put('/api/devices/:lightId', devices.update));
@@ -25,15 +24,11 @@ app.use(route.del('/api/devices/:lightId', devices.remove));
 app.use(route.get('/api/devices/:lightId', devices.find));
 
 // emulate the Hue Hub
-// See HueMulator.java
-//app.use(route.get('/(.*)', emulator.wildcard));
 app.use(route.post('/(.*)', emulator.postwildcard));
 app.use(route.get('/api/:userId', emulator.root));
 app.use(route.get('/api/:userId/lights', emulator.list));
 app.use(route.get('/api/:userId/lights/:lightId', emulator.list));
 app.use(route.put('/api/:userId/lights/:lightId/state', emulator.update));
-
-// See UpnpListener & UpnpSettingsResource
 app.use(route.get('/upnp/:deviceId/setup.xml', upnp.setup));
 
 if (!module.parent) {
