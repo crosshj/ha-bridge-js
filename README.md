@@ -2,6 +2,8 @@
 > See java version at https://github.com/armzilla/amazon-echo-ha-bridge   
 > Also see https://github.com/bwssytems/ha-bridge
 
+Use an emulated Hue bridge to tie your home automation together.  This bridge allows you to customize control of your devices *locally* using TCP and UDP with future plans for ZWave/ZigBee/Bluetooth using Wink hub radios and IR using IR blaster. 
+
 ## how to
 ```npm install```   
 ```npm start```   
