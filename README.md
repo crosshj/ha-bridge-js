@@ -1,6 +1,6 @@
 Use an emulated Philips Hue bridge to tie your home automation together, complete with voice control via Amazon Echo/Dot.   
 
-This bridge allows you to customize control of your devices *locally* using TCP and UDP with pending support for ZWave/ZigBee/Bluetooth using Wink hub radios and IR using IR blaster. 
+This bridge allows you to customize control of your devices *locally* using TCP and UDP with pending support for ZWave / ZigBee / Bluetooth using Wink hub radios and IR using IR blaster. 
 
 ## how to
 ```npm install```   
@@ -22,7 +22,7 @@ Ask Alexa to turn your device(s) on/off
 ## goals
 - [X] emulation running on a computer
 - [ ] emulation running on a rooted Wink Hub
-- [ ] replace Smartthings Hub functionality
+- [ ] replace my Smartthings Hub functionality/usage
 - [ ] easily add devices to Wink Hub via mobile interface
 - [ ] connect devices like MiLight easily to HA hub
 - [ ] color control of lights/scenes using Alexa/Echo
