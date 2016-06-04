@@ -38,6 +38,7 @@ module.exports.create = function *create() {
     yield createThunk(device);
     this.body = "device created";
   } catch (error) {
+    this.status = 400; //Bad request
     this.body = "error creating device:\n" + JSON.stringify(error, null, '\t');
   }
 };
@@ -47,6 +48,7 @@ module.exports.find = function *find(lightId) {
     var findResult = yield findThunk(lightId);
     this.body = findResult;
   } catch (error) {
+    this.status = 400; //Bad request
     this.body = "error finding device:\n" + JSON.stringify(error, null, '\t');
   }
 };
@@ -64,6 +66,7 @@ module.exports.update = function *update(lightId) {
     yield updateThunk(lightId, fieldName, fieldValue);
     this.body = "device updated successfully";
   } catch (error) {
+    this.status = 400; //Bad request
     this.body = "error updating device:\n" + JSON.stringify(error, null, '\t');
   }
 };
@@ -76,6 +79,7 @@ module.exports.remove = function *remove(lightId) {
     yield removeThunk(lightId);
     this.body = "device deleted successfully";
   } catch(error) {
+    this.status = 400; //Bad request
     this.body = "error deleting device:\n" + JSON.stringify(error, null, '\t');
   }
 };
