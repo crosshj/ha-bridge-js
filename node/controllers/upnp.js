@@ -5,7 +5,6 @@ const friendlyName = '(' + require('ip').address() + ')';
 const filledTemplate = hueUpnpTemplate(urlBase, friendlyName, uuid);
 
 module.exports.setup= function *setup(deviceId) {
-  console.log('--- upnp setup happened')
   this.type = "application/xml";
   this.set('Server','Apache-Coyote/1.1'); //TODO: remove?
   this.set('Access-Control-Allow-Origin', '*');

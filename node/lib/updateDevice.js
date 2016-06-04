@@ -10,16 +10,15 @@ module.exports = function* (deviceId, payload){
   var deviceState = [{
     'success': {}
   }];
-  console.log(status)
+
   try {
     if (!fieldName){
       throw "could not find fieldName";
     }
-    // TODO: trigger updateOn / updateOff here
+    // TODO: trigger updateOn / updateOff here, or maybe not (echo may do this)
     yield updateThunk(deviceId, fieldName, fieldValue);
     deviceState[0].success["/lights/" + deviceId + "/state/on"] = fieldValue;
   } catch (error) {
-    console.log('error updating lights: ', error)
     deviceState = { error };
   }
   return deviceState;
