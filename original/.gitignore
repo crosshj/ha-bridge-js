@@ -10,3 +10,4 @@ buildNumber.properties
 *.jar
 data
 .idea
+RUN_ME_TO_START.sh
