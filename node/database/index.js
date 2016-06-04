@@ -47,7 +47,9 @@ function exitHandler(quiet) {
 function createDevice(device, callback) {
   //TODO: validate device before creating
   device = device || {};
-  device.uuid = Guid.v1();
+  device.uuid = validateUUID(device.uuid)
+    ? device.uuid
+    : Guid.v1();
   var values = [
     device.deviceId || null,
     device.status || "off",
@@ -74,11 +76,9 @@ function readDevice(deviceId, callback) {
   var statement = 'SELECT * FROM devices'
   const deviceIdValid = !!deviceId && validateUUID(deviceId);
   statement += deviceIdValid
-    ? ' WHERE uuid = (?)'
+    ? ' WHERE uuid = "' + deviceId + '"'
     : '';
-  const args = deviceIdValid
-    ? [deviceId]
-    : [];
+  const args = [];
   db.all(statement, args, callback);
 }
 
