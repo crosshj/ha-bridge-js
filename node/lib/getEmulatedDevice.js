@@ -1,7 +1,7 @@
 module.exports = function getEmulatedDevice(device) {
   var emulated = {
     "state": {
-      "on": false,
+      "on": device.status === "on",
       "bri": 254,
       "hue": 15823,
       "sat": 88,

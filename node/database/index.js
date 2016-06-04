@@ -7,6 +7,7 @@ var dbClosed = false;
 
 var deviceModel = [
   "deviceId INTEGER PRIMARY KEY",
+  "status TEXT",
   "uuid TEXT",
   "name TEXT",
   "level TEXT",
@@ -20,6 +21,7 @@ var deviceModel = [
 
 var deviceFields = [
   "deviceId",
+  "status",
   "uuid",
   "name",
   "level",
@@ -30,6 +32,10 @@ var deviceFields = [
   "contentType",
   "contentBody"
 ];
+
+function validateUUID(str) {
+  return /[0-9a-f]{22}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i.test(str);
+}
 
 function exitHandler(quiet) {
   if (dbClosed){ return; }
@@ -44,6 +50,7 @@ function createDevice(device, callback) {
   device.uuid = Guid.v1();
   var values = [
     device.deviceId || null,
+    device.status || "off",
     device.uuid,
     device.name || '',
     device.level || 100,
@@ -65,9 +72,9 @@ function createDevice(device, callback) {
 
 function readDevice(deviceId, callback) {
   var statement = 'SELECT * FROM devices'
-  const deviceIdValid = !!deviceId && !isNaN(deviceId);
+  const deviceIdValid = !!deviceId && validateUUID(deviceId);
   statement += deviceIdValid
-    ? ' WHERE deviceId = (?)'
+    ? ' WHERE uuid = (?)'
     : '';
   const args = deviceIdValid
     ? [deviceId]
@@ -76,12 +83,12 @@ function readDevice(deviceId, callback) {
 }
 
 function updateDevice(deviceId, fieldName, fieldValue, callback) {
-  var statement = 'UPDATE devices SET '+fieldName+' = "'+fieldValue+'" WHERE deviceId = ' + deviceId;
+  var statement = 'UPDATE devices SET '+fieldName+' = "'+fieldValue+'" WHERE uuid = "' + deviceId + '"';
   db.all(statement, [], callback);
 }
 
 function deleteDevice(deviceId, callback) {
-  var statement = 'DELETE FROM devices WHERE deviceId = ' + deviceId;
+  var statement = 'DELETE FROM devices WHERE uuid = ' + deviceId;
   db.all(statement, [], callback);
 }
 
