@@ -1,8 +1,4 @@
-> Javascript version++ of a "java software that emulates philips hue api to other home automation gateways."   
-> See java version at https://github.com/armzilla/amazon-echo-ha-bridge   
-> Also see https://github.com/bwssytems/ha-bridge
-
-Use an emulated Hue bridge to tie your home automation together.  This bridge allows you to customize control of your devices *locally* using TCP and UDP with future plans for ZWave/ZigBee/Bluetooth using Wink hub radios and IR using IR blaster. 
+Use an emulated Hue bridge to tie your home automation together.  This bridge allows you to customize control of your devices *locally* using TCP and UDP with plans for ZWave/ZigBee/Bluetooth using Wink hub radios and IR using IR blaster. 
 
 ## how to
 ```npm install```   
@@ -29,3 +25,7 @@ Ask Alexa to turn your device(s) on/off
 - [ ] connect devices like MiLight easily to HA hub
 - [ ] color control of lights/scenes using Alexa/Echo
 - [ ] solid mobile/desktop experience
+
+## credits
+https://github.com/armzilla/amazon-echo-ha-bridge   
+https://github.com/bwssytems/ha-bridge
