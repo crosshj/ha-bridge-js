@@ -1,7 +1,8 @@
 'use strict';
 const route = require('koa-route');
 const koa = require('koa');
-let bodyParser = require('koa-bodyparser');
+let koaBodyParser = require('koa-bodyparser');
+let koaStatic = require('koa-static');
 const app = module.exports = koa();
 const upnpListener = require('./lib/upnpListener');
 
@@ -10,7 +11,10 @@ const devices = require('./controllers/devices');
 const emulator = require('./controllers/emulator');
 const upnp = require('./controllers/upnp');
 
-app.use(bodyParser());
+app.use(koaBodyParser());
+
+// serve files in public folder (css, js etc)
+app.use(koaStatic(__dirname + '/public'));
 
 // to modify devices stored internally
 // See DeviceResource.java

@@ -8,6 +8,7 @@ var expect = chai.expect;
 describe('SQLite Database', function () {
   var db;
   var dbFileName;
+  var deviceUUID = '3dcc9eb0-2a71-11e6-a3a3-73120746dc1b';
 
   before(function(done) {
     db = require('../database')({ fileName: ':memory:'}, done);
@@ -21,6 +22,8 @@ describe('SQLite Database', function () {
     //arrange
     var device = {
       deviceId: 234,
+      status: 'off',
+      uuid: deviceUUID,
       name: 'foo',
       level: '100',
       deviceType: 'light',
@@ -49,6 +52,7 @@ describe('SQLite Database', function () {
     //arrange
     var device = {
       name: 'fooAuto',
+      status: 'off',
       level: '100',
       deviceType: 'light',
       offUrl: 'http://www.foo.com/off',
@@ -75,6 +79,8 @@ describe('SQLite Database', function () {
     //arrange
     var device = {
       deviceId: 234,
+      status: 'off',
+      uuid: deviceUUID,
       name: 'foo',
       level: '100',
       deviceType: 'light',
@@ -86,7 +92,7 @@ describe('SQLite Database', function () {
     }; // use inserted item from previous step
 
     //act
-    db.readDevice(device.deviceId, callback);
+    db.readDevice(device.uuid, callback);
 
     //assert
     function callback(err, rows) {
@@ -104,7 +110,6 @@ describe('SQLite Database', function () {
 
     //assert
     function callback(err, rows) {
-      console.log(rows)
       expect(rows.length).to.equal(2);
       done();
     }
@@ -115,7 +120,7 @@ describe('SQLite Database', function () {
     // use inserted item from previous step
     var fieldName = 'name';
     var fieldValue = 'newfoo';
-    var deviceId = 234;
+    var deviceId = deviceUUID;
 
     //act
     db.updateDevice(deviceId, fieldName, fieldValue, callback);
@@ -123,7 +128,7 @@ describe('SQLite Database', function () {
     //assert
     function callback(err, result) {
       db.instance.all("select * from devices", function(err, rows){
-        rows = rows.filter(function(item){ return item.deviceId === deviceId; });
+        rows = rows.filter(function(item){ return item.uuid === deviceId; });
         var lastItem = rows[rows.length-1];
         expect(lastItem.name).to.equal(fieldValue);
         done();
@@ -134,7 +139,7 @@ describe('SQLite Database', function () {
   it('delete device(s) by id', function (done) {
     //arrange
     // use inserted item from previous step
-    var deviceId = '234';
+    var deviceId = deviceUUID;
 
     //act
     db.deleteDevice(deviceId, callback);
