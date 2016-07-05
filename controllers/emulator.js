@@ -45,5 +45,6 @@ module.exports.list = function* list(userId, lightId) {
 module.exports.update = function* update(userId, lightId) {
   const updatePayload = this.request.body;
   const updateResult = yield updateDevice(lightId, updatePayload);
+  console.log(updateResult);
   this.body = updateResult;
 };
