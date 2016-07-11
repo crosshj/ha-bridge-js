@@ -7,7 +7,7 @@ This bridge allows you to customize control of your devices *locally* using TCP 
 ```npm start```   
 Go to localhost:80 to add devices (make sure onUrl/offUrl is valid)   
 Ask Alexa/Echo to discover devices   
-Once done, you should see your device(s) in Alexa app   
+Once done, you should see your device(s) in Alexa app as "Dimmable Light"  
 Ask Alexa to turn your device(s) on/off   
 
 ## to do
@@ -16,7 +16,8 @@ Ask Alexa to turn your device(s) on/off
 - downgrade from koa to something lighter (restify/flatiron) for embedded (Wink)   
 - improve configurator (currently just a copy from original project)
   - search/add new device to Wink via configurator
-  - mobile (almost native) web view
+  - different UI framework (react)
+  - mobile web experience, responsive
   - mobile app
 
 ## goals
@@ -27,7 +28,8 @@ Ask Alexa to turn your device(s) on/off
 - [ ] connect devices like MiLight easily to HA hub
 - [ ] color control of lights/scenes using Alexa/Echo
 - [ ] solid mobile/desktop experience
+- [ ] compatibilty with Hue apps
 
-## credits
+## credits / influence / direction / thank you
 https://github.com/armzilla/amazon-echo-ha-bridge   
 https://github.com/bwssytems/ha-bridge
