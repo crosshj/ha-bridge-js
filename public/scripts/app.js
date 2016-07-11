@@ -1,7 +1,7 @@
 angular.module('configurator', [])
     .service('bridgeService', ["$http", function ($http) {
         var self = this;
-        this.state = {base: window.location.origin + "/api/devices", devices: [], error: ""};
+        this.state = {base: window.location.origin + "/local-api/devices", devices: [], error: ""};
 
         this.viewDevices = function () {
             this.state.error = "";

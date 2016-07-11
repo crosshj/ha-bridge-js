@@ -17,11 +17,11 @@ app.use(koaBodyParser());
 app.use(koaStatic(__dirname + '/public'));
 
 // user interface to modify devices stored internally
-app.use(route.post('/api/devices', devices.create));
-app.use(route.get('/api/devices', devices.find));
-app.use(route.put('/api/devices/:lightId', devices.update));
-app.use(route.del('/api/devices/:lightId', devices.remove));
-app.use(route.get('/api/devices/:lightId', devices.find));
+app.use(route.post('/local-api/devices', devices.create));
+app.use(route.get('/local-api/devices', devices.find));
+app.use(route.put('/local-api/devices/:lightId', devices.update));
+app.use(route.del('/local-api/devices/:lightId', devices.remove));
+app.use(route.get('/local-api/devices/:lightId', devices.find));
 
 // emulate the Hue Hub
 app.use(route.post('/(.*)', emulator.postwildcard));
