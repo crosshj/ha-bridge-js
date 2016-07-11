@@ -8,6 +8,7 @@ module.exports.wildcard = function* wildcard(path, next) {
 };
 
 module.exports.postwildcard = function* postwildcard(path, next) {
+  console.log('WILDCARD: ', this.request.body);
   // NOTE: this is probably not necessary
   this.body = {
     'success': {
@@ -18,31 +19,38 @@ module.exports.postwildcard = function* postwildcard(path, next) {
 
 module.exports.root = function* root(userId) {
   try {
+    console.log('ROOT REQUEST: ', this.request.body);
     var findResult = yield findThunk();
     var hueDevices = findResult.reduce(function(prev, next){
       prev[next.uuid] = getEmulatedDevice(next);
       return prev;
     }, {});
+    console.log("emulator.root: ", hueDevices)
     this.body = {lights: hueDevices};
   } catch (error) {
+    console.log(error)
     this.body = "error finding hue devices:\n" + JSON.stringify(error, null, '\t');
   }
 };
 
 module.exports.list = function* list(userId, lightId) {
   try {
+    console.log('LIST REQUEST: ', this.request.body);
     var findResult = yield findThunk(lightId);
     var hueDevices = findResult.reduce(function(prev, next){
-      prev[next.uuid] = next.name;
+      prev[next.uuid] = lightId ? getEmulatedDevice(next) : next.name;
       return prev;
     }, {});
-    this.body = hueDevices;
+    this.body = lightId ? hueDevices[lightId] : hueDevices;
+    console.log("emulator.list: ", this.body)
   } catch (error) {
+    console.log(error)
     this.body = "error finding hue devices:\n" + JSON.stringify(error, null, '\t');
   }
 };
 
 module.exports.update = function* update(userId, lightId) {
+  console.log('UPDATE REQUEST: ', this.request.body);
   const updatePayload = this.request.body;
   const updateResult = yield updateDevice(lightId, updatePayload);
   console.log(updateResult);
