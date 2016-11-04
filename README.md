@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/crosshj/ha-bridge-js.svg?branch=master)](https://travis-ci.org/crosshj/ha-bridge-js)
+
+
 Use an emulated Philips Hue bridge to tie your home automation together, complete with voice control via Amazon Echo/Dot.   
 
 This bridge allows you to customize control of your devices *locally* using TCP and UDP with pending support for ZWave / ZigBee / Bluetooth using Wink hub radios and IR using IR blaster. 
