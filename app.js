@@ -25,6 +25,7 @@ app.use(route.get('/local-api/devices/:lightId', devices.find));
 
 // emulate the Hue Hub
 app.use(route.post('/(.*)', emulator.postwildcard));
+app.use(route.put('/(.*)', emulator.wildcard));
 app.use(route.get('/api/:userId', emulator.root));
 app.use(route.get('/api/:userId/lights', emulator.list));
 app.use(route.get('/api/:userId/lights/:lightId', emulator.list));

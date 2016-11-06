@@ -4,6 +4,9 @@ const findThunk = require('./devices').findThunk;
 const getEmulatedDevice = require('../lib/getEmulatedDevice');
 
 module.exports.wildcard = function* wildcard(path, next) {
+  console.log('WILDCARD: ', this.request.url);
+  console.log('WILDCARD BODY: ', this.request.body);
+  console.log('WILDCARD BODY: ', this.request.method);
   yield next;
 };
 
@@ -35,13 +38,14 @@ module.exports.root = function* root(userId) {
 
 module.exports.list = function* list(userId, lightId) {
   try {
-    console.log('LIST REQUEST: ', this.request.body);
+    console.log('LIST REQUEST: ', this.request.url);
     var findResult = yield findThunk(lightId);
     var hueDevices = findResult.reduce(function(prev, next){
       prev[next.uuid] = lightId ? getEmulatedDevice(next) : next.name;
       return prev;
     }, {});
     this.body = lightId ? hueDevices[lightId] : hueDevices;
+    //this.body.state.on=true;
     console.log("emulator.list: ", this.body)
   } catch (error) {
     console.log(error)
