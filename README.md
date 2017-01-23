@@ -36,3 +36,4 @@ Ask Alexa to turn your device(s) on/off
 ## credits / influence / direction / thank you
 https://github.com/armzilla/amazon-echo-ha-bridge   
 https://github.com/bwssytems/ha-bridge
+
