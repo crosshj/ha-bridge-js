@@ -1,4 +1,5 @@
 'use strict';
+const serverPort = require('./config').serverPort;
 const route = require('koa-route');
 const koa = require('koa');
 let koaBodyParser = require('koa-bodyparser');
@@ -33,7 +34,7 @@ app.use(route.put('/api/:userId/lights/:lightId/state', emulator.update));
 app.use(route.get('/upnp/:deviceId/setup.xml', upnp.setup));
 
 if (!module.parent) {
-  var server = app.listen(80);
+  var server = app.listen(serverPort);
   require('./lib/win-die')(server); //lame, lame, lame
-  console.log('listening on port 80');
+  console.log('listening on port ' + serverPort);
 }
