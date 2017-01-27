@@ -1,7 +1,7 @@
 var WifiBoxModule = require('./wifibox.js');
 var cmd = require('./commands.js');
 
-const _defaultCallback = (err, threeByteArray) => {
+const defaultCallback = (err, threeByteArray) => {
   if (err) {
     console.log("udp error:" + err);
   } else {
@@ -23,6 +23,7 @@ class Milight {
   }
 
   on({zone=0, brightness, callback=defaultCallback}){
+    console.log('box: ', this.box.toString())
     this.box.command(cmd.rgbw.on(zone), err => {
       if(err){
         return callback(err, cmd.rgbw.on(zone));
@@ -64,7 +65,7 @@ var box = new Milight({ ip: "192.168.1.56"});
 var masterBox = new Milight({ ip: "192.168.1.4"});
 
 module.exports = {
-  create: (ip, port) => new Milight({ip, port}),
+  create: ({ip, port}) => { return new Milight({ip, port}); },
   Milight,
   on,
   off,
