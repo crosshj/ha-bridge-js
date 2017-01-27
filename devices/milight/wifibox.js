@@ -44,7 +44,7 @@ WifiBox.prototype.command = function (threeByteArray,callback) {
         , buffer.length
         , this.port
         , this.ip
-        , callback || function (err, bytes) {
+        , callback || function (err) {
             if (err) {
                 //console.log("udp error:" + err);
                 throw err;
