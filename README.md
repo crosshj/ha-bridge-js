@@ -14,14 +14,11 @@ Once done, you should see your device(s) in Alexa app as "Dimmable Light"
 Ask Alexa to turn your device(s) on/off   
 
 ## to do
-- fix update/delete in configurator
-- brightness, ie "Alexa, set {device name} to 75   
+- fix update in configurator
 - downgrade from koa to something lighter (restify/flatiron) for embedded (Wink)   
 - improve configurator (currently just a copy from original project)
   - search/add new device to Wink via configurator
   - different UI framework (react)
-  - mobile web experience, responsive
-  - mobile app
 
 ## goals
 - [X] emulation running on a computer
