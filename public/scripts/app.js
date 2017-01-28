@@ -21,14 +21,12 @@ angular.module('configurator', [])
             );
         };
 
-        this.addDevice = function (id, name, type, onUrl, offUrl) {
+        this.addDevice = function (id, uuid, name, type, onUrl, offUrl) {
             this.state.error = "";
-            if (id) {
-                var putUrl = this.state.base + "/" + id;
+            if (uuid) {
+                var putUrl = this.state.base + "/" + uuid;
                 return $http.put(putUrl, {
-                    id: id,
                     name: name,
-                    deviceType: type,
                     onUrl: onUrl,
                     offUrl: offUrl
                 }).then(
@@ -77,8 +75,9 @@ angular.module('configurator', [])
             );
         };
 
-        this.editDevice = function (id, name, type, onUrl, offUrl) {
+        this.editDevice = function (id, uuid, name, type, onUrl, offUrl) {
             this.device.id = id;
+            this.device.uuid = uuid;
             this.device.name = name;
             this.device.onUrl = onUrl;
             this.device.offUrl = offUrl;
@@ -99,7 +98,7 @@ angular.module('configurator', [])
             bridgeService.viewDevices();
         };
         $scope.editDevice = function (device) {
-            bridgeService.editDevice(device.deviceId, device.name, device.type, device.onUrl, device.offUrl);
+            bridgeService.editDevice(device.deviceId, device.uuid, device.name, device.type, device.onUrl, device.offUrl);
         };
     }])
 
@@ -127,9 +126,10 @@ angular.module('configurator', [])
         };
 
         $scope.addDevice = function () {
-            bridgeService.addDevice($scope.device.id, $scope.device.name, $scope.device.type, $scope.device.onUrl, $scope.device.offUrl).then(
+            bridgeService.addDevice($scope.device.id, $scope.device.uuid, $scope.device.name, $scope.device.type, $scope.device.onUrl, $scope.device.offUrl).then(
                 function () {
                     $scope.device.id = "";
+                    $scope.device.uuid = "";
                     $scope.device.name = "";
                     $scope.device.onUrl = "";
                     $scope.device.offUrl = "";

@@ -55,6 +55,27 @@ module.exports.find = function *find(lightId) {
 
 module.exports.update = function *update(lightId) {
   try {
+    var currentDevice = yield findThunk(lightId);
+    if (!currentDevice.length > 0) {
+      throw "could not find device";
+    } else {
+      currentDevice = currentDevice[0];
+    }
+    var updateDevice = this.request.body;
+
+    // make array of different fields
+    var toUpdate = Object.keys(updateDevice).reduce((all, key)=>{
+      if (updateDevice[key] !== currentDevice[key]){
+        all.push({
+          fieldName: key,
+          fieldValue: updateDevice[key]
+        });
+      }
+      return all;
+    }, []);
+
+    // update fields in databse
+    //TODO: do this ^^^^
     if (!this.request.body.fieldName) {
       throw "request body must include fieldName";
     }
