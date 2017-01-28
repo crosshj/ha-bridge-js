@@ -88,7 +88,7 @@ function updateDevice(deviceId, fieldName, fieldValue, callback) {
 }
 
 function deleteDevice(deviceId, callback) {
-  var statement = 'DELETE FROM devices WHERE uuid = ' + deviceId;
+  var statement = 'DELETE FROM devices WHERE uuid = "' + deviceId + '"';
   db.all(statement, [], callback);
 }
 
