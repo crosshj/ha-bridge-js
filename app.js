@@ -2,9 +2,12 @@
 const serverPort = require('./config').serverPort;
 const route = require('koa-route');
 const koa = require('koa');
-let koaBodyParser = require('koa-bodyparser');
-let koaStatic = require('koa-static');
+const koaBodyParser = require('koa-bodyparser');
+const koaStatic = require('koa-static');
+const addTrailingSlashes = require('koa-add-trailing-slashes');
+
 const app = module.exports = koa();
+
 const upnpListener = require('./lib/upnpListener');
 
 const config = require('./config');
@@ -19,6 +22,7 @@ const devices = require('./controllers/devices')
 const emulator = require('./controllers/emulator');
 const upnp = require('./controllers/upnp');
 
+app.use(addTrailingSlashes());
 app.use(koaBodyParser());
 
 // serve files in public folder (css, js etc)

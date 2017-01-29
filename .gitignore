@@ -2,6 +2,9 @@ node_modules
 npm-debug.log
 logs
 
+public/react*
+client/build*
+
 *.exe
 *.dll
 *.db
