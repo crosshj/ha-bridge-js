@@ -83,7 +83,7 @@ function readDevice(deviceId, callback) {
 }
 
 function updateDevice(deviceId, fieldName, fieldValue, callback) {
-  var statement = 'UPDATE devices SET '+fieldName+' = "'+fieldValue+'" WHERE uuid = "' + deviceId + '"';
+  var statement = 'UPDATE devices SET "'+fieldName+'" = "'+fieldValue+'" WHERE uuid = "' + deviceId + '"';
   db.all(statement, [], callback);
 }
 

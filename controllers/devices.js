@@ -67,24 +67,22 @@ module.exports.update = function *update(lightId) {
     var toUpdate = Object.keys(updateDevice).reduce((all, key)=>{
       if (updateDevice[key] !== currentDevice[key]){
         all.push({
-          fieldName: key,
-          fieldValue: updateDevice[key]
+          name: key,
+          value: updateDevice[key]
         });
       }
       return all;
     }, []);
 
-    // update fields in databse
-    //TODO: do this ^^^^
-    if (!this.request.body.fieldName) {
-      throw "request body must include fieldName";
+    if (toUpdate.length <= 0) {
+      throw "no fields to update";
     }
-    if (!this.request.body.fieldValue) {
-      throw "request body must include fieldValue";
-    }
-    var fieldName = this.request.body.fieldName;
-    var fieldValue = this.request.body.fieldValue;
-    yield updateThunk(lightId, fieldName, fieldValue);
+
+    // update fields in database
+    yield toUpdate.map(field => {
+      return updateThunk(lightId, field.name, field.value);
+    });
+
     this.body = "device updated successfully";
   } catch (error) {
     this.status = 400; //Bad request
