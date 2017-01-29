@@ -1,4 +1,5 @@
 var fs = require("fs");
+var async = require('async');
 const Guid = require('node-uuid');
 const sqlite3 = require("sqlite3").verbose();
 
@@ -93,8 +94,14 @@ function deleteDevice(deviceId, callback) {
 }
 
 function initDatabase(config, callback) {
+  if (!callback){
+    callback = (err, result) => {
+      if(err){ return console.log('initDatabase error:\n', err); }
+      console.log('initDatabase result:\n', result);
+    };
+  }
   config = config || {};
-  var file = config.fileName || require('path').join(__dirname, "database.db");
+  var file = require('path').join(__dirname, config.databaseFileName);
   var exists = false;
   if (file !== ':memory:') {
     exists = fs.existsSync(file);
@@ -113,21 +120,21 @@ function initDatabase(config, callback) {
 
   db = new sqlite3.Database(file);
 
-  if(!exists) {
-    var statement = "CREATE TABLE devices (" + deviceModel.join(', ') + ")";
-    db.run(statement, [], function(err){
-      if (err){ console.log(err); }
-      if (callback) {
-        callback();
-      }
+  db.serialize(() => {
+    db.all("select name from sqlite_master where type='table'", function (err, tables) {
+        if (err) { callback(err); }
+        var tableCreators = []
+
+        // add devices table if not present
+        if(!tables.find(x => x.name === 'devices')){
+          tableCreators.push(devicesTableCreateCallback => {
+            var statement = "CREATE TABLE devices (" + deviceModel.join(', ') + ")";
+            db.run(statement, [], devicesTableCreateCallback);
+          })
+        }
+        async.series(tableCreators, callback);
     });
-  } else {
-    if (callback) {
-      setTimeout(function(){
-        callback();
-      }, 1);
-    }
-  }
+  });
 
   return {
     exit: exitHandler,

@@ -7,8 +7,15 @@ let koaStatic = require('koa-static');
 const app = module.exports = koa();
 const upnpListener = require('./lib/upnpListener');
 
+const config = require('./config');
+const database = require('./database')(
+	config,
+	()=>{}  //empty callback swallows errors
+);
+
 //controllers
-const devices = require('./controllers/devices');
+const devices = require('./controllers/devices')
+	.attachDatabase(database);
 const emulator = require('./controllers/emulator');
 const upnp = require('./controllers/upnp');
 

@@ -1,7 +1,14 @@
 'use strict';
 // see http://blog.stevensanderson.com/2013/12/21/experiments-with-koa-and-javascript-generators/
 
-var db = require('../database')();
+var db = function(){
+  console.log('database not initialized');
+};
+
+module.exports.attachDatabase = function(database){
+  db = database;
+  return module.exports;
+}
 
 function createThunk(device) {
   return function(callback){
