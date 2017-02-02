@@ -3,24 +3,22 @@ var TopMenu   = require('impromptu-react-animated-header').TopMenu;
 var MenuItem  = require('impromptu-react-animated-header').MenuItem;
 var MenuBrand = require('impromptu-react-animated-header').MenuBrand;
 
-TopMenu.toggleExpanded = () => console.log('hello');
-
 var MyMenu = React.createClass({
     render: function() {
 
         return (
-            <TopMenu>
+            <TopMenu cssTransitions align='right'>
                 <MenuBrand>
                     <a href="#home">HA Bridge Configuration</a>
                 </MenuBrand>
                 <MenuItem>
-                    <a href="#home">Bridge</a>
+                    <a href="#bridge-section">Bridge</a>
                 </MenuItem>
                 <MenuItem>
-                    <a href="#about">Devices</a>
+                    <a href="#devices-section">Devices</a>
                 </MenuItem>
                 <MenuItem>
-                    <a href="#configuration">New Device</a>
+                    <a href="#newDevice-section">New Device</a>
                 </MenuItem>
              </TopMenu>
         );

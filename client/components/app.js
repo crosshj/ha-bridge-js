@@ -1,9 +1,14 @@
 import React from 'react';
 import Menu from './menu';
+import Body from './body';
 
 class App extends React.Component {
   render () {
-    return <Menu />;
+    return <div>
+        <Menu />
+        <Body />
+    </div>
+
   }
 }
 
