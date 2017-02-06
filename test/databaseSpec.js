@@ -11,7 +11,8 @@ describe('SQLite Database', function () {
   var deviceUUID = '3dcc9eb0-2a71-11e6-a3a3-73120746dc1b';
 
   before(function(done) {
-    db = require('../database')({ fileName: ':memory:'}, done);
+    var config = { databaseFileName: ':memory:'};
+    db = require('../database')(config, done);
   });
 
   after(function() {
