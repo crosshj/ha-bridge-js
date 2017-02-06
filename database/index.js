@@ -101,10 +101,13 @@ function initDatabase(config, callback) {
     };
   }
   config = config || {};
-  var file = require('path').join(__dirname, config.databaseFileName);
+  var file = '';
   var exists = false;
-  if (file !== ':memory:') {
+  if (config.databaseFileName !== ':memory:') {
+    require('path').join(__dirname, config.databaseFileName)
     exists = fs.existsSync(file);
+  } else {
+    file = ':memory:';
   }
 
   //do something when app is closing
