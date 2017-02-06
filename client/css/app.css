@@ -2,3 +2,7 @@ body {
     padding-top: 60px;
     padding-bottom: 20px;
 }
+
+button.btn {
+    margin-right: 5px;
+}

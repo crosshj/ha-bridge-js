@@ -37,7 +37,7 @@ function duplicate(props){
 			            <div className="panel-heading">
 			            	<h2 className="panel-title">Current devices</h2>
 		            	</div>
-			            <table className="table table-bordered table-striped table-hover">
+		            	<table className="table table-bordered table-striped table-hover">
 			                <thead>
 				                <tr>
 				                    <th>Name</th>
@@ -45,17 +45,23 @@ function duplicate(props){
 				                </tr>
 			                </thead>
 			                <tbody>
-				                <tr>
-				                    <td>_den</td>
-				                    <td>
-				                        <button className="btn btn-info" type="submit">ON</button>
-				                        <button className="btn btn-info" type="submit">OFF</button>
-				                        <button className="btn btn-danger" type="submit">Edit</button>
-				                        <button className="btn btn-danger" type="submit">Delete</button>
-				                    </td>
-				                </tr>
+					            { ['_den', '_master_b_room', 'WifiPlugOne'].map((name, key) => {
+						            return (
+							                <tr key={key}>
+							                    <td>{name}</td>
+							                    <td>
+							                        <button className="btn btn-info" type="submit">ON</button>
+							                        <button className="btn btn-info" type="submit">OFF</button>
+							                        <button className="btn btn-danger" type="submit">Edit</button>
+							                        <button className="btn btn-danger" type="submit">Delete</button>
+							                    </td>
+							                </tr>
+						            	);
+						        	})
+					        	}
 				            </tbody>
 			            </table>
+
 			        </div>
 			    </div>
 
