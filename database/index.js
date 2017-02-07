@@ -19,20 +19,16 @@ var deviceModel = [
   "contentType TEXT",
   "contentBody TEXT"
 ];
+var deviceFields = deviceModel.map(x => x.split(' ')[0]);
 
-var deviceFields = [
-  "deviceId",
-  "status",
-  "uuid",
-  "name",
-  "level",
-  "deviceType",
-  "offUrl",
-  "onUrl",
-  "httpVerb",
-  "contentType",
-  "contentBody"
+var hubModel = [
+  "hubId INTEGER PRIMARY KEY",
+  "uuid TEXT",
+  "name TEXT",
+  "url TEXT",
+  "type TEXT"
 ];
+var hubFields = hubModel.map(x => x.split(' ')[0]);
 
 function validateUUID(str) {
   return /[0-9a-f]{22}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i.test(str);
@@ -44,6 +40,8 @@ function exitHandler(quiet) {
   db.close();
   dbClosed = true;
 }
+
+// --- DEVICES -----------------------------------------------------------------
 
 function createDevice(device, callback) {
   //TODO: validate device before creating
@@ -93,6 +91,50 @@ function deleteDevice(deviceId, callback) {
   db.all(statement, [], callback);
 }
 
+// --- HUBS --------------------------------------------------------------------
+
+function createHub(hub, callback) {
+  //TODO: validate device before creating
+  hub = hub || {};
+  hub.uuid = validateUUID(hub.uuid)
+    ? hub.uuid
+    : Guid.v1();
+  var values = [
+    hub.hubId || null,
+    hub.uuid,
+    hub.name || '',
+    hub.url || '',
+    hub.type || ''
+  ];
+  var template = values.map(function(){return '?'}).join(',');
+  var statement = 'INSERT INTO hubs ' + 'VALUES (' + template + ')';
+  //TODO: would be nice to return id of just created device, as below
+  //statement += "; SELECT last_insert_rowid() AS rowid FROM devices LIMIT 1";
+  var stmt = db.prepare(statement);
+  stmt.run(values, callback);
+  stmt.finalize();
+}
+
+function readHub(hubId, callback) {
+  var statement = 'SELECT * FROM hubs'
+  const hubIdValid = !!hubId && validateUUID(hubId);
+  statement += hubIdValid
+    ? ' WHERE hubId = "' + hubId + '"'
+    : '';
+  const args = [];
+  db.all(statement, args, callback);
+}
+
+function updateHub(hubId, fieldName, fieldValue, callback) {
+  var statement = 'UPDATE devices SET "'+fieldName+'" = "'+fieldValue+'" WHERE hubId = "' + hubId + '"';
+  db.all(statement, [], callback);
+}
+
+function deleteHub(hubId, callback) {
+  var statement = 'DELETE FROM hubs WHERE hubId = "' + hubId + '"';
+  db.all(statement, [], callback);
+}
+
 function initDatabase(config, callback) {
   if (!callback){
     callback = (err, result) => {
@@ -132,6 +174,12 @@ function initDatabase(config, callback) {
             db.run(statement, [], devicesTableCreateCallback);
           })
         }
+        if(!tables.find(x => x.name === 'hubs')){
+          tableCreators.push(hubTableCreateCallback => {
+            var statement = "CREATE TABLE hubs (" + hubModel.join(', ') + ")";
+            db.run(statement, [], hubTableCreateCallback);
+          })
+        }
         async.series(tableCreators, callback);
     });
   });
@@ -142,7 +190,11 @@ function initDatabase(config, callback) {
     createDevice,
     readDevice,
     updateDevice,
-    deleteDevice
+    deleteDevice,
+    createHub,
+    readHub,
+    updateHub,
+    deleteHub
   };
 }
 
