@@ -119,21 +119,23 @@ function readHub(hubId, callback) {
   var statement = 'SELECT * FROM hubs'
   const hubIdValid = !!hubId && validateUUID(hubId);
   statement += hubIdValid
-    ? ' WHERE hubId = "' + hubId + '"'
+    ? ' WHERE uuid = "' + hubId + '"'
     : '';
   const args = [];
   db.all(statement, args, callback);
 }
 
 function updateHub(hubId, fieldName, fieldValue, callback) {
-  var statement = 'UPDATE devices SET "'+fieldName+'" = "'+fieldValue+'" WHERE hubId = "' + hubId + '"';
+  var statement = 'UPDATE hubs SET "'+fieldName+'" = "'+fieldValue+'" WHERE uuid = "' + hubId + '"';
   db.all(statement, [], callback);
 }
 
 function deleteHub(hubId, callback) {
-  var statement = 'DELETE FROM hubs WHERE hubId = "' + hubId + '"';
+  var statement = 'DELETE FROM hubs WHERE uuid = "' + hubId + '"';
   db.all(statement, [], callback);
 }
+
+// --- database general --------------------------------------------------------
 
 function initDatabase(config, callback) {
   if (!callback){

@@ -5,69 +5,58 @@ this is more an integration test for this app and SQLLite DB
 var chai = require('chai');
 var expect = chai.expect;
 
-describe('SQLite Database', function () {
+describe('SQLite Database - Hubs', function () {
   var db;
   var dbFileName;
-  var deviceUUID = '3dcc9eb0-2a71-11e6-a3a3-73120746dc1b';
+  var hubUUID = '3dcc9eb0-2a71-11e6-a3a3-73120746dc1b';
 
   before(function(done) {
-    db = require('../database')({ fileName: ':memory:'}, done);
+    var config = { databaseFileName: ':memory:'};
+    db = require('../database')(config, done);
   });
 
   after(function() {
       db.exit(quiet=true);
   });
 
-  it('creates a device', function (done) {
+  it('creates a hub', function (done) {
     //arrange
-    var device = {
-      deviceId: 234,
-      status: 'off',
-      uuid: deviceUUID,
+    var hub = {
+      hubId: 234,
+      uuid: hubUUID,
       name: 'foo',
-      level: '100',
-      deviceType: 'light',
-      offUrl: 'http://www.foo.com/off',
-      onUrl: 'http://www.foo.com/on',
-      httpVerb: 'GET',
-      contentType: 'foo',
-      contentBody: 'foo'
+      type: 'milight',
+      url: 'http://www.foo.com/{deviceId}/{deviceState}'
     };
 
     //act
-    db.createDevice(device, callback);
+    db.createHub(hub, callback);
 
     //assert
     function callback(err) {
-      db.instance.all("select * from devices", function(err, rows){
+      db.instance.all("select * from hubs", function(err, rows){
         var lastItem = rows[rows.length-1];
         ///lastItem.deviceId = lastItem.deviceId.toString();
-        expect(lastItem).to.deep.equal(device);
+        expect(lastItem).to.deep.equal(hub);
         done();
       })
     }
   });
 
-  it('creates a device with automatic Id', function (done) {
+  it('creates a hub with automatic Id', function (done) {
     //arrange
-    var device = {
+    var hub = {
       name: 'fooAuto',
-      status: 'off',
-      level: '100',
-      deviceType: 'light',
-      offUrl: 'http://www.foo.com/off',
-      onUrl: 'http://www.foo.com/on',
-      httpVerb: 'GET',
-      contentType: 'foo',
-      contentBody: 'foo'
+      type: 'milight',
+      url: 'http://www.foo.com/{deviceId}/{deviceState}'
     };
 
     //act
-    db.createDevice(device, callback);
+    db.createHub(hub, callback);
 
     //assert
     function callback(err) {
-      db.instance.all("select * from devices where name = 'fooAuto'", function(err, rows){
+      db.instance.all('select * from hubs where name = "fooAuto"', function(err, rows){
         var lastItem = rows[rows.length-1];
         expect(rows.length).to.equal(1);
         done();
@@ -75,38 +64,32 @@ describe('SQLite Database', function () {
     }
   });
 
-  it('reads device(s) by id', function (done) {
+  it('reads hub(s) by id', function (done) {
     //arrange
-    var device = {
-      deviceId: 234,
-      status: 'off',
-      uuid: deviceUUID,
+    var hub = {
+      hubId: 234,
+      uuid: hubUUID,
       name: 'foo',
-      level: '100',
-      deviceType: 'light',
-      offUrl: 'http://www.foo.com/off',
-      onUrl: 'http://www.foo.com/on',
-      httpVerb: 'GET',
-      contentType: 'foo',
-      contentBody: 'foo'
+      type: 'milight',
+      url: 'http://www.foo.com/{deviceId}/{deviceState}'
     }; // use inserted item from previous step
 
     //act
-    db.readDevice(device.uuid, callback);
+    db.readHub(hub.uuid, callback);
 
     //assert
     function callback(err, rows) {
       var lastItem = rows[rows.length-1];
-      expect(lastItem).to.deep.equal(device);
+      expect(lastItem).to.deep.equal(hub);
       done();
     }
   });
 
-  it('reads all devices when id not specified', function (done) {
+  it('reads all hubs when id not specified', function (done) {
     //arrange
 
     //act
-    db.readDevice(null, callback);
+    db.readHub(null, callback);
 
     //assert
     function callback(err, rows) {
@@ -115,20 +98,20 @@ describe('SQLite Database', function () {
     }
   });
 
-  it('updates device(s) by id', function (done) {
+  it('updates hub(s) by id', function (done) {
     //arrange
     // use inserted item from previous step
     var fieldName = 'name';
     var fieldValue = 'newfoo';
-    var deviceId = deviceUUID;
+    var hubId = hubUUID;
 
     //act
-    db.updateDevice(deviceId, fieldName, fieldValue, callback);
+    db.updateHub(hubId, fieldName, fieldValue, callback);
 
     //assert
     function callback(err, result) {
-      db.instance.all("select * from devices", function(err, rows){
-        rows = rows.filter(function(item){ return item.uuid === deviceId; });
+      db.instance.all("select * from hubs", function(err, rows){
+        rows = rows.filter(function(item){ return item.uuid === hubId; });
         var lastItem = rows[rows.length-1];
         expect(lastItem.name).to.equal(fieldValue);
         done();
@@ -136,18 +119,18 @@ describe('SQLite Database', function () {
     }
   });
 
-  it('delete device(s) by id', function (done) {
+  it('delete hub(s) by id', function (done) {
     //arrange
     // use inserted item from previous step
-    var deviceId = deviceUUID;
+    var hubId = hubUUID;
 
     //act
-    db.deleteDevice(deviceId, callback);
+    db.deleteHub(hubId, callback);
 
     //assert
     function callback(err, result) {
-      db.instance.all("select * from devices", function(err, rows){
-        rows = rows.filter(function(item){ return item.deviceId === deviceId; });
+      db.instance.all("select * from hubs", function(err, rows){
+        rows = rows.filter(function(item){ return item.uuid === hubId; });
         expect(rows.length).to.equal(0);
         done();
       })

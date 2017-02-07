@@ -5,7 +5,7 @@ this is more an integration test for this app and SQLLite DB
 var chai = require('chai');
 var expect = chai.expect;
 
-describe('SQLite Database', function () {
+describe('SQLite Database - Devices', function () {
   var db;
   var dbFileName;
   var deviceUUID = '3dcc9eb0-2a71-11e6-a3a3-73120746dc1b';
