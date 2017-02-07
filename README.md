@@ -11,10 +11,10 @@ This bridge allows you to customize control of your devices *locally* using TCP 
 Go to localhost:80 to add devices (make sure onUrl/offUrl is valid)   
 Ask Alexa/Echo to discover devices   
 Once done, you should see your device(s) in Alexa app as "Dimmable Light"  
-Ask Alexa to turn your device(s) on/off   
+Ask Alexa to turn your device(s) on/off or change brightness   
 
 ## to do
-- downgrade from koa to something lighter (restify/flatiron) for embedded (Wink)   
+- rooted Wink plugin   
 - improve configurator (currently just a copy from original project)
   - search/add new device to Wink via configurator
   - different UI framework (react)
