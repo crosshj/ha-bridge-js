@@ -14,7 +14,8 @@ Once done, you should see your device(s) in Alexa app as "Dimmable Light"
 Ask Alexa to turn your device(s) on/off or change brightness   
 
 ## to do
-- rooted Wink plugin   
+- rooted Wink plugin
+- Milight plugin
 - improve configurator (currently just a copy from original project)
   - search/add new device to Wink via configurator
   - different UI framework (react)
