@@ -5,7 +5,8 @@
   "description": "react client for ha-bridge-js",
   "main": "index.js",
   "scripts": {
-    "build": "webpack -d",
+    "build": "webpack -d # -d for development mode",
+    "watch": "webpack -d --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
