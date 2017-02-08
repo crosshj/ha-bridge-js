@@ -21,7 +21,8 @@ var config = {
     }),
     new CopyWebpackPlugin([
       { from: 'icons', to: 'icons' },
-      { from: 'css', to: 'css' }
+      { from: 'css', to: 'css' },
+      { from: 'manifest.json', to: 'manifest.json'}
     ])
   ],
   module : {
