@@ -1,7 +1,7 @@
 import React from 'react';
 
 var tempHub = {
-  name: 'TODO: change tempHub'
+  name: 'TODO: change tempHub!'
 };
 
 function duplicate({
@@ -33,7 +33,7 @@ function duplicate({
 
   const duplicate = (
     <div>
-      <nav className="navbar navbar-inverse navbar-fixed-top">
+      <nav className="navbar navbar-custom navbar-fixed-top">
           <div className="container">
               <div className="navbar-header">
                   <a className="navbar-brand" href="#">HA Bridge Configuration</a>
@@ -41,7 +41,7 @@ function duplicate({
           </div>
       </nav>
       <div className="container">
-          <div className="panel panel-default bridgeServer">
+          <div className="panel panel-default panel-success bridgeServer">
               <div className="panel-heading">
                 <h1 className="panel-title">Bridge settings</h1>
               </div>
@@ -64,7 +64,7 @@ function duplicate({
 
 
           { !newHub &&
-          <div className="panel panel-default">
+          <div className="panel panel-default panel-success">
               <div className="panel-heading">
                 <h2 className="panel-title">Hubs</h2>
               </div>
@@ -85,7 +85,7 @@ function duplicate({
                     </div>
                     <div className="cols-xs-12 text-center">
                       { !newHub &&
-                        <button className="btn" type="submit" onClick={handleAddHubClick}>Add Hub</button>
+                        <button className="btn" type="submit" onClick={handleAddHubClick}>Add A New Hub</button>
                       }
                     </div>
                 </div>
@@ -94,7 +94,7 @@ function duplicate({
         }{/* Hubs List */}
 
           { newHub &&
-          <div className="panel panel-default">
+          <div className="panel panel-default panel-success">
               <div className="panel-heading">
                 <h2 className="panel-title">New Hub</h2>
               </div>
@@ -165,7 +165,7 @@ function duplicate({
           }{/* currentDevices list */}
 
           { selected.hub !== 'All' && !newHub &&
-          <div className="panel panel-default">
+          <div className="panel panel-default panel-success">
               <div className="panel-heading">
                 <h2 className="panel-title">New {selected.hub} device</h2>
               </div>
