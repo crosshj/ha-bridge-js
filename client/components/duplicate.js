@@ -33,6 +33,28 @@ function duplicate(props){
 			            </div>
 			        </div>
 
+              <div>
+                  <div className="panel panel-default">
+                      <div className="panel-heading">
+                        <h2 className="panel-title">Hubs</h2>
+                      </div>
+                      <div className="panel-body">
+                        <div className="form-group">
+                            <div className="col-xs-1"></div>
+                            <div className="col-xs-11">
+                              { ['Milight', 'Wink', 'Hue', 'Default'].map((name, key) => {
+                                return (
+                                  <label className="radio" key={key}>
+                                      <input value={key} type="radio" name="radio" defaultChecked={name==='Default'}/>{name}
+                                  </label>
+                                );
+                              })}
+                            </div>
+                        </div>
+                      </div>
+                  </div>
+              </div>
+
 			        <div className="panel panel-default">
 			            <div className="panel-heading">
 			            	<h2 className="panel-title">Current devices</h2>
