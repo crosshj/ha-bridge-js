@@ -13,6 +13,7 @@ class App extends React.Component {
     this.handleReload = props.handleReload || (() => {});
     this.handleHubChange = this.handleHubChange.bind(this);
     this.handleAddHub = this.handleAddHub.bind(this);
+    this.handleDeviceChange = this.handleDeviceChange.bind(this);
   }
 
   componentWillReceiveProps({devices, hubs}){
@@ -22,6 +23,20 @@ class App extends React.Component {
 
   handleHubChange(selectedHub){
     this.setState({selectedHub});
+  }
+
+  handleDeviceChange(change, name){
+    var device = this.state.devices.find(x => x.name === name);
+    device && console.log(device);
+    if (change === 'on' || change === 'off'){
+      const changeUrl = device[change+"Url"];
+      fetch(changeUrl, {mode: 'no-cors'})
+        .then(r => r.status)
+        .then(status => console.log(`Response from ${changeUrl} : ${status}`))
+        .catch(e => console.log('Error:\n', e))
+    }
+    console.log('TODO: change device status to pending, on repsonse change device status properly');
+    console.log(change + " device: " + name);
   }
 
   handleAddHub(newHub){
@@ -51,6 +66,7 @@ class App extends React.Component {
       devices: this.state.devices,
       newHub: this.state.newHub,
       handleAddHub: this.handleAddHub,
+      handleDeviceChange: this.handleDeviceChange,
       handleHubChange: this.handleHubChange,
       handleReload: this.handleReload
     };

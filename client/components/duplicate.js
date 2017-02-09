@@ -4,13 +4,12 @@ var tempHub = {
   name: 'TODO: change tempHub!'
 };
 
-var tempDevice = undefined;
-
 function duplicate({
   selected={}, hubs=[], devices=[], newHub,
   handleHubChange = () => {},
   handleAddHub = () => {},
   handleReload = () => {},
+  handleDeviceChange = () => {},
   url
 }){
   const hubChange = (event) => {
@@ -28,8 +27,6 @@ function duplicate({
     }
     handleAddHub(newHub);
   };
-
-  const handleDeviceChange = (change, name) => console.log(change + " device: " + name);
 
   //TODO: change tempHub when newHub dialog changes
 
