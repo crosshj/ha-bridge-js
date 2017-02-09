@@ -7,7 +7,9 @@ var tempHub = {
 function duplicate({
   selected={}, hubs=[], devices=[], newHub,
   handleHubChange = () => {},
-  handleAddHub = () => {}
+  handleAddHub = () => {},
+  handleReload = () => {},
+  url
 }){
   const hubChange = (event) => {
     const hub = event.target.value;
@@ -29,7 +31,7 @@ function duplicate({
 
   const currentDevices = selected.hub === 'All'
     ? devices
-    : devices.filter(x => x.hub === selected.hub);
+    : devices.filter(x => x.hub === selected.hub || (selected.hub === 'Generic' && !x.hub));
 
   const duplicate = (
     <div>
@@ -46,19 +48,22 @@ function duplicate({
                 <h1 className="panel-title">Bridge settings</h1>
               </div>
               <div className="panel-body">
-                  <form className="form">
-                      <div className="col-xs-7 col-sm-7">
-                          <input id="bridge-base" className="form-control" type="text" placeholder="URL to bridge" />
-                      </div>
-                      <div className="btn-toolbar">
-                          <button type="submit" className="col-xs-2 col-sm-1 btn btn-primary btn">
-                            Load
-                          </button>
-                          <button type="submit" className="col-xs-2 col-sm-1 btn btn-primary">
-                            Go
-                          </button>
-                      </div>
-                  </form>
+                <div className="col-xs-7 col-sm-7">
+                    <input id="bridge-base" className="form-control"
+                      defaultValue = {url} type="text" placeholder="URL to bridge" />
+                </div>
+                <div className="btn-toolbar">
+                    <button className="col-xs-2 col-sm-1 btn btn-primary btn"
+                      onClick={handleReload}
+                    >
+                      Load
+                    </button>
+                    <button className="col-xs-2 col-sm-1 btn btn-primary"
+                      onClick={() => window.open(url)}
+                    >
+                      Go
+                    </button>
+                </div>
               </div>
           </div>
 

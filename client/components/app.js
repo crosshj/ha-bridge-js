@@ -7,10 +7,17 @@ class App extends React.Component {
   constructor(props){
     super(props);
     this.state = {
-      hubs: ['Milight', 'Wink', 'Hue', 'Generic', 'All']
+      hubs: ['Milight', 'Wink', 'Hue', 'Generic', 'All'],
+      url: props.url
     };
+    this.handleReload = props.handleReload || (() => {});
     this.handleHubChange = this.handleHubChange.bind(this);
     this.handleAddHub = this.handleAddHub.bind(this);
+  }
+
+  componentWillReceiveProps({devices, hubs}){
+    devices && this.setState({devices});
+    hubs && this.setState({hubs});
   }
 
   handleHubChange(selectedHub){
@@ -36,18 +43,16 @@ class App extends React.Component {
 
   render () {
     const props = {
+      url: this.state.url,
       hubs: this.state.hubs,
       selected: {
         hub: this.state.selectedHub || 'All'
       },
-      devices: [
-        {name: '_den', hub: 'Milight'},
-        {name: '_master_b_room', hub: 'Milight'},
-        {name: 'WifiPlugOne', hub: 'Generic'}
-      ],
+      devices: this.state.devices,
       newHub: this.state.newHub,
       handleAddHub: this.handleAddHub,
-      handleHubChange: this.handleHubChange
+      handleHubChange: this.handleHubChange,
+      handleReload: this.handleReload
     };
     return <div>
         {
