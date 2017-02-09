@@ -4,6 +4,8 @@ var tempHub = {
   name: 'TODO: change tempHub!'
 };
 
+var tempDevice = undefined;
+
 function duplicate({
   selected={}, hubs=[], devices=[], newHub,
   handleHubChange = () => {},
@@ -26,6 +28,8 @@ function duplicate({
     }
     handleAddHub(newHub);
   };
+
+  const handleDeviceChange = (change, name) => console.log(change + " device: " + name);
 
   //TODO: change tempHub when newHub dialog changes
 
@@ -151,13 +155,13 @@ function duplicate({
                         <tr key={key}>
                             <td>{name}</td>
                             <td className="text-center">
-                                <button className="btn btn-info" type="submit">ON</button>
-                                <button className="btn btn-info" type="submit">OFF</button>
+                                <button className="btn btn-info" onClick={() => handleDeviceChange('on', name)}>ON</button>
+                                <button className="btn btn-info" onClick={() => handleDeviceChange('off', name)}>OFF</button>
                                 { selected.hub !== 'All' &&
-                                <button className="btn btn-danger" type="submit">Edit</button>
+                                <button className="btn btn-danger" onClick={() => handleDeviceChange('edit', name)}>Edit</button>
                                 }
                                 { selected.hub !== 'All' &&
-                                <button className="btn btn-danger" type="submit">Delete</button>
+                                <button className="btn btn-danger" onClick={() => handleDeviceChange('delete', name)}>Delete</button>
                                 }
                             </td>
                         </tr>
