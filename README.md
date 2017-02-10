@@ -15,7 +15,7 @@ Ask Alexa to turn your device(s) on/off or change brightness
 
 ## goals
 - [X] emulation running on a computer
-- [X} configurator / UI in react
+- [X] configurator / UI in react
 - [ ] plugin architecture and example hub plugins
 - [ ] rooted Milight plugin
 - [ ] rooted Wink Hub plugin
