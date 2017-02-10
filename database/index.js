@@ -36,7 +36,7 @@ function validateUUID(str) {
 
 function exitHandler(quiet) {
   if (dbClosed){ return; }
-  if (!quiet) console.log('Closing database...')
+  if (!quiet) console.log('Closing database...');
   db.close();
   dbClosed = true;
 }
@@ -62,7 +62,7 @@ function createDevice(device, callback) {
     device.contentType || '',
     device.contentBody || ''
   ];
-  var template = values.map(function(){return '?'}).join(',');
+  var template = values.map(function(){return '?';}).join(',');
   var statement = 'INSERT INTO devices ' + 'VALUES (' + template + ')';
   //TODO: would be nice to return id of just created device, as below
   //statement += "; SELECT last_insert_rowid() AS rowid FROM devices LIMIT 1";
@@ -72,7 +72,7 @@ function createDevice(device, callback) {
 }
 
 function readDevice(deviceId, callback) {
-  var statement = 'SELECT * FROM devices'
+  var statement = 'SELECT * FROM devices';
   const deviceIdValid = !!deviceId && validateUUID(deviceId);
   statement += deviceIdValid
     ? ' WHERE uuid = "' + deviceId + '"'
@@ -106,7 +106,7 @@ function createHub(hub, callback) {
     hub.url || '',
     hub.type || ''
   ];
-  var template = values.map(function(){return '?'}).join(',');
+  var template = values.map(function(){return '?';}).join(',');
   var statement = 'INSERT INTO hubs ' + 'VALUES (' + template + ')';
   //TODO: would be nice to return id of just created device, as below
   //statement += "; SELECT last_insert_rowid() AS rowid FROM devices LIMIT 1";
@@ -116,7 +116,7 @@ function createHub(hub, callback) {
 }
 
 function readHub(hubId, callback) {
-  var statement = 'SELECT * FROM hubs'
+  var statement = 'SELECT * FROM hubs';
   const hubIdValid = !!hubId && validateUUID(hubId);
   statement += hubIdValid
     ? ' WHERE uuid = "' + hubId + '"'
@@ -148,7 +148,7 @@ function initDatabase(config, callback) {
   var file = '';
   var exists = false;
   if (config.databaseFileName !== ':memory:') {
-    require('path').join(__dirname, config.databaseFileName)
+    require('path').join(__dirname, config.databaseFileName);
     exists = fs.existsSync(file);
   } else {
     file = ':memory:';
@@ -170,20 +170,20 @@ function initDatabase(config, callback) {
   db.serialize(() => {
     db.all("select name from sqlite_master where type='table'", function (err, tables) {
         if (err) { callback(err); }
-        var tableCreators = []
+        var tableCreators = [];
 
         // add devices table if not present
         if(!tables.find(x => x.name === 'devices')){
           tableCreators.push(devicesTableCreateCallback => {
             var statement = "CREATE TABLE devices (" + deviceModel.join(', ') + ")";
             db.run(statement, [], devicesTableCreateCallback);
-          })
+          });
         }
         if(!tables.find(x => x.name === 'hubs')){
           tableCreators.push(hubTableCreateCallback => {
             var statement = "CREATE TABLE hubs (" + hubModel.join(', ') + ")";
             db.run(statement, [], hubTableCreateCallback);
-          })
+          });
         }
         async.series(tableCreators, callback);
     });
