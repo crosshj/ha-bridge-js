@@ -11,7 +11,7 @@ const sectionItems = sections.map((section, key) =>
 	</section>
 );
 
-function Body(props){
+function Body(){
 	return (
 		<div>
 			{sectionItems}

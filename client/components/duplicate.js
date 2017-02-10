@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react';   
 
 var tempHub = {
   name: 'TODO: change tempHub!'
@@ -19,10 +19,10 @@ function duplicate({
 
   const handleAddHubClick = (event) => {
     var newHub = undefined;
-    if(!!~event.target.className.indexOf('submit-hub')){
+    if(~event.target.className.indexOf('submit-hub')){
       newHub = JSON.parse(JSON.stringify(tempHub));
     }
-    if(!!~event.target.className.indexOf('cancel-hub')){
+    if(~event.target.className.indexOf('cancel-hub')){
       newHub = 'cancel';
     }
     handleAddHub(newHub);
@@ -213,5 +213,23 @@ function duplicate({
 
   return duplicate;
 }
+
+// selected={}, hubs=[], devices=[], newHub,
+// handleHubChange = () => {},
+// handleAddHub = () => {},
+// handleReload = () => {},
+// handleDeviceChange = () => {},
+// url
+
+duplicate.propTypes = {
+  selected: React.PropTypes.object,
+  hubs: React.PropTypes.array,
+  devices: React.PropTypes.array,
+  url: React.PropTypes.string,
+  handleHubchange: React.PropTypes.func,
+  handleAddHub: React.PropTypes.func,
+  handleReload: React.PropTypes.func,
+  handleDeviceChange: React.PropTypes.func
+};
 
 export default duplicate;

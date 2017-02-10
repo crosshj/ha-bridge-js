@@ -1,6 +1,6 @@
 import React from 'react';
-import Menu from './menu';
-import Body from './body';
+// import Menu from './menu';
+// import Body from './body';
 import Duplicate from './duplicate';
 
 class App extends React.Component {
@@ -27,16 +27,20 @@ class App extends React.Component {
 
   handleDeviceChange(change, name){
     var device = this.state.devices.find(x => x.name === name);
-    device && console.log(device);
+    device && console.log(device); //eslint-disable-line no-console
+
     if (change === 'on' || change === 'off'){
       const changeUrl = device[change+"Url"];
       fetch(changeUrl, {mode: 'no-cors'})
         .then(r => r.status)
-        .then(status => console.log(`Response from ${changeUrl} : ${status}`))
-        .catch(e => console.log('Error:\n', e))
+        .then(status => console.log(`Response from ${changeUrl} : ${status}`)) //eslint-disable-line no-console
+        .catch(e => console.log('Error:\n', e)); //eslint-disable-line no-console
     }
+    /* eslint-disable no-console*/
     console.log('TODO: change device status to pending, on repsonse change device status properly');
+
     console.log(change + " device: " + name);
+    /* eslint-enable no-console*/
   }
 
   handleAddHub(newHub){
@@ -70,15 +74,22 @@ class App extends React.Component {
       handleHubChange: this.handleHubChange,
       handleReload: this.handleReload
     };
-    return <div>
+    return (
+      <div>
         {
         // <Menu />
         // <Body />
-      }
+        }
         <Duplicate {...props}/>
-    </div>
+      </div>
+    );
 
   }
 }
+
+App.propTypes = {
+  url: React.PropTypes.string,
+  handleReload: React.PropTypes.func
+};
 
 export default App;
