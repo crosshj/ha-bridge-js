@@ -26,7 +26,7 @@ app.use(addTrailingSlashes());
 app.use(koaBodyParser());
 
 // serve files in public folder (css, js etc)
-app.use(koaStatic(__dirname + '/public'));
+app.use(koaStatic(__dirname + '/build/client'));
 
 // user interface to modify devices stored internally
 app.use(route.post('/local-api/devices', devices.create));
