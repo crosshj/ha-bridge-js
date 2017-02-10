@@ -2,7 +2,7 @@ import React from 'react';
 import {render} from 'react-dom';
 import App from './components/app.js';
 
-const devicesUrl = location.origin + "/local-api/devices";
+const devicesUrl = location.origin + location.pathname + "local-api/devices";
 
 
 function reload(){

@@ -1,0 +1,15 @@
+{
+  "lang": "en",
+  "orientation": "portrait",
+  "background_color": "#8ec4a5",
+  "name": "HA Bridge JS",
+  "short_name": "ha-bridge-js",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "icons/haBridgeIcon144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    }
+  ]
+}

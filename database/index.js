@@ -148,7 +148,7 @@ function initDatabase(config, callback) {
   var file = '';
   var exists = false;
   if (config.databaseFileName !== ':memory:') {
-    require('path').join(__dirname, config.databaseFileName);
+    file = require('path').join(__dirname, config.databaseFileName);
     exists = fs.existsSync(file);
   } else {
     file = ':memory:';
