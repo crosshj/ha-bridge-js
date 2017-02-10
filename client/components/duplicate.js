@@ -45,7 +45,7 @@ function duplicate({
               </div>
           </div>
       </nav>
-      <div className="container">
+      <div className="container col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3">
           <div className="panel panel-default panel-success bridgeServer">
               <div className="panel-heading">
                 <h1 className="panel-title">Bridge settings</h1>
@@ -56,12 +56,12 @@ function duplicate({
                       defaultValue = {url} type="text" placeholder="URL to bridge" />
                 </div>
                 <div className="btn-toolbar">
-                    <button className="col-xs-2 col-sm-1 btn btn-primary btn"
+                    <button className="col-xs-2 btn btn-primary btn"
                       onClick={handleReload}
                     >
                       Load
                     </button>
-                    <button className="col-xs-2 col-sm-1 btn btn-primary"
+                    <button className="col-xs-2 btn btn-primary"
                       onClick={() => window.open(url)}
                     >
                       Go
@@ -192,7 +192,9 @@ function duplicate({
                                     onChange={event => handleTempDeviceChange('name', event.target.value)}
                                   />
                               </div>
-                              <button type="submit" className="col-xs-3 col-sm-2 btn btn-primary">
+                              <button className="col-xs-3 col-sm-2 btn btn-primary" type="button"
+                                onClick={() => handleTempDeviceChange((selected.device ? "update" : "add"), tempDevice)}
+                              >
                                   {(selected.device ? "Update" : "Add")} Device
                               </button>
                           </div>

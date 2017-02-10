@@ -57,31 +57,97 @@ class App extends React.Component {
       });
     }
 
-    if (change === 'add') {
-      //POST
+    if (change === 'delete') {
+      //DELETE
+      const url = this.state.url + '/' + device.uuid;
+      const config = {
+        method: 'DELETE'
+      };
+      fetch(url, config)
+        .then(r => r.text())
+        .then(body => {
+          console.log(`Response from ${url} : ${body}`); //eslint-disable-line no-console
+          this.setState({tempDevice: {}, selectedDevice: undefined});
+          this.handleReload();
+        })
+        .catch(e => console.log('Error:\n', e)); //eslint-disable-line no-console
+
       /* eslint-disable no-console*/
       console.log('TODO: change device status to pending, on repsonse change device status properly');
-
-      console.log(change + " device: " + name);
+      console.log(change + " device: " + device.name);
       /* eslint-enable no-console*/
+      return;
     }
-    if (change === 'update') {
-      //PUT
-      /* eslint-disable no-console*/
-      console.log('TODO: change device status to pending, on repsonse change device status properly');
 
-      console.log(change + " device: " + name);
-      /* eslint-enable no-console*/
-    }
   }
 
   handleTempDeviceChange(prop, value){
+    if (prop === 'add') {
+      //POST
+      const url = this.state.url;
+      const config = {
+        method: 'POST',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        }),
+        body: JSON.stringify(value)
+      };
+      fetch(url, config)
+        .then(r => r.text())
+        .then(body => {
+          console.log(`Response from ${url} : ${body}`); //eslint-disable-line no-console
+          this.setState({tempDevice: {}, selectedDevice: undefined});
+          this.handleReload();
+        })
+        .catch(e => console.log('Error:\n', e)); //eslint-disable-line no-console
+
+      /* eslint-disable no-console*/
+      console.log('TODO: change device status to pending, on repsonse change device status properly');
+
+      console.log(prop + " device: " + value.name);
+      /* eslint-enable no-console*/
+      return;
+    }
+
+    if (prop === 'update') {
+      //PUT
+      const url = this.state.url + '/' + value.uuid;
+      const config = {
+        method: 'PUT',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        }),
+        body: JSON.stringify({
+          name: value.name,
+          onUrl: value.onUrl,
+          offUrl: value.offUrl
+        })
+      };
+      fetch(url, config)
+        .then(r => r.text())
+        .then(body => {
+          console.log(`Response from ${url} : ${body}`); //eslint-disable-line no-console
+          this.setState({tempDevice: {}, selectedDevice: undefined});
+          this.handleReload();
+        })
+        .catch(e => console.log('Error:\n', e)); //eslint-disable-line no-console
+
+      /* eslint-disable no-console*/
+      console.log('TODO: change device status to pending, on repsonse change device status properly');
+      console.log(prop + " device: " + value.name);
+      /* eslint-enable no-console*/
+      return;
+    }
+
     if(prop === 'test'){
       this.testUrl(value);
       /* eslint-disable no-console*/
       console.log('TODO: change device status to pending, on repsonse change device status properly');
       /* eslint-enable no-console*/
-    } else if (prop === 'cancel'){
+      return;
+    }
+
+    if (prop === 'cancel'){
       this.setState({tempDevice: {}, selectedDevice: undefined});
     } else {
       var tempDevice = this.state.tempDevice;
