@@ -61,10 +61,10 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var devicesUrl = location.origin + location.pathname + "local-api/devices";
+	var apiUrl = location.origin + location.pathname + "local-api/";
 	
 	function reload() {
-	  fetch(devicesUrl).then(function (r) {
+	  fetch(apiUrl + "devices").then(function (r) {
 	    return r.json();
 	  }).then(function (data) {
 	    return (0, _reactDom.render)(_react2.default.createElement(_app2.default, { devices: data }), document.getElementById('app'));
@@ -72,13 +72,16 @@
 	    return console.log("Error:\n", e);
 	  }); //eslint-disable-line no-console
 	
-	  // fetch("/local-api/hubs")
-	  //   .then(r => r.json())
-	  //   .then(data => render(<App hubs={data}/>, document.getElementById('app')))
-	  //   .catch(e => console.log("Error:\n", e));
+	  fetch(apiUrl + "hubs").then(function (r) {
+	    return r.json();
+	  }).then(function (data) {
+	    return (0, _reactDom.render)(_react2.default.createElement(_app2.default, { hubs: data }), document.getElementById('app'));
+	  }).catch(function (e) {
+	    return console.log("Error:\n", e);
+	  }); //eslint-disable-line no-console
 	}
 	
-	(0, _reactDom.render)(_react2.default.createElement(_app2.default, { url: devicesUrl, handleReload: reload }), document.getElementById('app'));
+	(0, _reactDom.render)(_react2.default.createElement(_app2.default, { url: apiUrl, handleReload: reload }), document.getElementById('app'));
 	reload();
 
 /***/ },
@@ -22145,7 +22148,7 @@
 	
 	    _this.state = {
 	      hubs: ['Milight', 'Wink', 'Hue', 'Generic', 'All'],
-	      url: props.url,
+	      url: props.url + "devices",
 	      tempDevice: {}
 	    };
 	    _this.handleReload = props.handleReload || function () {};

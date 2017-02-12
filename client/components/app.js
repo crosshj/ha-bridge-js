@@ -15,7 +15,7 @@ class App extends React.Component {
     super(props);
     this.state = {
       hubs: ['Milight', 'Wink', 'Hue', 'Generic', 'All'],
-      url: props.url,
+      url: props.url + "devices",
       tempDevice: {}
     };
     this.handleReload = props.handleReload || (() => {});
