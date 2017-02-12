@@ -5,8 +5,9 @@ var tempHub = {
 };
 
 function duplicate({
-  selected={}, hubs=[], devices=[], newHub,
-  tempDevice,
+  selected={}, hubs=[], devices=[],
+  hubTypes=[],
+  newHub, tempDevice,
   handleHubChange = () => {},
   handleAddHub = () => {},
   handleReload = () => {},
@@ -120,9 +121,9 @@ function duplicate({
                     <div className="form-group">
                       <label htmlFor="exampleSelect1">Example select</label>
                       <select className="form-control" id="exampleSelect1">
-                        <option>todo plugin type</option>
-                        <option>todo plugin type</option>
-                        <option>todo plugin type</option>
+                        { hubTypes && hubTypes.map((type, key) =>
+                          <option key={key} value={type}>{type}</option>
+                        )}
                       </select>
                     </div>
                 </form>

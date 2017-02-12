@@ -14,7 +14,8 @@ class App extends React.Component {
   constructor(props){
     super(props);
     this.state = {
-      hubs: ['Milight', 'Wink', 'Hue', 'Generic', 'All'],
+      hubs: ['Generic', 'All'],
+      hubTypes: [],
       url: props.url + "devices",
       tempDevice: {}
     };
@@ -28,7 +29,11 @@ class App extends React.Component {
 
   componentWillReceiveProps({devices, hubs}){
     devices && this.setState({devices});
-    hubs && this.setState({hubs});
+    if (hubs && hubs.instances){
+      const instances = ['Generic', 'All'].concat(hubs.instances);
+      const hubTypes = hubs.templates;
+      this.setState({hubs: instances, hubTypes});
+    }
   }
 
   handleHubChange(selectedHub){
@@ -178,6 +183,7 @@ class App extends React.Component {
     const props = {
       url: this.state.url,
       hubs: this.state.hubs,
+      hubTypes: this.state.hubTypes,
       selected: {
         hub: this.state.selectedHub || 'All',
         device: this.state.selectedDevice

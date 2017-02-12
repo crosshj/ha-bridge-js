@@ -53,7 +53,10 @@ module.exports.create = function *create() {
 module.exports.find = function *find(hubId) {
   try {
     var findResult = yield findThunk(hubId);
-    this.body = findResult;
+    this.body = {
+      instances: findResult,
+      templates: ['Milight', 'Hue', 'Wink']
+    };
   } catch (error) {
     this.status = 400; //Bad request
     this.body = "error finding hub:\n" + JSON.stringify(error, null, '\t');

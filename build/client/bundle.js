@@ -22147,7 +22147,8 @@
 	    var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 	
 	    _this.state = {
-	      hubs: ['Milight', 'Wink', 'Hue', 'Generic', 'All'],
+	      hubs: ['Generic', 'All'],
+	      hubTypes: [],
 	      url: props.url + "devices",
 	      tempDevice: {}
 	    };
@@ -22167,7 +22168,11 @@
 	          hubs = _ref.hubs;
 	
 	      devices && this.setState({ devices: devices });
-	      hubs && this.setState({ hubs: hubs });
+	      if (hubs && hubs.instances) {
+	        var instances = ['Generic', 'All'].concat(hubs.instances);
+	        var hubTypes = hubs.templates;
+	        this.setState({ hubs: instances, hubTypes: hubTypes });
+	      }
 	    }
 	  }, {
 	    key: 'handleHubChange',
@@ -22346,6 +22351,7 @@
 	      var props = {
 	        url: this.state.url,
 	        hubs: this.state.hubs,
+	        hubTypes: this.state.hubTypes,
 	        selected: {
 	          hub: this.state.selectedHub || 'All',
 	          device: this.state.selectedDevice
@@ -22407,6 +22413,8 @@
 	      hubs = _ref$hubs === undefined ? [] : _ref$hubs,
 	      _ref$devices = _ref.devices,
 	      devices = _ref$devices === undefined ? [] : _ref$devices,
+	      _ref$hubTypes = _ref.hubTypes,
+	      hubTypes = _ref$hubTypes === undefined ? [] : _ref$hubTypes,
 	      newHub = _ref.newHub,
 	      tempDevice = _ref.tempDevice,
 	      _ref$handleHubChange = _ref.handleHubChange,
@@ -22609,21 +22617,13 @@
 	              _react2.default.createElement(
 	                'select',
 	                { className: 'form-control', id: 'exampleSelect1' },
-	                _react2.default.createElement(
-	                  'option',
-	                  null,
-	                  'todo plugin type'
-	                ),
-	                _react2.default.createElement(
-	                  'option',
-	                  null,
-	                  'todo plugin type'
-	                ),
-	                _react2.default.createElement(
-	                  'option',
-	                  null,
-	                  'todo plugin type'
-	                )
+	                hubTypes && hubTypes.map(function (type, key) {
+	                  return _react2.default.createElement(
+	                    'option',
+	                    { key: key, value: type },
+	                    type
+	                  );
+	                })
 	              )
 	            )
 	          ),
