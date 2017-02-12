@@ -8,7 +8,7 @@ const addTrailingSlashes = require('koa-add-trailing-slashes');
 
 const app = module.exports = koa();
 
-const upnpListener = require('./lib/upnpListener');
+require('./lib/upnpListener');
 
 const config = require('./config');
 const database = require('./database')(
@@ -47,5 +47,5 @@ app.use(route.get('/upnp/:deviceId/setup.xml', upnp.setup));
 if (!module.parent) {
   var server = app.listen(serverPort);
   require('./lib/win-die')(server); //lame, lame, lame
-  console.log('listening on port ' + serverPort);
+  console.log('listening on port ' + serverPort); //eslint-disable-line no-console
 }
