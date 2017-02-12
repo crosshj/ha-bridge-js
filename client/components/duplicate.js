@@ -1,12 +1,9 @@
 import React from 'react';
 
-var tempHub = {
-  name: 'TODO: change tempHub!'
-};
+var tempHub = {};
 
 function duplicate({
   selected={}, hubs=[], devices=[],
-  hubTypes=[],
   newHub, tempDevice,
   handleHubChange = () => {},
   handleAddHub = () => {},
@@ -20,7 +17,7 @@ function duplicate({
     handleHubChange(hub);
   };
 
-  const handleAddHubClick = (event) => {
+  const handleAddHubClick = (event, change) => {
     var newHub = undefined;
     if(~event.target.className.indexOf('submit-hub')){
       newHub = JSON.parse(JSON.stringify(tempHub));
@@ -28,10 +25,9 @@ function duplicate({
     if(~event.target.className.indexOf('cancel-hub')){
       newHub = 'cancel';
     }
-    handleAddHub(newHub);
+    handleAddHub(newHub, change);
   };
 
-  //TODO: change tempHub when newHub dialog changes
 
   const currentDevices = selected.hub === 'All'
     ? devices
@@ -92,11 +88,15 @@ function duplicate({
                         );
                       })}
                     </div>
-                    { !newHub &&
                     <div className="cols-xs-12 text-center">
-                        <button className="btn" type="submit" onClick={handleAddHubClick}>Add A New Hub</button>
+                        { selected.hub !== "Generic" && selected.hub !== "All" &&
+                          <button className="btn" onClick={(event) => handleAddHubClick(event, 'edit')}>Edit</button>
+                        }
+                        { selected.hub !== "Generic" && selected.hub !== "All" &&
+                          <button className="btn" onClick={(event) => handleAddHubClick(event, 'delete')}>Delete</button>
+                        }
+                        <button className="btn" onClick={handleAddHubClick}>Add</button>
                     </div>
-                    }{/* Add New Hub*/}
                 </div>
               </div>
           </div>
@@ -111,17 +111,23 @@ function duplicate({
                 <form>
                     <div className="form-group">
                       <label htmlFor="hub-name">Name</label>
-                      <input type="text" className="form-control" id="hub-name" />
+                      <input type="text" className="form-control" id="hub-name"
+                        onChange={event => tempHub.name=event.target.value}
+                      />
                     </div>
                     <div className="form-group">
                       <label htmlFor="hub-pattern">URL Pattern</label>
-                      <input type="text" className="form-control" id="hub-pattern" />
+                      <input type="text" className="form-control" id="hub-pattern"
+                        onChange={event => tempHub.url=event.target.value}
+                      />
                     </div>
                     <span className="col-xs-12">TODO: put preview here</span>
                     <div className="form-group">
                       <label htmlFor="exampleSelect1">Example select</label>
-                      <select className="form-control" id="exampleSelect1">
-                        { hubTypes && hubTypes.map((type, key) =>
+                      <select className="form-control" id="exampleSelect1"
+                        onChange={event => tempHub.type=event.target.value}
+                      >
+                        { newHub.types && newHub.types.map((type, key) =>
                           <option key={key} value={type}>{type}</option>
                         )}
                       </select>
@@ -129,7 +135,7 @@ function duplicate({
                 </form>
                 <div className="cols-xs-12 text-center">
                   <button className="btn btn-danger cancel-hub" onClick={handleAddHubClick}>Cancel</button>
-                  <button className="btn btn-info submit-hub" type="submit" onClick={handleAddHubClick}>Add Hub</button>
+                  <button className="btn btn-info submit-hub" onClick={handleAddHubClick}>Add Hub</button>
                 </div>
               </div>
           </div>

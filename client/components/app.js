@@ -17,6 +17,7 @@ class App extends React.Component {
       hubs: ['Generic', 'All'],
       hubTypes: [],
       url: props.url + "devices",
+      hubUrl: props.url + "hubs",
       tempDevice: {}
     };
     this.handleReload = props.handleReload || (() => {});
@@ -30,7 +31,7 @@ class App extends React.Component {
   componentWillReceiveProps({devices, hubs}){
     devices && this.setState({devices});
     if (hubs && hubs.instances){
-      const instances = ['Generic', 'All'].concat(hubs.instances);
+      const instances = hubs.instances.map(x=>x.name).concat(['Generic', 'All']);
       const hubTypes = hubs.templates;
       this.setState({hubs: instances, hubTypes});
     }
@@ -161,21 +162,48 @@ class App extends React.Component {
     }
   }
 
-  handleAddHub(newHub){
+  handleAddHub(newHub, change){
     this.setState({tempDevice: {}, selectedDevice: undefined});
+
+    if(change === 'delete'){
+      debugger;
+      return;
+    }
+
+    if(change === 'edit'){
+      debugger;
+      return;
+    }
+
     if(!newHub){
+      // set hub for hub editor
       this.setState({newHub: {
         name: '',
         url: '',
-        types: ['foo', 'bar', 'baz']
+        types: this.state.hubTypes
       }});
     } else {
-      this.setState({
-        newHub: undefined,
-        hubs: (newHub === 'cancel')
-          ? this.state.hubs
-          : [newHub.name].concat(this.state.hubs)
-      });
+      //TODO: are we editing a hub or adding a new one??
+      //POST
+      newHub.type = newHub.type || this.state.hubTypes[0];
+      const url = this.state.hubUrl;
+      const config = {
+        method: 'POST',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        }),
+        body: JSON.stringify(newHub)
+      };
+      fetch(url, config)
+        .then(r => r.text())
+        .then(body => {
+          console.log(`Response from ${url} : ${body}`); //eslint-disable-line no-console
+          this.setState({
+            newHub: undefined
+          });
+          this.handleReload();
+        })
+        .catch(e => console.log('Error:\n', e)); //eslint-disable-line no-console
     }
   }
 
@@ -183,7 +211,6 @@ class App extends React.Component {
     const props = {
       url: this.state.url,
       hubs: this.state.hubs,
-      hubTypes: this.state.hubTypes,
       selected: {
         hub: this.state.selectedHub || 'All',
         device: this.state.selectedDevice

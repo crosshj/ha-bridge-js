@@ -22150,6 +22150,7 @@
 	      hubs: ['Generic', 'All'],
 	      hubTypes: [],
 	      url: props.url + "devices",
+	      hubUrl: props.url + "hubs",
 	      tempDevice: {}
 	    };
 	    _this.handleReload = props.handleReload || function () {};
@@ -22169,7 +22170,9 @@
 	
 	      devices && this.setState({ devices: devices });
 	      if (hubs && hubs.instances) {
-	        var instances = ['Generic', 'All'].concat(hubs.instances);
+	        var instances = hubs.instances.map(function (x) {
+	          return x.name;
+	        }).concat(['Generic', 'All']);
 	        var hubTypes = hubs.templates;
 	        this.setState({ hubs: instances, hubTypes: hubTypes });
 	      }
@@ -22330,19 +22333,53 @@
 	    }
 	  }, {
 	    key: 'handleAddHub',
-	    value: function handleAddHub(newHub) {
+	    value: function handleAddHub(newHub, change) {
+	      var _this4 = this;
+	
 	      this.setState({ tempDevice: {}, selectedDevice: undefined });
+	
+	      if (change === 'delete') {
+	        debugger;
+	        return;
+	      }
+	
+	      if (change === 'edit') {
+	        debugger;
+	        return;
+	      }
+	
 	      if (!newHub) {
+	        // set hub for hub editor
 	        this.setState({ newHub: {
 	            name: '',
 	            url: '',
-	            types: ['foo', 'bar', 'baz']
+	            types: this.state.hubTypes
 	          } });
 	      } else {
-	        this.setState({
-	          newHub: undefined,
-	          hubs: newHub === 'cancel' ? this.state.hubs : [newHub.name].concat(this.state.hubs)
-	        });
+	        (function () {
+	          //TODO: are we editing a hub or adding a new one??
+	          //POST
+	          newHub.type = newHub.type || _this4.state.hubTypes[0];
+	          var url = _this4.state.hubUrl;
+	          var config = {
+	            method: 'POST',
+	            headers: new Headers({
+	              'Content-Type': 'application/json'
+	            }),
+	            body: JSON.stringify(newHub)
+	          };
+	          fetch(url, config).then(function (r) {
+	            return r.text();
+	          }).then(function (body) {
+	            console.log('Response from ' + url + ' : ' + body); //eslint-disable-line no-console
+	            _this4.setState({
+	              newHub: undefined
+	            });
+	            _this4.handleReload();
+	          }).catch(function (e) {
+	            return console.log('Error:\n', e);
+	          }); //eslint-disable-line no-console
+	        })();
 	      }
 	    }
 	  }, {
@@ -22351,7 +22388,6 @@
 	      var props = {
 	        url: this.state.url,
 	        hubs: this.state.hubs,
-	        hubTypes: this.state.hubTypes,
 	        selected: {
 	          hub: this.state.selectedHub || 'All',
 	          device: this.state.selectedDevice
@@ -22402,9 +22438,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var tempHub = {
-	  name: 'TODO: change tempHub!'
-	};
+	var tempHub = {};
 	
 	function duplicate(_ref) {
 	  var _ref$selected = _ref.selected,
@@ -22413,8 +22447,6 @@
 	      hubs = _ref$hubs === undefined ? [] : _ref$hubs,
 	      _ref$devices = _ref.devices,
 	      devices = _ref$devices === undefined ? [] : _ref$devices,
-	      _ref$hubTypes = _ref.hubTypes,
-	      hubTypes = _ref$hubTypes === undefined ? [] : _ref$hubTypes,
 	      newHub = _ref.newHub,
 	      tempDevice = _ref.tempDevice,
 	      _ref$handleHubChange = _ref.handleHubChange,
@@ -22434,7 +22466,7 @@
 	    handleHubChange(hub);
 	  };
 	
-	  var handleAddHubClick = function handleAddHubClick(event) {
+	  var handleAddHubClick = function handleAddHubClick(event, change) {
 	    var newHub = undefined;
 	    if (~event.target.className.indexOf('submit-hub')) {
 	      newHub = JSON.parse(JSON.stringify(tempHub));
@@ -22442,10 +22474,8 @@
 	    if (~event.target.className.indexOf('cancel-hub')) {
 	      newHub = 'cancel';
 	    }
-	    handleAddHub(newHub);
+	    handleAddHub(newHub, change);
 	  };
-	
-	  //TODO: change tempHub when newHub dialog changes
 	
 	  var currentDevices = selected.hub === 'All' ? devices : devices.filter(function (x) {
 	    return x.hub === selected.hub || selected.hub === 'Generic' && !x.hub;
@@ -22551,13 +22581,27 @@
 	                );
 	              })
 	            ),
-	            !newHub && _react2.default.createElement(
+	            _react2.default.createElement(
 	              'div',
 	              { className: 'cols-xs-12 text-center' },
+	              selected.hub !== "Generic" && selected.hub !== "All" && _react2.default.createElement(
+	                'button',
+	                { className: 'btn', onClick: function onClick(event) {
+	                    return handleAddHubClick(event, 'edit');
+	                  } },
+	                'Edit'
+	              ),
+	              selected.hub !== "Generic" && selected.hub !== "All" && _react2.default.createElement(
+	                'button',
+	                { className: 'btn', onClick: function onClick(event) {
+	                    return handleAddHubClick(event, 'delete');
+	                  } },
+	                'Delete'
+	              ),
 	              _react2.default.createElement(
 	                'button',
-	                { className: 'btn', type: 'submit', onClick: handleAddHubClick },
-	                'Add A New Hub'
+	                { className: 'btn', onClick: handleAddHubClick },
+	                'Add'
 	              )
 	            )
 	          )
@@ -22589,7 +22633,11 @@
 	                { htmlFor: 'hub-name' },
 	                'Name'
 	              ),
-	              _react2.default.createElement('input', { type: 'text', className: 'form-control', id: 'hub-name' })
+	              _react2.default.createElement('input', { type: 'text', className: 'form-control', id: 'hub-name',
+	                onChange: function onChange(event) {
+	                  return tempHub.name = event.target.value;
+	                }
+	              })
 	            ),
 	            _react2.default.createElement(
 	              'div',
@@ -22599,7 +22647,11 @@
 	                { htmlFor: 'hub-pattern' },
 	                'URL Pattern'
 	              ),
-	              _react2.default.createElement('input', { type: 'text', className: 'form-control', id: 'hub-pattern' })
+	              _react2.default.createElement('input', { type: 'text', className: 'form-control', id: 'hub-pattern',
+	                onChange: function onChange(event) {
+	                  return tempHub.url = event.target.value;
+	                }
+	              })
 	            ),
 	            _react2.default.createElement(
 	              'span',
@@ -22616,8 +22668,12 @@
 	              ),
 	              _react2.default.createElement(
 	                'select',
-	                { className: 'form-control', id: 'exampleSelect1' },
-	                hubTypes && hubTypes.map(function (type, key) {
+	                { className: 'form-control', id: 'exampleSelect1',
+	                  onChange: function onChange(event) {
+	                    return tempHub.type = event.target.value;
+	                  }
+	                },
+	                newHub.types && newHub.types.map(function (type, key) {
 	                  return _react2.default.createElement(
 	                    'option',
 	                    { key: key, value: type },
@@ -22637,7 +22693,7 @@
 	            ),
 	            _react2.default.createElement(
 	              'button',
-	              { className: 'btn btn-info submit-hub', type: 'submit', onClick: handleAddHubClick },
+	              { className: 'btn btn-info submit-hub', onClick: handleAddHubClick },
 	              'Add Hub'
 	            )
 	          )
