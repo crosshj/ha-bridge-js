@@ -2,13 +2,13 @@
 // see http://blog.stevensanderson.com/2013/12/21/experiments-with-koa-and-javascript-generators/
 
 var db = function(){
-  console.log('database not initialized');
+  console.log('database not initialized'); //eslint-disable-line no-console
 };
 
 module.exports.attachDatabase = function(database){
   db = database;
   return module.exports;
-}
+};
 
 function createThunk(device) {
   return function(callback){
@@ -100,7 +100,7 @@ module.exports.update = function *update(lightId) {
 module.exports.remove = function *remove(lightId) {
   try {
     if (!lightId) {
-      throw "no deviceId specified in URL"
+      throw "no deviceId specified in URL";
     }
     yield removeThunk(lightId);
     this.body = "device deleted successfully";

@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 var fs = require("fs");
 var async = require('async');
 const Guid = require('node-uuid');
@@ -19,7 +21,7 @@ var deviceModel = [
   "contentType TEXT",
   "contentBody TEXT"
 ];
-var deviceFields = deviceModel.map(x => x.split(' ')[0]);
+//var deviceFields = deviceModel.map(x => x.split(' ')[0]);
 
 var hubModel = [
   "hubId INTEGER PRIMARY KEY",
@@ -28,7 +30,7 @@ var hubModel = [
   "url TEXT",
   "type TEXT"
 ];
-var hubFields = hubModel.map(x => x.split(' ')[0]);
+//var hubFields = hubModel.map(x => x.split(' ')[0]);
 
 function validateUUID(str) {
   return /[0-9a-f]{22}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i.test(str);
@@ -36,7 +38,7 @@ function validateUUID(str) {
 
 function exitHandler(quiet) {
   if (dbClosed){ return; }
-  if (!quiet) console.log('Closing database...');
+  if (!quiet) console.log('\nClosing database...');
   db.close();
   dbClosed = true;
 }
