@@ -16,8 +16,8 @@ Ask Alexa to turn your device(s) on/off or change brightness
 ## goals
 - [X] emulation running on a computer
 - [X] configurator / UI in react
-- [ ] plugin architecture and example hub plugins
-- [ ] rooted Milight plugin
+- [X] plugin architecture and example hub plugins
+- [ ] Milight plugin
 - [ ] rooted Wink Hub plugin
 - [ ] easily add devices to hubs via mobile interface (discovery for plugins)
 - [ ] replace my Smartthings Hub functionality/usage
