@@ -75,6 +75,7 @@ module.exports.create = function *create() {
 };
 
 module.exports.actions = function *actions(hubName, deviceId, state) {
+  console.log('------------------------- HERE');
   var allHubs = yield findThunk();
   var hub = allHubs.find(x => x.name === hubName);
   var templates = yield getTemplatesThunk();

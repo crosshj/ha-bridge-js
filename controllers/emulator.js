@@ -3,6 +3,9 @@ const updateDevice = require('../lib/updateDevice.js');
 const findThunk = require('./devices').findThunk;
 const getEmulatedDevice = require('../lib/getEmulatedDevice');
 
+var ip = require('ip');
+const baseUrl = 'http://' + ip.address();
+
 module.exports.wildcard = function* wildcard(path, next) {
   console.log('WILDCARD: ', this.request.url);
   console.log('WILDCARD BODY: ', this.request.body);
@@ -24,6 +27,14 @@ module.exports.root = function* root(userId) {
   try {
     console.log('ROOT REQUEST: ', this.request.body);
     var findResult = yield findThunk();
+    findResult.forEach(x => {
+      if (x.onUrl[0] === '/'){
+        x.onUrl = baseUrl + x.onUrl;
+      }
+      if (x.offUrl[0] === '/'){
+        x.offUrl = baseUrl + x.offUrl;
+      }
+    });
     var hueDevices = findResult.reduce(function(prev, next){
       prev[next.uuid] = getEmulatedDevice(next);
       return prev;
@@ -40,6 +51,14 @@ module.exports.list = function* list(userId, lightId) {
   try {
     console.log('LIST REQUEST: ', this.request.url);
     var findResult = yield findThunk(lightId);
+    findResult.forEach(x => {
+      if (x.onUrl[0] === '/'){
+        x.onUrl = baseUrl + x.onUrl;
+      }
+      if (x.offUrl[0] === '/'){
+        x.offUrl = baseUrl + x.offUrl;
+      }
+    });
     var hueDevices = findResult.reduce(function(prev, next){
       prev[next.uuid] = lightId ? getEmulatedDevice(next) : next.name;
       return prev;
