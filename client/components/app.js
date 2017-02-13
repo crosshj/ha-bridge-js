@@ -14,7 +14,7 @@ class App extends React.Component {
   constructor(props){
     super(props);
     this.state = {
-      hubs: ['Generic', 'All'],
+      hubs: [{name:'Generic'}, {name: 'All'}],
       hubTypes: [],
       url: props.url + "devices",
       hubUrl: props.url + "hubs",
@@ -31,9 +31,12 @@ class App extends React.Component {
   componentWillReceiveProps({devices, hubs}){
     devices && this.setState({devices});
     if (hubs && hubs.instances){
-      const instances = hubs.instances.map(x=>x.name).concat(['Generic', 'All']);
+      const instances = hubs.instances.concat([{name:'Generic'}, {name: 'All'}]);
       const hubTypes = hubs.templates;
-      this.setState({hubs: instances, hubTypes});
+      const selected = this.state.selectedHub
+        ? hubs.instances.find(x => x.uuid === this.state.selectedHub.uuid)
+        : this.state.selectedHub;
+      this.setState({hubs: instances, hubTypes, selectedHub: selected});
     }
   }
 
@@ -166,12 +169,56 @@ class App extends React.Component {
     this.setState({tempDevice: {}, selectedDevice: undefined});
 
     if(change === 'delete'){
-      debugger;
+      //PUT
+      const url = this.state.hubUrl + "/" + this.state.selectedHub.uuid;
+      const config = {
+        method: 'DELETE',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      };
+      fetch(url, config)
+        .then(r => r.text())
+        .then(body => {
+          console.log(`Response from ${url} : ${body}`); //eslint-disable-line no-console
+          this.setState({newHub: undefined});
+          this.handleReload();
+        })
+        .catch(e => console.log('Error:\n', e)); //eslint-disable-line no-console
+      return;
+    }
+
+    if(change === 'cancel'){
+      this.setState({newHub: undefined});
       return;
     }
 
     if(change === 'edit'){
-      debugger;
+      var editHub = JSON.parse(JSON.stringify(this.state.selectedHub));
+      editHub.types = this.state.hubTypes;
+      this.setState({newHub: editHub});
+      return;
+    }
+
+    if(change === 'update'){
+      //PUT
+      newHub.type = newHub.type || this.state.hubTypes[0];
+      const url = this.state.hubUrl + "/" + this.state.selectedHub.uuid;
+      const config = {
+        method: 'PUT',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        }),
+        body: JSON.stringify(newHub)
+      };
+      fetch(url, config)
+        .then(r => r.text())
+        .then(body => {
+          console.log(`Response from ${url} : ${body}`); //eslint-disable-line no-console
+          this.setState({newHub: undefined});
+          this.handleReload();
+        })
+        .catch(e => console.log('Error:\n', e)); //eslint-disable-line no-console
       return;
     }
 
@@ -198,9 +245,7 @@ class App extends React.Component {
         .then(r => r.text())
         .then(body => {
           console.log(`Response from ${url} : ${body}`); //eslint-disable-line no-console
-          this.setState({
-            newHub: undefined
-          });
+          this.setState({newHub: undefined});
           this.handleReload();
         })
         .catch(e => console.log('Error:\n', e)); //eslint-disable-line no-console
@@ -212,7 +257,7 @@ class App extends React.Component {
       url: this.state.url,
       hubs: this.state.hubs,
       selected: {
-        hub: this.state.selectedHub || 'All',
+        hub: this.state.selectedHub || {name:'All'},
         device: this.state.selectedDevice
       },
       tempDevice: this.state.tempDevice,

@@ -12,8 +12,10 @@ function duplicate({
   handleTempDeviceChange = () => {},
   url
 }){
+  //tempHub = newHub || tempHub;
+
   const hubChange = (event) => {
-    const hub = event.target.value;
+    const hub = hubs.find(x => x.name===event.target.value);
     handleHubChange(hub);
   };
 
@@ -22,16 +24,22 @@ function duplicate({
     if(~event.target.className.indexOf('submit-hub')){
       newHub = JSON.parse(JSON.stringify(tempHub));
     }
+    if(~event.target.className.indexOf('update-hub')){
+      newHub = JSON.parse(JSON.stringify(tempHub));
+      change = 'update';
+    }
     if(~event.target.className.indexOf('cancel-hub')){
-      newHub = 'cancel';
+      tempHub = {};
+      change = 'cancel';
     }
     handleAddHub(newHub, change);
   };
 
-
-  const currentDevices = selected.hub === 'All'
+  const currentDevices = selected.hub.name === 'All'
     ? devices
-    : devices.filter(x => x.hub === selected.hub || (selected.hub === 'Generic' && !x.hub));
+    : devices.filter(x => (x.hub && x.hub.uuid === selected.hub.uuid) || (selected.hub.name === 'Generic' && !x.hub));
+
+  var addUpdateButtonRef = undefined;
 
   const duplicate = (
     <div>
@@ -77,22 +85,22 @@ function duplicate({
                 <div className="form-group">
                     <div className="col-xs-1"></div>
                     <div className="col-xs-11">
-                      { hubs.map((name, key) => {
+                      { hubs && hubs.map((hub, key) => {
                         return (
                           <label className="radio" key={key}>
-                              <input value={name} type="radio" name="radio"
-                                checked={name===selected.hub}
+                              <input value={hub.name} type="radio" name="radio"
+                                checked={hub.name===selected.hub.name}
                                 onChange={hubChange}
-                              />{name}
+                              />{hub.name}
                           </label>
                         );
                       })}
                     </div>
                     <div className="cols-xs-12 text-center">
-                        { selected.hub !== "Generic" && selected.hub !== "All" &&
+                        { selected.hub.name !== "Generic" && selected.hub.name !== "All" &&
                           <button className="btn" onClick={(event) => handleAddHubClick(event, 'edit')}>Edit</button>
                         }
-                        { selected.hub !== "Generic" && selected.hub !== "All" &&
+                        { selected.hub.name !== "Generic" && selected.hub.name !== "All" &&
                           <button className="btn" onClick={(event) => handleAddHubClick(event, 'delete')}>Delete</button>
                         }
                         <button className="btn" onClick={handleAddHubClick}>Add</button>
@@ -105,27 +113,57 @@ function duplicate({
           { newHub &&
           <div className="panel panel-default panel-success">
               <div className="panel-heading">
-                <h2 className="panel-title">New Hub</h2>
+                <h2 className="panel-title">{newHub.uuid ? 'Edit' : 'New'} Hub</h2>
               </div>
               <div className="panel-body">
                 <form>
                     <div className="form-group">
                       <label htmlFor="hub-name">Name</label>
                       <input type="text" className="form-control" id="hub-name"
-                        onChange={event => tempHub.name=event.target.value}
+                        defaultValue={newHub && newHub.name}
+                        onChange={event => {
+                          if (newHub && newHub.name && newHub.name !== event.target.value){
+                            tempHub.name=event.target.value;
+                            addUpdateButtonRef.style.display='';
+                          }
+                          if (!newHub || !newHub.name){
+                            tempHub.name=event.target.value;
+                            addUpdateButtonRef.style.display='';
+                          }
+                        }}
                       />
                     </div>
                     <div className="form-group">
                       <label htmlFor="hub-pattern">URL Pattern</label>
                       <input type="text" className="form-control" id="hub-pattern"
-                        onChange={event => tempHub.url=event.target.value}
+                        defaultValue={newHub && newHub.url}
+                        onChange={event => {
+                          if (newHub && newHub.url && newHub.url !== event.target.value){
+                            tempHub.url=event.target.value;
+                            addUpdateButtonRef.style.display='';
+                          }
+                          if (!newHub || !newHub.url){
+                            tempHub.url=event.target.value;
+                            addUpdateButtonRef.style.display='';
+                          }
+                        }}
                       />
                     </div>
                     <span className="col-xs-12">TODO: put preview here</span>
                     <div className="form-group">
                       <label htmlFor="exampleSelect1">Example select</label>
                       <select className="form-control" id="exampleSelect1"
-                        onChange={event => tempHub.type=event.target.value}
+                        defaultValue={newHub && newHub.type}
+                        onChange={event => {
+                          if (newHub && newHub.type && newHub.type !== event.target.value){
+                            tempHub.type=event.target.value;
+                            addUpdateButtonRef.style.display='';
+                          }
+                          if (!newHub || !newHub.type){
+                            tempHub.type=event.target.value;
+                            addUpdateButtonRef.style.display='';
+                          }
+                        }}
                       >
                         { newHub.types && newHub.types.map((type, key) =>
                           <option key={key} value={type}>{type}</option>
@@ -135,7 +173,12 @@ function duplicate({
                 </form>
                 <div className="cols-xs-12 text-center">
                   <button className="btn btn-danger cancel-hub" onClick={handleAddHubClick}>Cancel</button>
-                  <button className="btn btn-info submit-hub" onClick={handleAddHubClick}>Add Hub</button>
+                  <button className={"btn btn-info " +  (newHub.uuid ? 'update-hub' : 'submit-hub')}
+                    onClick={handleAddHubClick}
+                    style={{display: 'none'}}
+                    ref={ref => addUpdateButtonRef = ref}
+                  >{newHub.uuid ? 'Update' : 'Add'} Hub
+                  </button>
                 </div>
               </div>
           </div>
@@ -144,7 +187,7 @@ function duplicate({
           { currentDevices.length > 0 && !newHub &&
           <div className="panel panel-default panel-success">
               <div className="panel-heading">
-                <h2 className="panel-title">{selected.hub} devices</h2>
+                <h2 className="panel-title">{selected.hub.name} devices</h2>
               </div>
               <table className="table table-bordered table-striped table-hover">
                   <thead>
@@ -154,7 +197,7 @@ function duplicate({
                     </tr>
                   </thead>
                   <tbody>
-                  { currentDevices
+                  { currentDevices && currentDevices
                     .map(x => x.name)
                     .map((name, key) => {
                       return (
@@ -163,10 +206,10 @@ function duplicate({
                             <td className="text-center">
                                 <button className="btn btn-info" onClick={() => handleDeviceChange('on', name)}>ON</button>
                                 <button className="btn btn-info" onClick={() => handleDeviceChange('off', name)}>OFF</button>
-                                { selected.hub !== 'All' &&
+                                { selected.hub.name !== 'All' &&
                                 <button className="btn btn-danger" onClick={() => handleDeviceChange('edit', name)}>Edit</button>
                                 }
-                                { selected.hub !== 'All' &&
+                                { selected.hub.name !== 'All' &&
                                 <button className="btn btn-danger" onClick={() => handleDeviceChange('delete', name)}>Delete</button>
                                 }
                             </td>
@@ -179,10 +222,10 @@ function duplicate({
           </div>
           }{/* currentDevices list */}
 
-          { selected.hub !== 'All' && !newHub &&
+          { selected.hub.name !== 'All' && !newHub &&
           <div className="panel panel-default panel-success">
               <div className="panel-heading">
-                <h2 className="panel-title">{(selected.device ? "Edit " : "Add ") + selected.hub} device</h2>
+                <h2 className="panel-title">{(selected.device ? "Edit " : "Add ") + selected.hub.name} device</h2>
               </div>
               <ul className="list-group">
                   <li className="list-group-item">
@@ -263,13 +306,6 @@ function duplicate({
 
   return duplicate;
 }
-
-// selected={}, hubs=[], devices=[], newHub,
-// handleHubChange = () => {},
-// handleAddHub = () => {},
-// handleReload = () => {},
-// handleDeviceChange = () => {},
-// url
 
 duplicate.propTypes = {
   selected: React.PropTypes.object,
