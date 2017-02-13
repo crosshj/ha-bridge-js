@@ -37,6 +37,7 @@ app.use(route.get('/local-api/devices/:lightId', devices.find));
 
 app.use(route.post('/local-api/hubs', hubs.create));
 app.use(route.get('/local-api/hubs', hubs.find));
+app.use(route.get('/local-api/hubs/:hubName/:deviceId/:state', hubs.actions));
 app.use(route.put('/local-api/hubs/:hubId', hubs.update));
 app.use(route.del('/local-api/hubs/:hubId', hubs.remove));
 app.use(route.get('/local-api/hubs/:hubId', hubs.find));

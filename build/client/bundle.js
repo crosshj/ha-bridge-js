@@ -22418,7 +22418,6 @@
 	          } });
 	      } else {
 	        (function () {
-	          //TODO: are we editing a hub or adding a new one??
 	          //POST
 	          newHub.type = newHub.type || _this5.state.hubTypes[0].name;
 	          var url = _this5.state.hubUrl;
@@ -22553,6 +22552,8 @@
 	  var exampleUrlRef = undefined;
 	
 	  var getExampleUrl = function getExampleUrl(type, types, url) {
+	    type = type || types[0].name;
+	
 	    return types.find(function (x) {
 	      return x.name === type;
 	    }).urlPattern.replace('{base}', url).replace('{deviceId}', '0').replace('{state}', 'on');
@@ -22760,7 +22761,7 @@
 	                    return exampleUrlRef = _ref2;
 	                  }
 	                },
-	                'eg. ' + getExampleUrl(newHub.type, newHub.types, newHub.url)
+	                newHub.url && 'eg. ' + getExampleUrl(newHub.type, newHub.types, newHub.url)
 	              )
 	            ),
 	            _react2.default.createElement(

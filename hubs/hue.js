@@ -1,7 +1,7 @@
 
 var Hue = {
   name: "Hue",
-  urlPattern: "{base}/{deviceId}/{state}"
+  urlPattern: "{base}/hue-DUMMY/{deviceId}/{state}"
 };
 
 module.exports = Hue;

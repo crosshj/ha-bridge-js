@@ -43,6 +43,8 @@ function duplicate({
   var exampleUrlRef = undefined;
 
   const getExampleUrl = (type, types, url) => {
+    type = type || types[0].name;
+
     return types.find(x => x.name === type)
       .urlPattern
       .replace('{base}', url)
@@ -164,7 +166,7 @@ function duplicate({
                     <div className="panel-body text-muted" style={{paddingTop: 0, paddingLeft: 0}}>
                       <span className="col-xs-12"
                         ref={ref => exampleUrlRef=ref }
-                      >{  'eg. ' + getExampleUrl(newHub.type, newHub.types, newHub.url) }</span>
+                      >{ newHub.url &&  ('eg. ' + getExampleUrl(newHub.type, newHub.types, newHub.url)) }</span>
                     </div>
                     <div className="form-group">
                       <label htmlFor="typeSelect">Type</label>

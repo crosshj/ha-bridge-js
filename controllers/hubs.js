@@ -1,5 +1,7 @@
 'use strict';
 // see http://blog.stevensanderson.com/2013/12/21/experiments-with-koa-and-javascript-generators/
+const devicesCreateThunk = require('./devices').createThunk;
+var request = require('koa-request');
 
 var db = function(){
   console.log('database not initialized'); //eslint-disable-line no-console
@@ -54,11 +56,41 @@ module.exports.create = function *create() {
   var hub = this.request.body;
   try {
     yield createThunk(hub);
+    var templates = yield getTemplatesThunk();
+    var hubTemplate = templates.find(x => x.name === hub.type);
+    var hubDevices = hubTemplate.getDevices && hubTemplate.getDevices();
+    for (var deviceId in hubDevices) {
+      const device = {
+        name: hub.name + ':' + deviceId,
+        onUrl: 'local-api/hubs/' + hub.name + '/' + deviceId + "/on", //TODO: should come from template more...
+        offUrl: 'local-api/hubs/' + hub.name + '/' + deviceId + "/off"
+      };
+      yield devicesCreateThunk(device);
+    }
     this.body = "hub created";
   } catch (error) {
     this.status = 400; //Bad request
     this.body = "error creating hub:\n" + JSON.stringify(error, null, '\t');
   }
+};
+
+module.exports.actions = function *actions(hubName, deviceId, state) {
+  var allHubs = yield findThunk();
+  var hub = allHubs.find(x => x.name === hubName);
+  var templates = yield getTemplatesThunk();
+  var hubTemplate = templates.find(x => x.name === hub.type);
+
+  const url = hubTemplate.urlPattern
+    .replace('{base}', hub.url)
+    .replace('{deviceId}', deviceId)
+    .replace('{state}', state);
+
+  var options = {url};
+
+  var response = yield request(options);
+  //console.log(JSON.stringify({url, response}, null, '  ')); //{url, hub, hubTemplate, deviceId, state}, null, ' '));
+
+  this.body = response;
 };
 
 module.exports.find = function *find(hubId) {

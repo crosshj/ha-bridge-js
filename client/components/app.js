@@ -230,7 +230,6 @@ class App extends React.Component {
         types: this.state.hubTypes
       }});
     } else {
-      //TODO: are we editing a hub or adding a new one??
       //POST
       newHub.type = newHub.type || this.state.hubTypes[0].name;
       const url = this.state.hubUrl;

@@ -1,5 +1,7 @@
 'use strict';
 // see http://blog.stevensanderson.com/2013/12/21/experiments-with-koa-and-javascript-generators/
+var ip = require('ip');
+//const baseUrl = 'http://' + ip.address();
 
 var db = function(){
   console.log('database not initialized'); //eslint-disable-line no-console
