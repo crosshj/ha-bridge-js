@@ -34,6 +34,17 @@ function removeThunk(hubId) {
   };
 }
 
+function getTemplatesThunk() {
+  return function(callback){
+    var normalizedPath = require("path").join(__dirname, "../hubs");
+    var templates = [];
+    require("fs").readdirSync(normalizedPath).forEach(function(file) {
+      templates.push(require("../hubs/" + file));
+    });
+    callback(null, templates);
+  };
+}
+
 module.exports.createThunk = createThunk;
 module.exports.findThunk = findThunk;
 module.exports.updateThunk = updateThunk;
@@ -53,9 +64,10 @@ module.exports.create = function *create() {
 module.exports.find = function *find(hubId) {
   try {
     var findResult = yield findThunk(hubId);
+    var templates = yield getTemplatesThunk();
     this.body = {
       instances: findResult,
-      templates: ['Milight', 'Hue', 'Wink']
+      templates: templates
     };
   } catch (error) {
     this.status = 400; //Bad request

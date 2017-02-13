@@ -22147,7 +22147,7 @@
 	    var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 	
 	    _this.state = {
-	      hubs: ['Generic', 'All'],
+	      hubs: [{ name: 'Generic' }, { name: 'All' }],
 	      hubTypes: [],
 	      url: props.url + "devices",
 	      hubUrl: props.url + "hubs",
@@ -22165,16 +22165,19 @@
 	  _createClass(App, [{
 	    key: 'componentWillReceiveProps',
 	    value: function componentWillReceiveProps(_ref) {
+	      var _this2 = this;
+	
 	      var devices = _ref.devices,
 	          hubs = _ref.hubs;
 	
 	      devices && this.setState({ devices: devices });
 	      if (hubs && hubs.instances) {
-	        var instances = hubs.instances.map(function (x) {
-	          return x.name;
-	        }).concat(['Generic', 'All']);
+	        var instances = hubs.instances.concat([{ name: 'Generic' }, { name: 'All' }]);
 	        var hubTypes = hubs.templates;
-	        this.setState({ hubs: instances, hubTypes: hubTypes });
+	        var selected = this.state.selectedHub ? hubs.instances.find(function (x) {
+	          return x.uuid === _this2.state.selectedHub.uuid;
+	        }) : this.state.selectedHub;
+	        this.setState({ hubs: instances, hubTypes: hubTypes, selectedHub: selected });
 	      }
 	    }
 	  }, {
@@ -22186,7 +22189,7 @@
 	  }, {
 	    key: 'handleDeviceChange',
 	    value: function handleDeviceChange(change, name) {
-	      var _this2 = this;
+	      var _this3 = this;
 	
 	      var device = this.state.devices.find(function (x) {
 	        return x.name === name;
@@ -22213,7 +22216,7 @@
 	      if (change === 'delete') {
 	        var _ret = function () {
 	          //DELETE
-	          var url = _this2.state.url + '/' + device.uuid;
+	          var url = _this3.state.url + '/' + device.uuid;
 	          var config = {
 	            method: 'DELETE'
 	          };
@@ -22221,8 +22224,8 @@
 	            return r.text();
 	          }).then(function (body) {
 	            console.log('Response from ' + url + ' : ' + body); //eslint-disable-line no-console
-	            _this2.setState({ tempDevice: {}, selectedDevice: undefined });
-	            _this2.handleReload();
+	            _this3.setState({ tempDevice: {}, selectedDevice: undefined });
+	            _this3.handleReload();
 	          }).catch(function (e) {
 	            return console.log('Error:\n', e);
 	          }); //eslint-disable-line no-console
@@ -22242,12 +22245,12 @@
 	  }, {
 	    key: 'handleTempDeviceChange',
 	    value: function handleTempDeviceChange(prop, value) {
-	      var _this3 = this;
+	      var _this4 = this;
 	
 	      if (prop === 'add') {
 	        var _ret2 = function () {
 	          //POST
-	          var url = _this3.state.url;
+	          var url = _this4.state.url;
 	          var config = {
 	            method: 'POST',
 	            headers: new Headers({
@@ -22259,8 +22262,8 @@
 	            return r.text();
 	          }).then(function (body) {
 	            console.log('Response from ' + url + ' : ' + body); //eslint-disable-line no-console
-	            _this3.setState({ tempDevice: {}, selectedDevice: undefined });
-	            _this3.handleReload();
+	            _this4.setState({ tempDevice: {}, selectedDevice: undefined });
+	            _this4.handleReload();
 	          }).catch(function (e) {
 	            return console.log('Error:\n', e);
 	          }); //eslint-disable-line no-console
@@ -22281,7 +22284,7 @@
 	      if (prop === 'update') {
 	        var _ret3 = function () {
 	          //PUT
-	          var url = _this3.state.url + '/' + value.uuid;
+	          var url = _this4.state.url + '/' + value.uuid;
 	          var config = {
 	            method: 'PUT',
 	            headers: new Headers({
@@ -22297,8 +22300,8 @@
 	            return r.text();
 	          }).then(function (body) {
 	            console.log('Response from ' + url + ' : ' + body); //eslint-disable-line no-console
-	            _this3.setState({ tempDevice: {}, selectedDevice: undefined });
-	            _this3.handleReload();
+	            _this4.setState({ tempDevice: {}, selectedDevice: undefined });
+	            _this4.handleReload();
 	          }).catch(function (e) {
 	            return console.log('Error:\n', e);
 	          }); //eslint-disable-line no-console
@@ -22334,18 +22337,76 @@
 	  }, {
 	    key: 'handleAddHub',
 	    value: function handleAddHub(newHub, change) {
-	      var _this4 = this;
+	      var _this5 = this;
 	
 	      this.setState({ tempDevice: {}, selectedDevice: undefined });
 	
 	      if (change === 'delete') {
-	        debugger;
+	        var _ret4 = function () {
+	          //PUT
+	          var url = _this5.state.hubUrl + "/" + _this5.state.selectedHub.uuid;
+	          var config = {
+	            method: 'DELETE',
+	            headers: new Headers({
+	              'Content-Type': 'application/json'
+	            })
+	          };
+	          fetch(url, config).then(function (r) {
+	            return r.text();
+	          }).then(function (body) {
+	            console.log('Response from ' + url + ' : ' + body); //eslint-disable-line no-console
+	            _this5.setState({ newHub: undefined });
+	            _this5.handleReload();
+	          }).catch(function (e) {
+	            return console.log('Error:\n', e);
+	          }); //eslint-disable-line no-console
+	          return {
+	            v: void 0
+	          };
+	        }();
+	
+	        if ((typeof _ret4 === 'undefined' ? 'undefined' : _typeof(_ret4)) === "object") return _ret4.v;
+	      }
+	
+	      if (change === 'cancel') {
+	        this.setState({ newHub: undefined });
 	        return;
 	      }
 	
 	      if (change === 'edit') {
-	        debugger;
+	        var editHub = JSON.parse(JSON.stringify(this.state.selectedHub));
+	        editHub.types = this.state.hubTypes;
+	        this.setState({ newHub: editHub });
 	        return;
+	      }
+	
+	      if (change === 'update') {
+	        var _ret5 = function () {
+	          //PUT
+	          newHub.type = newHub.type || _this5.state.hubTypes[0].name;
+	          var url = _this5.state.hubUrl + "/" + _this5.state.selectedHub.uuid;
+	          var config = {
+	            method: 'PUT',
+	            headers: new Headers({
+	              'Content-Type': 'application/json'
+	            }),
+	            body: JSON.stringify(newHub)
+	          };
+	          fetch(url, config).then(function (r) {
+	            return r.text();
+	          }).then(function (body) {
+	            console.log('Response from ' + url + ' : ' + body); //eslint-disable-line no-console
+	            _this5.setState({ newHub: undefined });
+	            _this5.handleReload();
+	          }).catch(function (e) {
+	            return console.log('Error:\n', e);
+	          }); //eslint-disable-line no-console
+	          return {
+	            v: void 0
+	          };
+	        }();
+	
+	        if ((typeof _ret5 === 'undefined' ? 'undefined' : _typeof(_ret5)) === "object") return _ret5.v;
 	      }
 	
 	      if (!newHub) {
@@ -22359,8 +22420,8 @@
 	        (function () {
 	          //TODO: are we editing a hub or adding a new one??
 	          //POST
-	          newHub.type = newHub.type || _this4.state.hubTypes[0];
-	          var url = _this4.state.hubUrl;
+	          newHub.type = newHub.type || _this5.state.hubTypes[0].name;
+	          var url = _this5.state.hubUrl;
 	          var config = {
 	            method: 'POST',
 	            headers: new Headers({
@@ -22372,10 +22433,8 @@
 	            return r.text();
 	          }).then(function (body) {
 	            console.log('Response from ' + url + ' : ' + body); //eslint-disable-line no-console
-	            _this4.setState({
-	              newHub: undefined
-	            });
-	            _this4.handleReload();
+	            _this5.setState({ newHub: undefined });
+	            _this5.handleReload();
 	          }).catch(function (e) {
 	            return console.log('Error:\n', e);
 	          }); //eslint-disable-line no-console
@@ -22389,7 +22448,7 @@
 	        url: this.state.url,
 	        hubs: this.state.hubs,
 	        selected: {
-	          hub: this.state.selectedHub || 'All',
+	          hub: this.state.selectedHub || { name: 'All' },
 	          device: this.state.selectedDevice
 	        },
 	        tempDevice: this.state.tempDevice,
@@ -22461,8 +22520,12 @@
 	      handleTempDeviceChange = _ref$handleTempDevice === undefined ? function () {} : _ref$handleTempDevice,
 	      url = _ref.url;
 	
+	  //tempHub = newHub || tempHub;
+	
 	  var hubChange = function hubChange(event) {
-	    var hub = event.target.value;
+	    var hub = hubs.find(function (x) {
+	      return x.name === event.target.value;
+	    });
 	    handleHubChange(hub);
 	  };
 	
@@ -22471,15 +22534,29 @@
 	    if (~event.target.className.indexOf('submit-hub')) {
 	      newHub = JSON.parse(JSON.stringify(tempHub));
 	    }
+	    if (~event.target.className.indexOf('update-hub')) {
+	      newHub = JSON.parse(JSON.stringify(tempHub));
+	      change = 'update';
+	    }
 	    if (~event.target.className.indexOf('cancel-hub')) {
-	      newHub = 'cancel';
+	      tempHub = {};
+	      change = 'cancel';
 	    }
 	    handleAddHub(newHub, change);
 	  };
 	
-	  var currentDevices = selected.hub === 'All' ? devices : devices.filter(function (x) {
-	    return x.hub === selected.hub || selected.hub === 'Generic' && !x.hub;
+	  var currentDevices = selected.hub.name === 'All' ? devices : devices.filter(function (x) {
+	    return x.hub && x.hub.uuid === selected.hub.uuid || selected.hub.name === 'Generic' && !x.hub;
 	  });
+	
+	  var addUpdateButtonRef = undefined;
+	  var exampleUrlRef = undefined;
+	
+	  var getExampleUrl = function getExampleUrl(type, types, url) {
+	    return types.find(function (x) {
+	      return x.name === type;
+	    }).urlPattern.replace('{base}', url).replace('{deviceId}', '0').replace('{state}', 'on');
+	  };
 	
 	  var duplicate = _react2.default.createElement(
 	    'div',
@@ -22569,29 +22646,29 @@
 	            _react2.default.createElement(
 	              'div',
 	              { className: 'col-xs-11' },
-	              hubs.map(function (name, key) {
+	              hubs && hubs.map(function (hub, key) {
 	                return _react2.default.createElement(
 	                  'label',
 	                  { className: 'radio', key: key },
-	                  _react2.default.createElement('input', { value: name, type: 'radio', name: 'radio',
-	                    checked: name === selected.hub,
+	                  _react2.default.createElement('input', { value: hub.name, type: 'radio', name: 'radio',
+	                    checked: hub.name === selected.hub.name,
 	                    onChange: hubChange
 	                  }),
-	                  name
+	                  hub.name
 	                );
 	              })
 	            ),
 	            _react2.default.createElement(
 	              'div',
 	              { className: 'cols-xs-12 text-center' },
-	              selected.hub !== "Generic" && selected.hub !== "All" && _react2.default.createElement(
+	              selected.hub.name !== "Generic" && selected.hub.name !== "All" && _react2.default.createElement(
 	                'button',
 	                { className: 'btn', onClick: function onClick(event) {
 	                    return handleAddHubClick(event, 'edit');
 	                  } },
 	                'Edit'
 	              ),
-	              selected.hub !== "Generic" && selected.hub !== "All" && _react2.default.createElement(
+	              selected.hub.name !== "Generic" && selected.hub.name !== "All" && _react2.default.createElement(
 	                'button',
 	                { className: 'btn', onClick: function onClick(event) {
 	                    return handleAddHubClick(event, 'delete');
@@ -22616,7 +22693,8 @@
 	          _react2.default.createElement(
 	            'h2',
 	            { className: 'panel-title' },
-	            'New Hub'
+	            newHub.uuid ? 'Edit' : 'New',
+	            ' Hub'
 	          )
 	        ),
 	        _react2.default.createElement(
@@ -22634,8 +22712,17 @@
 	                'Name'
 	              ),
 	              _react2.default.createElement('input', { type: 'text', className: 'form-control', id: 'hub-name',
+	                autoComplete: 'off',
+	                defaultValue: newHub && newHub.name,
 	                onChange: function onChange(event) {
-	                  return tempHub.name = event.target.value;
+	                  if (newHub && newHub.name && newHub.name !== event.target.value) {
+	                    tempHub.name = event.target.value;
+	                    addUpdateButtonRef.style.display = '';
+	                  }
+	                  if (!newHub || !newHub.name) {
+	                    tempHub.name = event.target.value;
+	                    addUpdateButtonRef.style.display = '';
+	                  }
 	                }
 	              })
 	            ),
@@ -22648,36 +22735,63 @@
 	                'URL Pattern'
 	              ),
 	              _react2.default.createElement('input', { type: 'text', className: 'form-control', id: 'hub-pattern',
+	                autoComplete: 'off',
+	                defaultValue: newHub && newHub.url,
 	                onChange: function onChange(event) {
-	                  return tempHub.url = event.target.value;
+	                  if (newHub && newHub.url && newHub.url !== event.target.value) {
+	                    tempHub.url = event.target.value;
+	                    addUpdateButtonRef.style.display = '';
+	                  }
+	                  if (!newHub || !newHub.url) {
+	                    tempHub.url = event.target.value;
+	                    addUpdateButtonRef.style.display = '';
+	                  }
+	                  exampleUrlRef.innerHTML = 'eg. ' + getExampleUrl(newHub.type, newHub.types, event.target.value);
 	                }
 	              })
 	            ),
 	            _react2.default.createElement(
-	              'span',
-	              { className: 'col-xs-12' },
-	              'TODO: put preview here'
+	              'div',
+	              { className: 'panel-body text-muted', style: { paddingTop: 0, paddingLeft: 0 } },
+	              _react2.default.createElement(
+	                'span',
+	                { className: 'col-xs-12',
+	                  ref: function ref(_ref2) {
+	                    return exampleUrlRef = _ref2;
+	                  }
+	                },
+	                'eg. ' + getExampleUrl(newHub.type, newHub.types, newHub.url)
+	              )
 	            ),
 	            _react2.default.createElement(
 	              'div',
 	              { className: 'form-group' },
 	              _react2.default.createElement(
 	                'label',
-	                { htmlFor: 'exampleSelect1' },
-	                'Example select'
+	                { htmlFor: 'typeSelect' },
+	                'Type'
 	              ),
 	              _react2.default.createElement(
 	                'select',
-	                { className: 'form-control', id: 'exampleSelect1',
+	                { className: 'form-control', id: 'typeSelect',
+	                  defaultValue: newHub && newHub.type,
 	                  onChange: function onChange(event) {
-	                    return tempHub.type = event.target.value;
+	                    if (newHub && newHub.type && newHub.type !== event.target.value) {
+	                      tempHub.type = event.target.value;
+	                      addUpdateButtonRef.style.display = '';
+	                    }
+	                    if (!newHub || !newHub.type) {
+	                      tempHub.type = event.target.value;
+	                      addUpdateButtonRef.style.display = '';
+	                    }
+	                    exampleUrlRef.innerHTML = 'eg. ' + getExampleUrl(event.target.value, newHub.types, tempHub.url || newHub.url);
 	                  }
 	                },
 	                newHub.types && newHub.types.map(function (type, key) {
 	                  return _react2.default.createElement(
 	                    'option',
-	                    { key: key, value: type },
-	                    type
+	                    { key: key, value: type.name },
+	                    type.name
 	                  );
 	                })
 	              )
@@ -22693,8 +22807,15 @@
 	            ),
 	            _react2.default.createElement(
 	              'button',
-	              { className: 'btn btn-info submit-hub', onClick: handleAddHubClick },
-	              'Add Hub'
+	              { className: "btn btn-info " + (newHub.uuid ? 'update-hub' : 'submit-hub'),
+	                onClick: handleAddHubClick,
+	                style: { display: 'none' },
+	                ref: function ref(_ref3) {
+	                  return addUpdateButtonRef = _ref3;
+	                }
+	              },
+	              newHub.uuid ? 'Update' : 'Add',
+	              ' Hub'
 	            )
 	          )
 	        )
@@ -22708,7 +22829,7 @@
 	          _react2.default.createElement(
 	            'h2',
 	            { className: 'panel-title' },
-	            selected.hub,
+	            selected.hub.name,
 	            ' devices'
 	          )
 	        ),
@@ -22736,7 +22857,7 @@
 	          _react2.default.createElement(
 	            'tbody',
 	            null,
-	            currentDevices.map(function (x) {
+	            currentDevices && currentDevices.map(function (x) {
 	              return x.name;
 	            }).map(function (name, key) {
 	              return _react2.default.createElement(
@@ -22764,14 +22885,14 @@
 	                      } },
 	                    'OFF'
 	                  ),
-	                  selected.hub !== 'All' && _react2.default.createElement(
+	                  selected.hub.name !== 'All' && _react2.default.createElement(
 	                    'button',
 	                    { className: 'btn btn-danger', onClick: function onClick() {
 	                        return handleDeviceChange('edit', name);
 	                      } },
 	                    'Edit'
 	                  ),
-	                  selected.hub !== 'All' && _react2.default.createElement(
+	                  selected.hub.name !== 'All' && _react2.default.createElement(
 	                    'button',
 	                    { className: 'btn btn-danger', onClick: function onClick() {
 	                        return handleDeviceChange('delete', name);
@@ -22784,7 +22905,7 @@
 	          )
 	        )
 	      ),
-	      selected.hub !== 'All' && !newHub && _react2.default.createElement(
+	      selected.hub.name !== 'All' && !newHub && _react2.default.createElement(
 	        'div',
 	        { className: 'panel panel-default panel-success' },
 	        _react2.default.createElement(
@@ -22793,7 +22914,7 @@
 	          _react2.default.createElement(
 	            'h2',
 	            { className: 'panel-title' },
-	            (selected.device ? "Edit " : "Add ") + selected.hub,
+	            (selected.device ? "Edit " : "Add ") + selected.hub.name,
 	            ' device'
 	          )
 	        ),
@@ -22901,13 +23022,6 @@
 	
 	  return duplicate;
 	}
-	
-	// selected={}, hubs=[], devices=[], newHub,
-	// handleHubChange = () => {},
-	// handleAddHub = () => {},
-	// handleReload = () => {},
-	// handleDeviceChange = () => {},
-	// url
 	
 	duplicate.propTypes = {
 	  selected: _react2.default.PropTypes.object,

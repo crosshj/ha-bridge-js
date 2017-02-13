@@ -40,6 +40,15 @@ function duplicate({
     : devices.filter(x => (x.hub && x.hub.uuid === selected.hub.uuid) || (selected.hub.name === 'Generic' && !x.hub));
 
   var addUpdateButtonRef = undefined;
+  var exampleUrlRef = undefined;
+
+  const getExampleUrl = (type, types, url) => {
+    return types.find(x => x.name === type)
+      .urlPattern
+      .replace('{base}', url)
+      .replace('{deviceId}', '0')
+      .replace('{state}', 'on');
+  };
 
   const duplicate = (
     <div>
@@ -120,6 +129,7 @@ function duplicate({
                     <div className="form-group">
                       <label htmlFor="hub-name">Name</label>
                       <input type="text" className="form-control" id="hub-name"
+                        autoComplete="off"
                         defaultValue={newHub && newHub.name}
                         onChange={event => {
                           if (newHub && newHub.name && newHub.name !== event.target.value){
@@ -136,6 +146,7 @@ function duplicate({
                     <div className="form-group">
                       <label htmlFor="hub-pattern">URL Pattern</label>
                       <input type="text" className="form-control" id="hub-pattern"
+                        autoComplete="off"
                         defaultValue={newHub && newHub.url}
                         onChange={event => {
                           if (newHub && newHub.url && newHub.url !== event.target.value){
@@ -146,13 +157,18 @@ function duplicate({
                             tempHub.url=event.target.value;
                             addUpdateButtonRef.style.display='';
                           }
+                          exampleUrlRef.innerHTML = 'eg. ' + getExampleUrl(newHub.type, newHub.types, event.target.value);
                         }}
                       />
                     </div>
-                    <span className="col-xs-12">TODO: put preview here</span>
+                    <div className="panel-body text-muted" style={{paddingTop: 0, paddingLeft: 0}}>
+                      <span className="col-xs-12"
+                        ref={ref => exampleUrlRef=ref }
+                      >{  'eg. ' + getExampleUrl(newHub.type, newHub.types, newHub.url) }</span>
+                    </div>
                     <div className="form-group">
-                      <label htmlFor="exampleSelect1">Example select</label>
-                      <select className="form-control" id="exampleSelect1"
+                      <label htmlFor="typeSelect">Type</label>
+                      <select className="form-control" id="typeSelect"
                         defaultValue={newHub && newHub.type}
                         onChange={event => {
                           if (newHub && newHub.type && newHub.type !== event.target.value){
@@ -163,10 +179,11 @@ function duplicate({
                             tempHub.type=event.target.value;
                             addUpdateButtonRef.style.display='';
                           }
+                          exampleUrlRef.innerHTML = 'eg. ' + getExampleUrl(event.target.value, newHub.types, tempHub.url || newHub.url);
                         }}
                       >
                         { newHub.types && newHub.types.map((type, key) =>
-                          <option key={key} value={type}>{type}</option>
+                          <option key={key} value={type.name}>{type.name}</option>
                         )}
                       </select>
                     </div>

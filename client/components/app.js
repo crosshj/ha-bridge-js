@@ -202,7 +202,7 @@ class App extends React.Component {
 
     if(change === 'update'){
       //PUT
-      newHub.type = newHub.type || this.state.hubTypes[0];
+      newHub.type = newHub.type || this.state.hubTypes[0].name;
       const url = this.state.hubUrl + "/" + this.state.selectedHub.uuid;
       const config = {
         method: 'PUT',
@@ -232,7 +232,7 @@ class App extends React.Component {
     } else {
       //TODO: are we editing a hub or adding a new one??
       //POST
-      newHub.type = newHub.type || this.state.hubTypes[0];
+      newHub.type = newHub.type || this.state.hubTypes[0].name;
       const url = this.state.hubUrl;
       const config = {
         method: 'POST',
