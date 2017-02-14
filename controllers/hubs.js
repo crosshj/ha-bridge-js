@@ -51,6 +51,7 @@ module.exports.createThunk = createThunk;
 module.exports.findThunk = findThunk;
 module.exports.updateThunk = updateThunk;
 module.exports.removeThunk = removeThunk;
+module.exports.getTemplatesThunk = getTemplatesThunk;
 
 module.exports.create = function *create() {
   var hub = this.request.body;
