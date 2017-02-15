@@ -1,4 +1,5 @@
 import React from 'react';
+import Hubs from './hubs';
 
 var tempHub = {};
 
@@ -52,6 +53,8 @@ function duplicate({
       .replace('{state}', 'on');
   };
 
+  const hubsProps = { newHub, hubs, selected, hubChange, handleAddHubClick };
+
   const duplicate = (
     <div>
       <nav className="navbar navbar-custom navbar-fixed-top">
@@ -61,7 +64,9 @@ function duplicate({
               </div>
           </div>
       </nav>
-      <div className="container col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3">
+      <div className={`container col-sm-10 col-sm-offset-1
+        col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3`}
+      >
           <div className="panel panel-default panel-success bridgeServer">
               <div className="panel-heading">
                 <h1 className="panel-title">Bridge settings</h1>
@@ -86,40 +91,7 @@ function duplicate({
               </div>
           </div>
 
-
-          { !newHub &&
-          <div className="panel panel-default panel-success">
-              <div className="panel-heading">
-                <h2 className="panel-title">Hubs</h2>
-              </div>
-              <div className="panel-body">
-                <div className="form-group">
-                    <div className="col-xs-1"></div>
-                    <div className="col-xs-11">
-                      { hubs && hubs.map((hub, key) => {
-                        return (
-                          <label className="radio" key={key}>
-                              <input value={hub.name} type="radio" name="radio"
-                                checked={hub.name===selected.hub.name}
-                                onChange={hubChange}
-                              />{hub.name}
-                          </label>
-                        );
-                      })}
-                    </div>
-                    <div className="cols-xs-12 text-center">
-                        { selected.hub.name !== "Generic" && selected.hub.name !== "All" &&
-                          <button className="btn" onClick={(event) => handleAddHubClick(event, 'edit')}>Edit</button>
-                        }
-                        { selected.hub.name !== "Generic" && selected.hub.name !== "All" &&
-                          <button className="btn" onClick={(event) => handleAddHubClick(event, 'delete')}>Delete</button>
-                        }
-                        <button className="btn" onClick={handleAddHubClick}>Add</button>
-                    </div>
-                </div>
-              </div>
-          </div>
-        }{/* Hubs List */}
+          <Hubs {...hubsProps} />
 
           { newHub &&
           <div className="panel panel-default panel-success">
@@ -201,7 +173,7 @@ function duplicate({
                 </div>
               </div>
           </div>
-        }{/* new hub */}
+          }{/* new hub */}
 
           { currentDevices.length > 0 && !newHub &&
           <div className="panel panel-default panel-success">
