@@ -1,4 +1,5 @@
 import React from 'react';
+import BridgeSettings from './bridge/bridgeSettings.js';
 import Hubs from './hub/hubs';
 import ModifyHub from './hub/modifyHub';
 import DeviceList from './device/deviceList';
@@ -7,16 +8,13 @@ var tempHub = {};
 
 function duplicate({
   selected={}, hubs=[], devices=[],
-  newHub, tempDevice,
+  newHub, tempDevice, url,
   handleHubChange = () => {},
   handleAddHub = () => {},
   handleReload = () => {},
   handleDeviceChange = () => {},
-  handleTempDeviceChange = () => {},
-  url
+  handleTempDeviceChange = () => {}
 }){
-  //tempHub = newHub || tempHub;
-
   const hubChange = (event) => {
     const hub = hubs.find(x => x.name===event.target.value);
     handleHubChange(hub);
@@ -38,6 +36,7 @@ function duplicate({
     handleAddHub(newHub, change);
   };
 
+  const bridgeSettingsProps = { url, handleReload };
   const hubsProps = { newHub, hubs, selected, hubChange, handleAddHubClick };
   const modifyHubProps = { newHub, tempHub, handleAddHubClick };
   const deviceListProps = { newHub, selected, devices, handleDeviceChange };
@@ -54,30 +53,7 @@ function duplicate({
       <div className={`container col-sm-10 col-sm-offset-1
         col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3`}
       >
-          <div className="panel panel-default panel-success bridgeServer">
-              <div className="panel-heading">
-                <h1 className="panel-title">Bridge settings</h1>
-              </div>
-              <div className="panel-body">
-                <div className="col-xs-7 col-sm-7">
-                    <input id="bridge-base" className="form-control"
-                      defaultValue = {url} type="text" placeholder="URL to bridge" />
-                </div>
-                <div className="btn-toolbar">
-                    <button className="col-xs-2 btn btn-primary btn"
-                      onClick={handleReload}
-                    >
-                      Load
-                    </button>
-                    <button className="col-xs-2 btn btn-primary"
-                      onClick={() => window.open(url)}
-                    >
-                      Go
-                    </button>
-                </div>
-              </div>
-          </div>
-
+          <BridgeSettings {...bridgeSettingsProps} />
           <Hubs {...hubsProps} />
           <ModifyHub {...modifyHubProps} />
           <DeviceList {...deviceListProps} />
