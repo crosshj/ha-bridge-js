@@ -1,14 +1,13 @@
 import React from 'react';
 
-function Hubs({
+function HubsList({
   selected={}, hubs=[], newHub,
   hubChange = () => {},
   handleAddHubClick = () => {}
 }){
 
   const component = (
-  <div>
-    { !newHub &&
+  <div>{ !newHub &&
     <div className="panel panel-default panel-success">
         <div className="panel-heading">
           <h2 className="panel-title">Hubs</h2>
@@ -40,18 +39,17 @@ function Hubs({
           </div>
         </div>
     </div>
-    }
-  </div>
+  }</div>
   );
 
   return component;
 }
 
-Hubs.propTypes = {
+HubsList.propTypes = {
   selected: React.PropTypes.object,
   hubs: React.PropTypes.array,
   hubchange: React.PropTypes.func,
   handleAddHubClick: React.PropTypes.func
 };
 
-export default Hubs;
+export default HubsList;

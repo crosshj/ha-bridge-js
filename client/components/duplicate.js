@@ -1,8 +1,9 @@
 import React from 'react';
 import BridgeSettings from './bridge/bridgeSettings.js';
-import Hubs from './hub/hubs';
+import HubsList from './hub/hubsList';
 import ModifyHub from './hub/modifyHub';
 import DeviceList from './device/deviceList';
+import ModifyDevice from './device/modifyDevice.js';
 
 var tempHub = {};
 
@@ -37,9 +38,10 @@ function duplicate({
   };
 
   const bridgeSettingsProps = { url, handleReload };
-  const hubsProps = { newHub, hubs, selected, hubChange, handleAddHubClick };
+  const hubsListProps = { newHub, hubs, selected, hubChange, handleAddHubClick };
   const modifyHubProps = { newHub, tempHub, handleAddHubClick };
   const deviceListProps = { newHub, selected, devices, handleDeviceChange };
+  const modifyDeviceProps = { tempDevice, newHub, selected, handleTempDeviceChange };
 
   const duplicate = (
     <div>
@@ -54,88 +56,10 @@ function duplicate({
         col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3`}
       >
           <BridgeSettings {...bridgeSettingsProps} />
-          <Hubs {...hubsProps} />
+          <HubsList {...hubsListProps} />
           <ModifyHub {...modifyHubProps} />
           <DeviceList {...deviceListProps} />
-
-          { selected.hub.name !== 'All' && !newHub &&
-          <div className="panel panel-default panel-success">
-              <div className="panel-heading">
-                <h2 className="panel-title">{(selected.device ? "Edit " : "Add ") + selected.hub.name} device</h2>
-              </div>
-              <ul className="list-group">
-                  <li className="list-group-item">
-                      <form className="form-horizontal">
-                          <div className="form-group">
-                              <div className="col-xs-8 col-sm-7">
-                                  <input type="text" className="form-control"
-                                    id="device-name" placeholder="Device Name"
-                                    value={
-                                      (tempDevice && tempDevice.name)
-                                      || (selected.device && selected.device.name)
-                                      || ''
-                                    }
-                                    onChange={event => handleTempDeviceChange('name', event.target.value)}
-                                  />
-                              </div>
-                              <button className="col-xs-3 col-sm-2 btn btn-primary" type="button"
-                                onClick={() => handleTempDeviceChange((selected.device ? "update" : "add"), tempDevice)}
-                              >
-                                  {(selected.device ? "Update" : "Add")} Device
-                              </button>
-                          </div>
-                          <div className="form-group">
-                              <div className="col-xs-8 col-sm-7">
-                                  <input type="text" className="form-control"
-                                    id="device-on-url" placeholder="URL to turn device on"
-                                    value={
-                                      (tempDevice && tempDevice.onUrl)
-                                      || (selected.device && selected.device.onUrl)
-                                      || ''
-                                    }
-                                    onChange={event => handleTempDeviceChange('onUrl', event.target.value)}
-                                  />
-                              </div>
-                              <button className="col-xs-3 col-sm-2 btn btn-success" type="button"
-                                onClick={() => handleTempDeviceChange(
-                                  'test',
-                                  (tempDevice && tempDevice.onUrl) || (selected.device && selected.device.onUrl)
-                                )}
-                              >
-                                On Test
-                              </button>
-                          </div>
-                          <div className="form-group">
-                              <div className="col-xs-8 col-sm-7">
-                                  <input type="text" className="form-control"
-                                    id="device-off-url" placeholder="URL to turn device off"
-                                    value={
-                                      (tempDevice && tempDevice.offUrl)
-                                      || (selected.device && selected.device.offUrl)
-                                      || ''
-                                    }
-                                    onChange={event => handleTempDeviceChange('offUrl', event.target.value)}
-                                  />
-                              </div>
-                              <button className="col-xs-3 col-sm-2 btn btn-success" type="button"
-                                onClick={() => handleTempDeviceChange(
-                                  'test',
-                                  (tempDevice && tempDevice.offUrl) || (selected.device && selected.device.offUrl)
-                                )}
-                              >
-                                Off Test
-                              </button>
-                          </div>
-                      </form>
-                      <div className="cols-xs-12 text-center">
-                          <button className="btn"
-                            onClick={() => handleTempDeviceChange('cancel')}
-                          >Cancel</button>
-                      </div>
-                  </li>
-              </ul>
-          </div>
-          }{/* new device */}
+          <ModifyDevice {...modifyDeviceProps} />
       </div>
     </div>
   );
