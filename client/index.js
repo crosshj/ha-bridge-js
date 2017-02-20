@@ -4,10 +4,20 @@ import App from './components/app.js';
 
 const apiUrl = location.origin + location.pathname + "local-api/";
 
+const addHubToDevices = devices => devices.map(device => {
+  var alteredDevice = device;
+  if (~device.offUrl.indexOf('local-api/hubs/')) {
+    alteredDevice.hub = {
+      name: device.offUrl.split('local-api/hubs/')[1].split('/')[0]
+    };
+  }
+  return alteredDevice;
+});
+
 function reload(){
   fetch(apiUrl + "devices")
     .then(r => r.json())
-    .then(data => render(<App devices={data}/>, document.getElementById('app')))
+    .then(data => render(<App devices={addHubToDevices(data)}/>, document.getElementById('app')))
     .catch(e => console.log("Error:\n", e)); //eslint-disable-line no-console
 
   fetch(apiUrl + "hubs")

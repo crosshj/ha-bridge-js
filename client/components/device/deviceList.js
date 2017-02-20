@@ -9,7 +9,7 @@ function DeviceList({
 
   const currentDevices = selected.hub.name === 'All'
     ? devices
-    : devices.filter(x => (x.hub && x.hub.uuid === selected.hub.uuid) || (selected.hub.name === 'Generic' && !x.hub));
+    : devices.filter(x => (x.hub && x.hub.name === selected.hub.name) || (selected.hub.name === 'Generic' && !x.hub));
 
   const component = (
   <div>{ currentDevices.length > 0 && !newHub &&

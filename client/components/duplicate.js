@@ -16,11 +16,7 @@ function duplicate({
   handleDeviceChange = () => {},
   handleTempDeviceChange = () => {}
 }){
-  const hubChange = (event) => {
-    const hub = hubs.find(x => x.name===event.target.value);
-    handleHubChange(hub);
-  };
-
+  {/* TODO: pull to top level  */}
   const handleAddHubClick = (event, change) => {
     var newHub = undefined;
     if(~event.target.className.indexOf('submit-hub')){
@@ -37,14 +33,18 @@ function duplicate({
     handleAddHub(newHub, change);
   };
 
+  {/* TODO: pull visibility to top level  */}
   const bridgeSettingsProps = { url, handleReload };
-  const hubsListProps = { newHub, hubs, selected, hubChange, handleAddHubClick };
+  const hubsListProps = { newHub, hubs, selected, handleHubChange, handleAddHubClick };
   const modifyHubProps = { newHub, tempHub, handleAddHubClick };
   const deviceListProps = { newHub, selected, devices, handleDeviceChange };
   const modifyDeviceProps = { tempDevice, newHub, selected, handleTempDeviceChange };
 
   const duplicate = (
     <div>
+      {/* TODO: create component, add hamburger menu -
+        http://stackoverflow.com/questions/26317679/how-to-add-hamburger-menu-in-bootstrap
+      */}
       <nav className="navbar navbar-custom navbar-fixed-top">
           <div className="container">
               <div className="navbar-header">

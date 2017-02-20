@@ -40,7 +40,10 @@ class App extends React.Component {
     }
   }
 
-  handleHubChange(selectedHub){
+  handleHubChange(selectedHub, event){
+    if (event){
+      selectedHub = this.state.hubs.find(x => x.name===event.target.value);
+    }
     this.setState({tempDevice: {}, selectedDevice: undefined});
     this.setState({selectedHub});
   }

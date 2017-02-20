@@ -2,7 +2,7 @@ import React from 'react';
 
 function HubsList({
   selected={}, hubs=[], newHub,
-  hubChange = () => {},
+  handleHubChange = () => {},
   handleAddHubClick = () => {}
 }){
 
@@ -21,7 +21,7 @@ function HubsList({
                     <label className="radio" key={key}>
                         <input value={hub.name} type="radio" name="radio"
                           checked={hub.name===selected.hub.name}
-                          onChange={hubChange}
+                          onChange={event => handleHubChange(null, event)}
                         />{hub.name}
                     </label>
                   );
@@ -48,7 +48,7 @@ function HubsList({
 HubsList.propTypes = {
   selected: React.PropTypes.object,
   hubs: React.PropTypes.array,
-  hubchange: React.PropTypes.func,
+  handleHubchange: React.PropTypes.func,
   handleAddHubClick: React.PropTypes.func
 };
 
