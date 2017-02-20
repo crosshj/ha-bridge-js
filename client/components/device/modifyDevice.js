@@ -2,13 +2,13 @@ import React from 'react';
 
 function ModifyDevice({
   tempDevice = {},
-  newHub = {},
+  newHub,
   selected = {},
   handleTempDeviceChange = () => {}
 }){
 
   const component = (
-  <div>{ selected.hub && selected.hub.name !== 'All' && !newHub &&
+  <div>{ selected.hub && selected.hub.name === 'Generic' && !newHub &&
     <div className="panel panel-default panel-success">
         <div className="panel-heading">
           <h2 className="panel-title">{(selected.device ? "Edit " : "Add ") + selected.hub.name} device</h2>
@@ -95,7 +95,6 @@ ModifyDevice.propTypes = {
   tempDevice: React.PropTypes.object,
   newHub: React.PropTypes.object,
   selected: React.PropTypes.object,
-  bridgeVisible: React.PropTypes.bool,
   handleTempDeviceChange: React.PropTypes.func
 };
 
