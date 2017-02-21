@@ -1,4 +1,5 @@
 import React from 'react';
+import Navbar from './navbar';
 import BridgeSettings from './bridge/bridgeSettings.js';
 import HubsList from './hub/hubsList';
 import ModifyHub from './hub/modifyHub';
@@ -34,6 +35,23 @@ function duplicate({
   };
 
   {/* TODO: pull visibility to top level  */}
+
+  const menuItems = [
+    {
+      name: 'Devices',
+      action: () => {}
+    },
+    {
+      name: 'Hubs',
+      action: () => {}
+    },
+    {
+      name: 'Bridge',
+      action: () => {}
+    }
+  ];
+
+  const navBarProps = {menuItems};
   const bridgeSettingsProps = { url, handleReload };
   const hubsListProps = { newHub, hubs, selected, handleHubChange, handleAddHubClick };
   const modifyHubProps = { newHub, tempHub, handleAddHubClick };
@@ -45,13 +63,7 @@ function duplicate({
       {/* TODO: create component, add hamburger menu -
         http://stackoverflow.com/questions/26317679/how-to-add-hamburger-menu-in-bootstrap
       */}
-      <nav className="navbar navbar-custom navbar-fixed-top">
-          <div className="container">
-              <div className="navbar-header">
-                  <a className="navbar-brand" href="#">HA Bridge Configuration</a>
-              </div>
-          </div>
-      </nav>
+      <Navbar {...navBarProps}/>
       <div className={`container col-sm-10 col-sm-offset-1
         col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3`}
       >

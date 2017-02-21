@@ -15,3 +15,24 @@ button.btn {
 .navbar-custom .navbar-brand{
   color: white;
 }
+
+button.navbar-toggle.collapsed {
+  float: left;
+}
+
+button.navbar-toggle.collapsed span {
+  background-color: white;
+  border-radius: 0px;
+}
+
+.navbar-nav a {
+  color: white;
+}
+
+.navbar-header, .navbar-nav {
+  cursor: default;
+}
+
+.navbar-nav > li > a:hover, .navbar-nav > li > a:focus {
+  background-color: rgba(255, 255, 255, 0.19);
+}
