@@ -12,8 +12,14 @@ button.btn {
   border-color: #5f9f8a;
 }
 
-.navbar-custom .navbar-brand{
+.navbar-custom .navbar-brand {
   color: white;
+  padding-left: 0px;
+}
+
+.navbar-custom .navbar-brand .icon-contain {
+  display: inline;
+  padding-right: 8px;
 }
 
 button.navbar-toggle.collapsed {
@@ -35,4 +41,12 @@ button.navbar-toggle.collapsed span {
 
 .navbar-nav > li > a:hover, .navbar-nav > li > a:focus {
   background-color: rgba(255, 255, 255, 0.19);
+}
+
+.navbar-collapse.in {
+  box-shadow: none;
+}
+
+ul.nav.navbar-nav a {
+  line-height: 22px;
 }

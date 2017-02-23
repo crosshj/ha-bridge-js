@@ -1,5 +1,5 @@
 import React from 'react';
-
+import HomeIcon from './homeIcon';
 var menuRef;
 
 const hamburgerClick = (menuRef) => {
@@ -37,7 +37,7 @@ const Navbar = ({menuItems=[]}) => {
                 <span className="icon-bar"></span>
                 <span className="icon-bar"></span>
               </button>
-              <a className="navbar-brand">ha-bridge-js</a>
+              <a className="navbar-brand"><HomeIcon />ha-bridge-js</a>
             </div>
             <div className="navbar-collapse collapse" id=""
               aria-expanded="false" style={{height: "1px"}}
