@@ -10,6 +10,41 @@ function testUrl(url){
     .catch(e => console.log('Error:\n', e)); //eslint-disable-line no-console
 }
 
+
+var visibility = { devices: true };
+const menuItems = [
+  {
+    name: 'Devices',
+    action: function() {
+      var visibility = this.state.visibility;
+      visibility.devices = 'All';
+      visibility.hubs = false;
+      visibility.bridge = false;
+      this.setState({visibility});
+    }
+  },
+  {
+    name: 'Hubs',
+    action: function() {
+      var visibility = this.state.visibility;
+      visibility.devices = true;
+      visibility.hubs = true;
+      visibility.bridge = false;
+      this.setState({visibility});
+    }
+  },
+  {
+    name: 'Bridge',
+    action: function() {
+      var visibility = this.state.visibility;
+      visibility.devices = false;
+      visibility.hubs = false;
+      visibility.bridge = true;
+      this.setState({visibility});
+    }
+  }
+];
+
 class App extends React.Component {
   constructor(props){
     super(props);
@@ -18,7 +53,9 @@ class App extends React.Component {
       hubTypes: [],
       url: props.url + "devices",
       hubUrl: props.url + "hubs",
-      tempDevice: {}
+      tempDevice: {},
+      visibility,
+      menuItems
     };
     this.handleReload = props.handleReload || (() => {});
     this.handleHubChange = this.handleHubChange.bind(this);
@@ -26,6 +63,10 @@ class App extends React.Component {
     this.handleDeviceChange = this.handleDeviceChange.bind(this);
     this.handleTempDeviceChange = this.handleTempDeviceChange.bind(this);
     this.testUrl = testUrl.bind(this);
+    menuItems.map(item => {
+      item.action = item.action.bind(this);
+      return item;
+    });
   }
 
   componentWillReceiveProps({devices, hubs}){
@@ -269,14 +310,12 @@ class App extends React.Component {
       handleDeviceChange: this.handleDeviceChange,
       handleHubChange: this.handleHubChange,
       handleReload: this.handleReload,
-      handleTempDeviceChange: this.handleTempDeviceChange
+      handleTempDeviceChange: this.handleTempDeviceChange,
+      visibility: this.state.visibility,
+      menuItems: this.state.menuItems
     };
     return (
       <div>
-        {
-        // <Menu />
-        // <Body />
-        }
         <Duplicate {...props}/>
       </div>
     );

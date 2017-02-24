@@ -2,15 +2,15 @@ import React from 'react';
 
 function BridgeSettings({
   url = '',
-  bridgeVisible = true,
+  visibility = {},
   handleReload = () => {}
 }){
 
   const component = (
-  <div>{ bridgeVisible &&
+  <div>{ visibility.bridge &&
     <div className="panel panel-default panel-success bridgeServer">
         <div className="panel-heading">
-          <h1 className="panel-title">Bridge settings</h1>
+          <h1 className="panel-title">Bridge</h1>
         </div>
         <div className="panel-body">
           <div className="col-xs-7 col-sm-7">

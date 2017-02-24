@@ -3,11 +3,12 @@ import React from 'react';
 function HubsList({
   selected={}, hubs=[], newHub,
   handleHubChange = () => {},
-  handleAddHubClick = () => {}
+  handleAddHubClick = () => {},
+  visibility = {}
 }){
 
   const component = (
-  <div>{ !newHub &&
+  <div>{ !newHub && visibility.hubs &&
     <div className="panel panel-default panel-success">
         <div className="panel-heading">
           <h2 className="panel-title">Hubs</h2>

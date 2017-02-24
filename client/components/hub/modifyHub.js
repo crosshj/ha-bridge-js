@@ -2,7 +2,8 @@ import React from 'react';
 
 function ModifyHub({
   tempHub, newHub,
-  handleAddHubClick = () => {}
+  handleAddHubClick = () => {},
+  visibility = {}
 }){
 
   var addUpdateButtonRef = undefined;
@@ -55,7 +56,7 @@ function ModifyHub({
 
   const component = (
   <div>
-  { newHub &&
+  { newHub && visibility.hubs &&
     <div className="panel panel-default panel-success">
         <div className="panel-heading">
           <h2 className="panel-title">{newHub.uuid ? 'Edit' : 'New'} Hub</h2>

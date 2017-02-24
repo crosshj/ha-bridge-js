@@ -14,10 +14,10 @@ const hamburgerClick = (menuRef) => {
 
 const makeMenu = (items, menuRef) => items.map((item, key) =>
   <li key={key}>
-    <a onClick={()=> {
+    <a onClick={event => {
       menuRef.className = menuRef.className.replace(' in', '');
       menuRef.style.height = '1px';
-      return item.action;
+      return item.action(event);
     }}
     >{item.name}</a>
   </li>

@@ -11,6 +11,7 @@ var tempHub = {};
 function duplicate({
   selected={}, hubs=[], devices=[],
   newHub, tempDevice, url,
+  menuItems = [], visibility = { devices: true },
   handleHubChange = () => {},
   handleAddHub = () => {},
   handleReload = () => {},
@@ -34,35 +35,15 @@ function duplicate({
     handleAddHub(newHub, change);
   };
 
-  {/* TODO: pull visibility to top level  */}
-
-  const menuItems = [
-    {
-      name: 'Devices',
-      action: () => {}
-    },
-    {
-      name: 'Hubs',
-      action: () => {}
-    },
-    {
-      name: 'Bridge',
-      action: () => {}
-    }
-  ];
-
   const navBarProps = {menuItems};
-  const bridgeSettingsProps = { url, handleReload };
-  const hubsListProps = { newHub, hubs, selected, handleHubChange, handleAddHubClick };
-  const modifyHubProps = { newHub, tempHub, handleAddHubClick };
-  const deviceListProps = { newHub, selected, devices, handleDeviceChange };
-  const modifyDeviceProps = { tempDevice, newHub, selected, handleTempDeviceChange };
+  const bridgeSettingsProps = { url, handleReload, visibility };
+  const hubsListProps = { newHub, hubs, selected, handleHubChange, handleAddHubClick, visibility };
+  const modifyHubProps = { newHub, tempHub, handleAddHubClick, visibility };
+  const deviceListProps = { newHub, selected, devices, handleDeviceChange, visibility };
+  const modifyDeviceProps = { tempDevice, newHub, selected, handleTempDeviceChange, visibility };
 
   const duplicate = (
     <div>
-      {/* TODO: create component, add hamburger menu -
-        http://stackoverflow.com/questions/26317679/how-to-add-hamburger-menu-in-bootstrap
-      */}
       <Navbar {...navBarProps}/>
       <div className={`container col-sm-10 col-sm-offset-1
         col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3`}

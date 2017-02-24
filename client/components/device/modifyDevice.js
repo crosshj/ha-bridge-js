@@ -4,11 +4,15 @@ function ModifyDevice({
   tempDevice = {},
   newHub,
   selected = {},
+  visibility = {},
   handleTempDeviceChange = () => {}
 }){
+  const selectedHub = visibility.devices === 'All'
+  ? { name: 'All' }
+  : selected.hub;
 
   const component = (
-  <div>{ selected.hub && selected.hub.name === 'Generic' && !newHub &&
+  <div>{ selectedHub.name === 'Generic' && !newHub && visibility.devices &&
     <div className="panel panel-default panel-success">
         <div className="panel-heading">
           <h2 className="panel-title">{(selected.device ? "Edit " : "Add ") + selected.hub.name} device</h2>
