@@ -14,6 +14,8 @@ button.btn {
 
 .navbar-custom .navbar-brand {
   color: white;
+  fill: white;
+  /*fill:"#a6ffcf";*/
   padding-left: 0px;
 }
 
@@ -49,4 +51,8 @@ button.navbar-toggle.collapsed span {
 
 ul.nav.navbar-nav a {
   line-height: 22px;
+}
+
+ul.nav.navbar-nav svg {
+  fill: white;
 }
