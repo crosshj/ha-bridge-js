@@ -5,6 +5,8 @@ Use an emulated Philips Hue bridge to tie your home automation together, complet
 
 This bridge allows you to customize control of your devices *locally* using TCP and UDP with pending support for ZWave / ZigBee / Bluetooth using Wink hub radios and IR using IR blaster.
 
+![image](https://cloud.githubusercontent.com/assets/1816471/23290958/cb9ad8ac-fa22-11e6-933e-d006e1657538.png)
+
 ## how to
 ```npm install```   
 ```npm start```   
