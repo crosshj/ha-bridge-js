@@ -37,10 +37,10 @@ function DeviceList({
                       <td className="text-center">
                           <button className="btn btn-info" onClick={() => handleDeviceChange('on', device.name)}>ON</button>
                           <button className="btn btn-info" onClick={() => handleDeviceChange('off', device.name)}>OFF</button>
-                          { selectedHub.name !== 'All' && (!device.hub || device.hub.name === 'Generic') &&
+                          { visibility.devices !== 'All' && (!device.hub || device.hub.name === 'Generic') &&
                           <button className="btn btn-danger" onClick={() => handleDeviceChange('edit', device.name)}>Edit</button>
                           }
-                          { selectedHub.name !== 'All' && (!device.hub || device.hub.name === 'Generic') &&
+                          { visibility.devices !== 'All' && (!device.hub || device.hub.name === 'Generic') &&
                           <button className="btn btn-danger" onClick={() => handleDeviceChange('delete', device.name)}>Delete</button>
                           }
                       </td>

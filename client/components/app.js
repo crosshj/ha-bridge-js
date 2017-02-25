@@ -11,7 +11,7 @@ function testUrl(url){
 }
 
 
-var visibility = { devices: true };
+var visibility = { devices: 'All' };
 const menuItems = [
   {
     name: 'Devices',

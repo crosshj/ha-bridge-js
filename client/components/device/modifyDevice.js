@@ -12,7 +12,7 @@ function ModifyDevice({
   : selected.hub;
 
   const component = (
-  <div>{ selectedHub.name === 'Generic' && !newHub && visibility.devices &&
+  <div>{ (selectedHub.name === 'Generic' && !newHub && visibility.devices) || (visibility.devices && visibility.devices !== 'All' && !!selected.device) &&
     <div className="panel panel-default panel-success">
         <div className="panel-heading">
           <h2 className="panel-title">{(selected.device ? "Edit " : "Add ") + selected.hub.name} device</h2>
