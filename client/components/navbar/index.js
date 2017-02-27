@@ -2,21 +2,27 @@ import React from 'react';
 import HomeIcon from './homeIcon';
 var menuRef;
 
+const hideMenu = (menuRef, event) => {
+  if(event && (~event.target.className.indexOf('navbar-toggle') || ~event.target.className.indexOf('icon-bar'))){
+    return;
+  }
+  if (!menuRef) return;
+  menuRef.className = menuRef.className.replace(' in', '');
+  menuRef.style.height = '1px';
+};
+
 const hamburgerClick = (menuRef) => {
   if (~menuRef.className.indexOf('in')) {
-    menuRef.className = menuRef.className.replace(' in', '');
-    menuRef.style.height = '1px';
+    hideMenu(menuRef);
   }else{
     menuRef.className += ' in';
     menuRef.style.height = '';
   }
 };
 
-const makeMenu = (items, menuRef) => items.map((item, key) =>
+const makeMenu = (items) => items.map((item, key) =>
   <li key={key}>
     <a onClick={event => {
-      menuRef.className = menuRef.className.replace(' in', '');
-      menuRef.style.height = '1px';
       return item.action(event);
     }}
     >{item.name}</a>
@@ -24,6 +30,7 @@ const makeMenu = (items, menuRef) => items.map((item, key) =>
 );
 
 const Navbar = ({menuItems=[]}) => {
+  document.addEventListener('click', (event)=>hideMenu(menuRef, event));
   return (<div>
     <nav className="navbar navbar-custom navbar-fixed-top">
         <div className="container">

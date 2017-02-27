@@ -1,6 +1,9 @@
 import React from 'react';
 
+/*
+https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_switch
 
+*/
 
 function DeviceList({
   selected={}, devices=[], newHub,
@@ -22,12 +25,14 @@ function DeviceList({
           <h2 className="panel-title">{selectedHub.name} devices</h2>
         </div>
         <table className="table table-bordered table-striped table-hover">
+            {/*
             <thead>
               <tr>
                   <th>Name</th>
                   <th>Actions</th>
               </tr>
             </thead>
+            */}
             <tbody>
             { currentDevices && currentDevices
               .map((device, key) => {
