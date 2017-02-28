@@ -101,6 +101,7 @@ class App extends React.Component {
           : 'off';
       const url = device[thisChange+"Url"];
       this.testUrl(url);
+      device.status = thisChange;
       /* eslint-disable no-console*/
       console.log('TODO: change device status to pending, on repsonse change device status properly');
 
