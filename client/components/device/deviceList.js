@@ -1,5 +1,5 @@
 import React from 'react';
-
+import ToggleButton from '../toggleButton';
 /*
 https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_switch
 
@@ -25,23 +25,24 @@ function DeviceList({
           <h2 className="panel-title">{selectedHub.name} devices</h2>
         </div>
         <table className="table table-bordered table-striped table-hover">
-            {/*
-            <thead>
-              <tr>
-                  <th>Name</th>
-                  <th>Actions</th>
-              </tr>
-            </thead>
-            */}
             <tbody>
             { currentDevices && currentDevices
               .map((device, key) => {
+
+                const toggleButtonProps = {
+                  clickHandler: () => handleDeviceChange('toggle', device.name),
+                  state: device.status
+                };
+
                 return (
                   <tr key={key}>
                       <td>{device.name}</td>
                       <td className="text-center">
+                          {/*
                           <button className="btn btn-info" onClick={() => handleDeviceChange('on', device.name)}>ON</button>
                           <button className="btn btn-info" onClick={() => handleDeviceChange('off', device.name)}>OFF</button>
+                          */}
+                          <ToggleButton {...toggleButtonProps} />
                           { visibility.devices !== 'All' && (!device.hub || device.hub.name === 'Generic') &&
                           <button className="btn btn-danger" onClick={() => handleDeviceChange('edit', device.name)}>Edit</button>
                           }

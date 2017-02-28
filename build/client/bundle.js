@@ -63,11 +63,23 @@
 	
 	var apiUrl = location.origin + location.pathname + "local-api/";
 	
+	var addHubToDevices = function addHubToDevices(devices) {
+	  return devices.map(function (device) {
+	    var alteredDevice = device;
+	    if (~device.offUrl.indexOf('local-api/hubs/')) {
+	      alteredDevice.hub = {
+	        name: device.offUrl.split('local-api/hubs/')[1].split('/')[0]
+	      };
+	    }
+	    return alteredDevice;
+	  });
+	};
+	
 	function reload() {
 	  fetch(apiUrl + "devices").then(function (r) {
 	    return r.json();
 	  }).then(function (data) {
-	    return (0, _reactDom.render)(_react2.default.createElement(_app2.default, { devices: data }), document.getElementById('app'));
+	    return (0, _reactDom.render)(_react2.default.createElement(_app2.default, { devices: addHubToDevices(data) }), document.getElementById('app'));
 	  }).catch(function (e) {
 	    return console.log("Error:\n", e);
 	  }); //eslint-disable-line no-console
@@ -22138,6 +22150,36 @@
 	  }); //eslint-disable-line no-console
 	}
 	
+	var visibility = { devices: 'All' };
+	var menuItems = [{
+	  name: 'Devices',
+	  action: function action() {
+	    var visibility = this.state.visibility;
+	    visibility.devices = 'All';
+	    visibility.hubs = false;
+	    visibility.bridge = false;
+	    this.setState({ visibility: visibility });
+	  }
+	}, {
+	  name: 'Hubs',
+	  action: function action() {
+	    var visibility = this.state.visibility;
+	    visibility.devices = true;
+	    visibility.hubs = true;
+	    visibility.bridge = false;
+	    this.setState({ visibility: visibility });
+	  }
+	}, {
+	  name: 'Bridge',
+	  action: function action() {
+	    var visibility = this.state.visibility;
+	    visibility.devices = false;
+	    visibility.hubs = false;
+	    visibility.bridge = true;
+	    this.setState({ visibility: visibility });
+	  }
+	}];
+	
 	var App = function (_React$Component) {
 	  _inherits(App, _React$Component);
 	
@@ -22151,7 +22193,9 @@
 	      hubTypes: [],
 	      url: props.url + "devices",
 	      hubUrl: props.url + "hubs",
-	      tempDevice: {}
+	      tempDevice: {},
+	      visibility: visibility,
+	      menuItems: menuItems
 	    };
 	    _this.handleReload = props.handleReload || function () {};
 	    _this.handleHubChange = _this.handleHubChange.bind(_this);
@@ -22159,6 +22203,10 @@
 	    _this.handleDeviceChange = _this.handleDeviceChange.bind(_this);
 	    _this.handleTempDeviceChange = _this.handleTempDeviceChange.bind(_this);
 	    _this.testUrl = testUrl.bind(_this);
+	    menuItems.map(function (item) {
+	      item.action = item.action.bind(_this);
+	      return item;
+	    });
 	    return _this;
 	  }
 	
@@ -22182,7 +22230,12 @@
 	    }
 	  }, {
 	    key: 'handleHubChange',
-	    value: function handleHubChange(selectedHub) {
+	    value: function handleHubChange(selectedHub, event) {
+	      if (event) {
+	        selectedHub = this.state.hubs.find(function (x) {
+	          return x.name === event.target.value;
+	        });
+	      }
 	      this.setState({ tempDevice: {}, selectedDevice: undefined });
 	      this.setState({ selectedHub: selectedHub });
 	    }
@@ -22196,8 +22249,9 @@
 	      });
 	      device && console.log(device); //eslint-disable-line no-console
 	
-	      if (change === 'on' || change === 'off') {
-	        var url = device[change + "Url"];
+	      if (change === 'on' || change === 'off' || change === 'toggle') {
+	        var thisChange = change !== 'toggle' ? change : !device.status || device.status === 'off' ? 'on' : 'off';
+	        var url = device[thisChange + "Url"];
 	        this.testUrl(url);
 	        /* eslint-disable no-console*/
 	        console.log('TODO: change device status to pending, on repsonse change device status properly');
@@ -22457,7 +22511,9 @@
 	        handleDeviceChange: this.handleDeviceChange,
 	        handleHubChange: this.handleHubChange,
 	        handleReload: this.handleReload,
-	        handleTempDeviceChange: this.handleTempDeviceChange
+	        handleTempDeviceChange: this.handleTempDeviceChange,
+	        visibility: this.state.visibility,
+	        menuItems: this.state.menuItems
 	      };
 	      return _react2.default.createElement(
 	        'div',
@@ -22494,6 +22550,30 @@
 	
 	var _react2 = _interopRequireDefault(_react);
 	
+	var _navbar = __webpack_require__(/*! ./navbar */ 180);
+	
+	var _navbar2 = _interopRequireDefault(_navbar);
+	
+	var _bridgeSettings = __webpack_require__(/*! ./bridge/bridgeSettings.js */ 182);
+	
+	var _bridgeSettings2 = _interopRequireDefault(_bridgeSettings);
+	
+	var _hubsList = __webpack_require__(/*! ./hub/hubsList */ 183);
+	
+	var _hubsList2 = _interopRequireDefault(_hubsList);
+	
+	var _modifyHub = __webpack_require__(/*! ./hub/modifyHub */ 184);
+	
+	var _modifyHub2 = _interopRequireDefault(_modifyHub);
+	
+	var _deviceList = __webpack_require__(/*! ./device/deviceList */ 185);
+	
+	var _deviceList2 = _interopRequireDefault(_deviceList);
+	
+	var _modifyDevice = __webpack_require__(/*! ./device/modifyDevice.js */ 187);
+	
+	var _modifyDevice2 = _interopRequireDefault(_modifyDevice);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var tempHub = {};
@@ -22507,6 +22587,11 @@
 	      devices = _ref$devices === undefined ? [] : _ref$devices,
 	      newHub = _ref.newHub,
 	      tempDevice = _ref.tempDevice,
+	      url = _ref.url,
+	      _ref$menuItems = _ref.menuItems,
+	      menuItems = _ref$menuItems === undefined ? [] : _ref$menuItems,
+	      _ref$visibility = _ref.visibility,
+	      visibility = _ref$visibility === undefined ? { devices: true } : _ref$visibility,
 	      _ref$handleHubChange = _ref.handleHubChange,
 	      handleHubChange = _ref$handleHubChange === undefined ? function () {} : _ref$handleHubChange,
 	      _ref$handleAddHub = _ref.handleAddHub,
@@ -22516,18 +22601,9 @@
 	      _ref$handleDeviceChan = _ref.handleDeviceChange,
 	      handleDeviceChange = _ref$handleDeviceChan === undefined ? function () {} : _ref$handleDeviceChan,
 	      _ref$handleTempDevice = _ref.handleTempDeviceChange,
-	      handleTempDeviceChange = _ref$handleTempDevice === undefined ? function () {} : _ref$handleTempDevice,
-	      url = _ref.url;
+	      handleTempDeviceChange = _ref$handleTempDevice === undefined ? function () {} : _ref$handleTempDevice;
 	
-	  //tempHub = newHub || tempHub;
-	
-	  var hubChange = function hubChange(event) {
-	    var hub = hubs.find(function (x) {
-	      return x.name === event.target.value;
-	    });
-	    handleHubChange(hub);
-	  };
-	
+	  {/* TODO: pull to top level  */}
 	  var handleAddHubClick = function handleAddHubClick(event, change) {
 	    var newHub = undefined;
 	    if (~event.target.className.indexOf('submit-hub')) {
@@ -22544,480 +22620,26 @@
 	    handleAddHub(newHub, change);
 	  };
 	
-	  var currentDevices = selected.hub.name === 'All' ? devices : devices.filter(function (x) {
-	    return x.hub && x.hub.uuid === selected.hub.uuid || selected.hub.name === 'Generic' && !x.hub;
-	  });
-	
-	  var addUpdateButtonRef = undefined;
-	  var exampleUrlRef = undefined;
-	
-	  var getExampleUrl = function getExampleUrl(type, types, url) {
-	    type = type || types[0].name;
-	
-	    return types.find(function (x) {
-	      return x.name === type;
-	    }).urlPattern.replace('{base}', url).replace('{deviceId}', '0').replace('{state}', 'on');
-	  };
+	  var navBarProps = { menuItems: menuItems };
+	  var bridgeSettingsProps = { url: url, handleReload: handleReload, visibility: visibility };
+	  var hubsListProps = { newHub: newHub, hubs: hubs, selected: selected, handleHubChange: handleHubChange, handleAddHubClick: handleAddHubClick, visibility: visibility };
+	  var modifyHubProps = { newHub: newHub, tempHub: tempHub, handleAddHubClick: handleAddHubClick, visibility: visibility };
+	  var deviceListProps = { newHub: newHub, selected: selected, devices: devices, handleDeviceChange: handleDeviceChange, visibility: visibility };
+	  var modifyDeviceProps = { tempDevice: tempDevice, newHub: newHub, selected: selected, handleTempDeviceChange: handleTempDeviceChange, visibility: visibility };
 	
 	  var duplicate = _react2.default.createElement(
 	    'div',
 	    null,
-	    _react2.default.createElement(
-	      'nav',
-	      { className: 'navbar navbar-custom navbar-fixed-top' },
-	      _react2.default.createElement(
-	        'div',
-	        { className: 'container' },
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'navbar-header' },
-	          _react2.default.createElement(
-	            'a',
-	            { className: 'navbar-brand', href: '#' },
-	            'HA Bridge Configuration'
-	          )
-	        )
-	      )
-	    ),
+	    _react2.default.createElement(_navbar2.default, navBarProps),
 	    _react2.default.createElement(
 	      'div',
-	      { className: 'container col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3' },
-	      _react2.default.createElement(
-	        'div',
-	        { className: 'panel panel-default panel-success bridgeServer' },
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'panel-heading' },
-	          _react2.default.createElement(
-	            'h1',
-	            { className: 'panel-title' },
-	            'Bridge settings'
-	          )
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'panel-body' },
-	          _react2.default.createElement(
-	            'div',
-	            { className: 'col-xs-7 col-sm-7' },
-	            _react2.default.createElement('input', { id: 'bridge-base', className: 'form-control',
-	              defaultValue: url, type: 'text', placeholder: 'URL to bridge' })
-	          ),
-	          _react2.default.createElement(
-	            'div',
-	            { className: 'btn-toolbar' },
-	            _react2.default.createElement(
-	              'button',
-	              { className: 'col-xs-2 btn btn-primary btn',
-	                onClick: handleReload
-	              },
-	              'Load'
-	            ),
-	            _react2.default.createElement(
-	              'button',
-	              { className: 'col-xs-2 btn btn-primary',
-	                onClick: function onClick() {
-	                  return window.open(url);
-	                }
-	              },
-	              'Go'
-	            )
-	          )
-	        )
-	      ),
-	      !newHub && _react2.default.createElement(
-	        'div',
-	        { className: 'panel panel-default panel-success' },
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'panel-heading' },
-	          _react2.default.createElement(
-	            'h2',
-	            { className: 'panel-title' },
-	            'Hubs'
-	          )
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'panel-body' },
-	          _react2.default.createElement(
-	            'div',
-	            { className: 'form-group' },
-	            _react2.default.createElement('div', { className: 'col-xs-1' }),
-	            _react2.default.createElement(
-	              'div',
-	              { className: 'col-xs-11' },
-	              hubs && hubs.map(function (hub, key) {
-	                return _react2.default.createElement(
-	                  'label',
-	                  { className: 'radio', key: key },
-	                  _react2.default.createElement('input', { value: hub.name, type: 'radio', name: 'radio',
-	                    checked: hub.name === selected.hub.name,
-	                    onChange: hubChange
-	                  }),
-	                  hub.name
-	                );
-	              })
-	            ),
-	            _react2.default.createElement(
-	              'div',
-	              { className: 'cols-xs-12 text-center' },
-	              selected.hub.name !== "Generic" && selected.hub.name !== "All" && _react2.default.createElement(
-	                'button',
-	                { className: 'btn', onClick: function onClick(event) {
-	                    return handleAddHubClick(event, 'edit');
-	                  } },
-	                'Edit'
-	              ),
-	              selected.hub.name !== "Generic" && selected.hub.name !== "All" && _react2.default.createElement(
-	                'button',
-	                { className: 'btn', onClick: function onClick(event) {
-	                    return handleAddHubClick(event, 'delete');
-	                  } },
-	                'Delete'
-	              ),
-	              _react2.default.createElement(
-	                'button',
-	                { className: 'btn', onClick: handleAddHubClick },
-	                'Add'
-	              )
-	            )
-	          )
-	        )
-	      ),
-	      newHub && _react2.default.createElement(
-	        'div',
-	        { className: 'panel panel-default panel-success' },
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'panel-heading' },
-	          _react2.default.createElement(
-	            'h2',
-	            { className: 'panel-title' },
-	            newHub.uuid ? 'Edit' : 'New',
-	            ' Hub'
-	          )
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'panel-body' },
-	          _react2.default.createElement(
-	            'form',
-	            null,
-	            _react2.default.createElement(
-	              'div',
-	              { className: 'form-group' },
-	              _react2.default.createElement(
-	                'label',
-	                { htmlFor: 'hub-name' },
-	                'Name'
-	              ),
-	              _react2.default.createElement('input', { type: 'text', className: 'form-control', id: 'hub-name',
-	                autoComplete: 'off',
-	                defaultValue: newHub && newHub.name,
-	                onChange: function onChange(event) {
-	                  if (newHub && newHub.name && newHub.name !== event.target.value) {
-	                    tempHub.name = event.target.value;
-	                    addUpdateButtonRef.style.display = '';
-	                  }
-	                  if (!newHub || !newHub.name) {
-	                    tempHub.name = event.target.value;
-	                    addUpdateButtonRef.style.display = '';
-	                  }
-	                }
-	              })
-	            ),
-	            _react2.default.createElement(
-	              'div',
-	              { className: 'form-group' },
-	              _react2.default.createElement(
-	                'label',
-	                { htmlFor: 'hub-pattern' },
-	                'URL Pattern'
-	              ),
-	              _react2.default.createElement('input', { type: 'text', className: 'form-control', id: 'hub-pattern',
-	                autoComplete: 'off',
-	                defaultValue: newHub && newHub.url,
-	                onChange: function onChange(event) {
-	                  if (newHub && newHub.url && newHub.url !== event.target.value) {
-	                    tempHub.url = event.target.value;
-	                    addUpdateButtonRef.style.display = '';
-	                  }
-	                  if (!newHub || !newHub.url) {
-	                    tempHub.url = event.target.value;
-	                    addUpdateButtonRef.style.display = '';
-	                  }
-	                  exampleUrlRef.innerHTML = 'eg. ' + getExampleUrl(newHub.type, newHub.types, event.target.value);
-	                }
-	              })
-	            ),
-	            _react2.default.createElement(
-	              'div',
-	              { className: 'panel-body text-muted', style: { paddingTop: 0, paddingLeft: 0 } },
-	              _react2.default.createElement(
-	                'span',
-	                { className: 'col-xs-12',
-	                  ref: function ref(_ref2) {
-	                    return exampleUrlRef = _ref2;
-	                  }
-	                },
-	                newHub.url && 'eg. ' + getExampleUrl(newHub.type, newHub.types, newHub.url)
-	              )
-	            ),
-	            _react2.default.createElement(
-	              'div',
-	              { className: 'form-group' },
-	              _react2.default.createElement(
-	                'label',
-	                { htmlFor: 'typeSelect' },
-	                'Type'
-	              ),
-	              _react2.default.createElement(
-	                'select',
-	                { className: 'form-control', id: 'typeSelect',
-	                  defaultValue: newHub && newHub.type,
-	                  onChange: function onChange(event) {
-	                    if (newHub && newHub.type && newHub.type !== event.target.value) {
-	                      tempHub.type = event.target.value;
-	                      addUpdateButtonRef.style.display = '';
-	                    }
-	                    if (!newHub || !newHub.type) {
-	                      tempHub.type = event.target.value;
-	                      addUpdateButtonRef.style.display = '';
-	                    }
-	                    exampleUrlRef.innerHTML = 'eg. ' + getExampleUrl(event.target.value, newHub.types, tempHub.url || newHub.url);
-	                  }
-	                },
-	                newHub.types && newHub.types.map(function (type, key) {
-	                  return _react2.default.createElement(
-	                    'option',
-	                    { key: key, value: type.name },
-	                    type.name
-	                  );
-	                })
-	              )
-	            )
-	          ),
-	          _react2.default.createElement(
-	            'div',
-	            { className: 'cols-xs-12 text-center' },
-	            _react2.default.createElement(
-	              'button',
-	              { className: 'btn btn-danger cancel-hub', onClick: handleAddHubClick },
-	              'Cancel'
-	            ),
-	            _react2.default.createElement(
-	              'button',
-	              { className: "btn btn-info " + (newHub.uuid ? 'update-hub' : 'submit-hub'),
-	                onClick: handleAddHubClick,
-	                style: { display: 'none' },
-	                ref: function ref(_ref3) {
-	                  return addUpdateButtonRef = _ref3;
-	                }
-	              },
-	              newHub.uuid ? 'Update' : 'Add',
-	              ' Hub'
-	            )
-	          )
-	        )
-	      ),
-	      currentDevices.length > 0 && !newHub && _react2.default.createElement(
-	        'div',
-	        { className: 'panel panel-default panel-success' },
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'panel-heading' },
-	          _react2.default.createElement(
-	            'h2',
-	            { className: 'panel-title' },
-	            selected.hub.name,
-	            ' devices'
-	          )
-	        ),
-	        _react2.default.createElement(
-	          'table',
-	          { className: 'table table-bordered table-striped table-hover' },
-	          _react2.default.createElement(
-	            'thead',
-	            null,
-	            _react2.default.createElement(
-	              'tr',
-	              null,
-	              _react2.default.createElement(
-	                'th',
-	                null,
-	                'Name'
-	              ),
-	              _react2.default.createElement(
-	                'th',
-	                null,
-	                'Actions'
-	              )
-	            )
-	          ),
-	          _react2.default.createElement(
-	            'tbody',
-	            null,
-	            currentDevices && currentDevices.map(function (x) {
-	              return x.name;
-	            }).map(function (name, key) {
-	              return _react2.default.createElement(
-	                'tr',
-	                { key: key },
-	                _react2.default.createElement(
-	                  'td',
-	                  null,
-	                  name
-	                ),
-	                _react2.default.createElement(
-	                  'td',
-	                  { className: 'text-center' },
-	                  _react2.default.createElement(
-	                    'button',
-	                    { className: 'btn btn-info', onClick: function onClick() {
-	                        return handleDeviceChange('on', name);
-	                      } },
-	                    'ON'
-	                  ),
-	                  _react2.default.createElement(
-	                    'button',
-	                    { className: 'btn btn-info', onClick: function onClick() {
-	                        return handleDeviceChange('off', name);
-	                      } },
-	                    'OFF'
-	                  ),
-	                  selected.hub.name !== 'All' && _react2.default.createElement(
-	                    'button',
-	                    { className: 'btn btn-danger', onClick: function onClick() {
-	                        return handleDeviceChange('edit', name);
-	                      } },
-	                    'Edit'
-	                  ),
-	                  selected.hub.name !== 'All' && _react2.default.createElement(
-	                    'button',
-	                    { className: 'btn btn-danger', onClick: function onClick() {
-	                        return handleDeviceChange('delete', name);
-	                      } },
-	                    'Delete'
-	                  )
-	                )
-	              );
-	            })
-	          )
-	        )
-	      ),
-	      selected.hub.name !== 'All' && !newHub && _react2.default.createElement(
-	        'div',
-	        { className: 'panel panel-default panel-success' },
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'panel-heading' },
-	          _react2.default.createElement(
-	            'h2',
-	            { className: 'panel-title' },
-	            (selected.device ? "Edit " : "Add ") + selected.hub.name,
-	            ' device'
-	          )
-	        ),
-	        _react2.default.createElement(
-	          'ul',
-	          { className: 'list-group' },
-	          _react2.default.createElement(
-	            'li',
-	            { className: 'list-group-item' },
-	            _react2.default.createElement(
-	              'form',
-	              { className: 'form-horizontal' },
-	              _react2.default.createElement(
-	                'div',
-	                { className: 'form-group' },
-	                _react2.default.createElement(
-	                  'div',
-	                  { className: 'col-xs-8 col-sm-7' },
-	                  _react2.default.createElement('input', { type: 'text', className: 'form-control',
-	                    id: 'device-name', placeholder: 'Device Name',
-	                    value: tempDevice && tempDevice.name || selected.device && selected.device.name || '',
-	                    onChange: function onChange(event) {
-	                      return handleTempDeviceChange('name', event.target.value);
-	                    }
-	                  })
-	                ),
-	                _react2.default.createElement(
-	                  'button',
-	                  { className: 'col-xs-3 col-sm-2 btn btn-primary', type: 'button',
-	                    onClick: function onClick() {
-	                      return handleTempDeviceChange(selected.device ? "update" : "add", tempDevice);
-	                    }
-	                  },
-	                  selected.device ? "Update" : "Add",
-	                  ' Device'
-	                )
-	              ),
-	              _react2.default.createElement(
-	                'div',
-	                { className: 'form-group' },
-	                _react2.default.createElement(
-	                  'div',
-	                  { className: 'col-xs-8 col-sm-7' },
-	                  _react2.default.createElement('input', { type: 'text', className: 'form-control',
-	                    id: 'device-on-url', placeholder: 'URL to turn device on',
-	                    value: tempDevice && tempDevice.onUrl || selected.device && selected.device.onUrl || '',
-	                    onChange: function onChange(event) {
-	                      return handleTempDeviceChange('onUrl', event.target.value);
-	                    }
-	                  })
-	                ),
-	                _react2.default.createElement(
-	                  'button',
-	                  { className: 'col-xs-3 col-sm-2 btn btn-success', type: 'button',
-	                    onClick: function onClick() {
-	                      return handleTempDeviceChange('test', tempDevice && tempDevice.onUrl || selected.device && selected.device.onUrl);
-	                    }
-	                  },
-	                  'On Test'
-	                )
-	              ),
-	              _react2.default.createElement(
-	                'div',
-	                { className: 'form-group' },
-	                _react2.default.createElement(
-	                  'div',
-	                  { className: 'col-xs-8 col-sm-7' },
-	                  _react2.default.createElement('input', { type: 'text', className: 'form-control',
-	                    id: 'device-off-url', placeholder: 'URL to turn device off',
-	                    value: tempDevice && tempDevice.offUrl || selected.device && selected.device.offUrl || '',
-	                    onChange: function onChange(event) {
-	                      return handleTempDeviceChange('offUrl', event.target.value);
-	                    }
-	                  })
-	                ),
-	                _react2.default.createElement(
-	                  'button',
-	                  { className: 'col-xs-3 col-sm-2 btn btn-success', type: 'button',
-	                    onClick: function onClick() {
-	                      return handleTempDeviceChange('test', tempDevice && tempDevice.offUrl || selected.device && selected.device.offUrl);
-	                    }
-	                  },
-	                  'Off Test'
-	                )
-	              )
-	            ),
-	            _react2.default.createElement(
-	              'div',
-	              { className: 'cols-xs-12 text-center' },
-	              _react2.default.createElement(
-	                'button',
-	                { className: 'btn',
-	                  onClick: function onClick() {
-	                    return handleTempDeviceChange('cancel');
-	                  }
-	                },
-	                'Cancel'
-	              )
-	            )
-	          )
-	        )
-	      )
+	      { className: 'container col-sm-10 col-sm-offset-1\n        col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3'
+	      },
+	      _react2.default.createElement(_bridgeSettings2.default, bridgeSettingsProps),
+	      _react2.default.createElement(_hubsList2.default, hubsListProps),
+	      _react2.default.createElement(_modifyHub2.default, modifyHubProps),
+	      _react2.default.createElement(_deviceList2.default, deviceListProps),
+	      _react2.default.createElement(_modifyDevice2.default, modifyDeviceProps)
 	    )
 	  );
 	
@@ -23036,6 +22658,890 @@
 	};
 	
 	exports.default = duplicate;
+
+/***/ },
+/* 180 */
+/*!************************************!*\
+  !*** ./components/navbar/index.js ***!
+  \************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _react = __webpack_require__(/*! react */ 1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _homeIcon = __webpack_require__(/*! ./homeIcon */ 181);
+	
+	var _homeIcon2 = _interopRequireDefault(_homeIcon);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var menuRef;
+	
+	var hideMenu = function hideMenu(menuRef, event) {
+	  if (event && (~(event.target.className || '').indexOf('navbar-toggle') || ~(event.target.className || '').indexOf('icon-bar'))) {
+	    return;
+	  }
+	  if (!menuRef) return;
+	  menuRef.className = menuRef.className.replace(' in', '');
+	  menuRef.style.height = '1px';
+	};
+	
+	var hamburgerClick = function hamburgerClick(menuRef) {
+	  if (~menuRef.className.indexOf('in')) {
+	    hideMenu(menuRef);
+	  } else {
+	    menuRef.className += ' in';
+	    menuRef.style.height = '';
+	  }
+	};
+	
+	var makeMenu = function makeMenu(items) {
+	  return items.map(function (item, key) {
+	    return _react2.default.createElement(
+	      'li',
+	      { key: key },
+	      _react2.default.createElement(
+	        'a',
+	        { onClick: function onClick(event) {
+	            return item.action(event);
+	          }
+	        },
+	        item.name
+	      )
+	    );
+	  });
+	};
+	
+	var Navbar = function Navbar(_ref) {
+	  var _ref$menuItems = _ref.menuItems,
+	      menuItems = _ref$menuItems === undefined ? [] : _ref$menuItems;
+	
+	  document.addEventListener('click', function (event) {
+	    return hideMenu(menuRef, event);
+	  });
+	  return _react2.default.createElement(
+	    'div',
+	    null,
+	    _react2.default.createElement(
+	      'nav',
+	      { className: 'navbar navbar-custom navbar-fixed-top' },
+	      _react2.default.createElement(
+	        'div',
+	        { className: 'container' },
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'navbar-header' },
+	          _react2.default.createElement(
+	            'button',
+	            { type: 'button', className: 'navbar-toggle collapsed',
+	              'aria-expanded': 'false',
+	              onClick: function onClick() {
+	                return hamburgerClick(menuRef);
+	              }
+	            },
+	            _react2.default.createElement(
+	              'span',
+	              { className: 'sr-only' },
+	              'Toggle navigation'
+	            ),
+	            _react2.default.createElement('span', { className: 'icon-bar' }),
+	            _react2.default.createElement('span', { className: 'icon-bar' }),
+	            _react2.default.createElement('span', { className: 'icon-bar' })
+	          ),
+	          _react2.default.createElement(
+	            'a',
+	            { className: 'navbar-brand' },
+	            _react2.default.createElement(_homeIcon2.default, null),
+	            'ha-bridge-js'
+	          )
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'navbar-collapse collapse', id: '',
+	            'aria-expanded': 'false', style: { height: "1px" },
+	            ref: function ref(_ref2) {
+	              return menuRef = _ref2;
+	            }
+	          },
+	          _react2.default.createElement(
+	            'ul',
+	            { className: 'nav navbar-nav' },
+	            makeMenu(menuItems, menuRef)
+	          )
+	        )
+	      )
+	    )
+	  );
+	};
+	
+	Navbar.propTypes = {
+	  menuItems: _react2.default.PropTypes.array
+	};
+	
+	exports.default = Navbar;
+
+/***/ },
+/* 181 */
+/*!***************************************!*\
+  !*** ./components/navbar/homeIcon.js ***!
+  \***************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _react = __webpack_require__(/*! react */ 1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var HomeIcon = function HomeIcon() {
+	  return _react2.default.createElement(
+	    "div",
+	    { className: "icon-contain" },
+	    _react2.default.createElement(
+	      "svg",
+	      {
+	        viewBox: "0 0 30 30",
+	        width: "15"
+	      },
+	      _react2.default.createElement(
+	        "g",
+	        null,
+	        _react2.default.createElement("path", { d: "M 15,0 L 0,14 V 30 H 11 V 18 H 19 V 30 H 30 V 14 Z" })
+	      )
+	    )
+	  );
+	};
+	
+	exports.default = HomeIcon;
+
+/***/ },
+/* 182 */
+/*!*********************************************!*\
+  !*** ./components/bridge/bridgeSettings.js ***!
+  \*********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _react = __webpack_require__(/*! react */ 1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function BridgeSettings(_ref) {
+	  var _ref$url = _ref.url,
+	      url = _ref$url === undefined ? '' : _ref$url,
+	      _ref$visibility = _ref.visibility,
+	      visibility = _ref$visibility === undefined ? {} : _ref$visibility,
+	      _ref$handleReload = _ref.handleReload,
+	      handleReload = _ref$handleReload === undefined ? function () {} : _ref$handleReload;
+	
+	
+	  var component = _react2.default.createElement(
+	    'div',
+	    null,
+	    visibility.bridge && _react2.default.createElement(
+	      'div',
+	      { className: 'panel panel-default panel-success bridgeServer' },
+	      _react2.default.createElement(
+	        'div',
+	        { className: 'panel-heading' },
+	        _react2.default.createElement(
+	          'h1',
+	          { className: 'panel-title' },
+	          'Bridge'
+	        )
+	      ),
+	      _react2.default.createElement(
+	        'div',
+	        { className: 'panel-body' },
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'col-xs-7 col-sm-7' },
+	          _react2.default.createElement('input', { id: 'bridge-base', className: 'form-control',
+	            defaultValue: url, type: 'text', placeholder: 'URL to bridge' })
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'btn-toolbar' },
+	          _react2.default.createElement(
+	            'button',
+	            { className: 'col-xs-2 btn btn-primary btn',
+	              onClick: handleReload
+	            },
+	            'Load'
+	          ),
+	          _react2.default.createElement(
+	            'button',
+	            { className: 'col-xs-2 btn btn-primary',
+	              onClick: function onClick() {
+	                return window.open(url);
+	              }
+	            },
+	            'Go'
+	          )
+	        )
+	      )
+	    )
+	  );
+	
+	  return component;
+	}
+	
+	BridgeSettings.propTypes = {
+	  url: _react2.default.PropTypes.string,
+	  bridgeVisible: _react2.default.PropTypes.bool,
+	  handleReload: _react2.default.PropTypes.func
+	};
+	
+	exports.default = BridgeSettings;
+
+/***/ },
+/* 183 */
+/*!************************************!*\
+  !*** ./components/hub/hubsList.js ***!
+  \************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _react = __webpack_require__(/*! react */ 1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function HubsList(_ref) {
+	  var _ref$selected = _ref.selected,
+	      selected = _ref$selected === undefined ? {} : _ref$selected,
+	      _ref$hubs = _ref.hubs,
+	      hubs = _ref$hubs === undefined ? [] : _ref$hubs,
+	      newHub = _ref.newHub,
+	      _ref$handleHubChange = _ref.handleHubChange,
+	      handleHubChange = _ref$handleHubChange === undefined ? function () {} : _ref$handleHubChange,
+	      _ref$handleAddHubClic = _ref.handleAddHubClick,
+	      handleAddHubClick = _ref$handleAddHubClic === undefined ? function () {} : _ref$handleAddHubClic,
+	      _ref$visibility = _ref.visibility,
+	      visibility = _ref$visibility === undefined ? {} : _ref$visibility;
+	
+	
+	  var component = _react2.default.createElement(
+	    "div",
+	    null,
+	    !newHub && visibility.hubs && _react2.default.createElement(
+	      "div",
+	      { className: "panel panel-default panel-success" },
+	      _react2.default.createElement(
+	        "div",
+	        { className: "panel-heading" },
+	        _react2.default.createElement(
+	          "h2",
+	          { className: "panel-title" },
+	          "Hubs"
+	        )
+	      ),
+	      _react2.default.createElement(
+	        "div",
+	        { className: "panel-body" },
+	        _react2.default.createElement(
+	          "div",
+	          { className: "form-group" },
+	          _react2.default.createElement("div", { className: "col-xs-1" }),
+	          _react2.default.createElement(
+	            "div",
+	            { className: "col-xs-11" },
+	            hubs && hubs.map(function (hub, key) {
+	              return _react2.default.createElement(
+	                "label",
+	                { className: "radio", key: key },
+	                _react2.default.createElement("input", { value: hub.name, type: "radio", name: "radio",
+	                  checked: hub.name === selected.hub.name,
+	                  onChange: function onChange(event) {
+	                    return handleHubChange(null, event);
+	                  }
+	                }),
+	                hub.name
+	              );
+	            })
+	          ),
+	          _react2.default.createElement(
+	            "div",
+	            { className: "cols-xs-12 text-center" },
+	            selected.hub.name !== "Generic" && selected.hub.name !== "All" && _react2.default.createElement(
+	              "button",
+	              { className: "btn", onClick: function onClick(event) {
+	                  return handleAddHubClick(event, 'edit');
+	                } },
+	              "Edit"
+	            ),
+	            selected.hub.name !== "Generic" && selected.hub.name !== "All" && _react2.default.createElement(
+	              "button",
+	              { className: "btn", onClick: function onClick(event) {
+	                  return handleAddHubClick(event, 'delete');
+	                } },
+	              "Delete"
+	            ),
+	            _react2.default.createElement(
+	              "button",
+	              { className: "btn", onClick: handleAddHubClick },
+	              "Add"
+	            )
+	          )
+	        )
+	      )
+	    )
+	  );
+	
+	  return component;
+	}
+	
+	HubsList.propTypes = {
+	  selected: _react2.default.PropTypes.object,
+	  hubs: _react2.default.PropTypes.array,
+	  handleHubchange: _react2.default.PropTypes.func,
+	  handleAddHubClick: _react2.default.PropTypes.func
+	};
+	
+	exports.default = HubsList;
+
+/***/ },
+/* 184 */
+/*!*************************************!*\
+  !*** ./components/hub/modifyHub.js ***!
+  \*************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _react = __webpack_require__(/*! react */ 1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function ModifyHub(_ref) {
+	  var tempHub = _ref.tempHub,
+	      newHub = _ref.newHub,
+	      _ref$handleAddHubClic = _ref.handleAddHubClick,
+	      handleAddHubClick = _ref$handleAddHubClic === undefined ? function () {} : _ref$handleAddHubClic,
+	      _ref$visibility = _ref.visibility,
+	      visibility = _ref$visibility === undefined ? {} : _ref$visibility;
+	
+	
+	  var addUpdateButtonRef = undefined;
+	  var exampleUrlRef = undefined;
+	
+	  var getExampleUrl = function getExampleUrl(type, types, url) {
+	    type = type || types[0].name;
+	
+	    return types.find(function (x) {
+	      return x.name === type;
+	    }).urlPattern.replace('{base}', url).replace('{deviceId}', '0').replace('{state}', 'on');
+	  };
+	
+	  var hubNameChange = function hubNameChange(event) {
+	    if (newHub && newHub.name && newHub.name !== event.target.value) {
+	      tempHub.name = event.target.value;
+	      addUpdateButtonRef.style.display = '';
+	    }
+	    if (!newHub || !newHub.name) {
+	      tempHub.name = event.target.value;
+	      addUpdateButtonRef.style.display = '';
+	    }
+	  };
+	
+	  var hubUrlChange = function hubUrlChange(event) {
+	    if (newHub && newHub.url && newHub.url !== event.target.value) {
+	      tempHub.url = event.target.value;
+	      addUpdateButtonRef.style.display = '';
+	    }
+	    if (!newHub || !newHub.url) {
+	      tempHub.url = event.target.value;
+	      addUpdateButtonRef.style.display = '';
+	    }
+	    exampleUrlRef.innerHTML = 'eg. ' + getExampleUrl(tempHub.type || newHub.type, newHub.types, event.target.value);
+	  };
+	
+	  var hubTypeChange = function hubTypeChange(event) {
+	    if (newHub && newHub.type && newHub.type !== event.target.value) {
+	      tempHub.type = event.target.value;
+	      addUpdateButtonRef.style.display = '';
+	    }
+	    if (!newHub || !newHub.type) {
+	      tempHub.type = event.target.value;
+	      addUpdateButtonRef.style.display = '';
+	    }
+	    exampleUrlRef.innerHTML = 'eg. ' + getExampleUrl(event.target.value, newHub.types, tempHub.url || newHub.url);
+	  };
+	
+	  var component = _react2.default.createElement(
+	    'div',
+	    null,
+	    newHub && visibility.hubs && _react2.default.createElement(
+	      'div',
+	      { className: 'panel panel-default panel-success' },
+	      _react2.default.createElement(
+	        'div',
+	        { className: 'panel-heading' },
+	        _react2.default.createElement(
+	          'h2',
+	          { className: 'panel-title' },
+	          newHub.uuid ? 'Edit' : 'New',
+	          ' Hub'
+	        )
+	      ),
+	      _react2.default.createElement(
+	        'div',
+	        { className: 'panel-body' },
+	        _react2.default.createElement(
+	          'form',
+	          null,
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'form-group' },
+	            _react2.default.createElement(
+	              'label',
+	              { htmlFor: 'hub-name' },
+	              'Name'
+	            ),
+	            _react2.default.createElement('input', { type: 'text', className: 'form-control', id: 'hub-name',
+	              autoComplete: 'off', defaultValue: newHub && newHub.name,
+	              onChange: hubNameChange
+	            })
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'form-group' },
+	            _react2.default.createElement(
+	              'label',
+	              { htmlFor: 'hub-pattern' },
+	              'URL Pattern'
+	            ),
+	            _react2.default.createElement('input', { type: 'text', className: 'form-control', id: 'hub-pattern',
+	              autoComplete: 'off', defaultValue: newHub && newHub.url,
+	              onChange: hubUrlChange
+	            })
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'panel-body text-muted', style: { paddingTop: 0, paddingLeft: 0 } },
+	            _react2.default.createElement(
+	              'span',
+	              { className: 'col-xs-12',
+	                ref: function ref(_ref2) {
+	                  return exampleUrlRef = _ref2;
+	                }
+	              },
+	              newHub.url && 'eg. ' + getExampleUrl(newHub.type, newHub.types, tempHub.url || newHub.url)
+	            )
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'form-group' },
+	            _react2.default.createElement(
+	              'label',
+	              { htmlFor: 'typeSelect' },
+	              'Type'
+	            ),
+	            _react2.default.createElement(
+	              'select',
+	              { className: 'form-control', id: 'typeSelect',
+	                defaultValue: newHub && newHub.type, onChange: hubTypeChange
+	              },
+	              newHub.types && newHub.types.map(function (type, key) {
+	                return _react2.default.createElement(
+	                  'option',
+	                  { key: key, value: type.name },
+	                  type.name
+	                );
+	              })
+	            )
+	          )
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'cols-xs-12 text-center' },
+	          _react2.default.createElement(
+	            'button',
+	            { className: 'btn btn-danger cancel-hub', onClick: handleAddHubClick },
+	            'Cancel'
+	          ),
+	          _react2.default.createElement(
+	            'button',
+	            { className: "btn btn-info " + (newHub.uuid ? 'update-hub' : 'submit-hub'),
+	              onClick: handleAddHubClick, style: { display: 'none' },
+	              ref: function ref(_ref3) {
+	                return addUpdateButtonRef = _ref3;
+	              }
+	            },
+	            newHub.uuid ? 'Update' : 'Add',
+	            ' Hub'
+	          )
+	        )
+	      )
+	    )
+	  );
+	
+	  return component;
+	}
+	
+	ModifyHub.propTypes = {
+	  selected: _react2.default.PropTypes.object,
+	  hubs: _react2.default.PropTypes.array,
+	  hubchange: _react2.default.PropTypes.func,
+	  handleAddHubClick: _react2.default.PropTypes.func
+	};
+	
+	exports.default = ModifyHub;
+
+/***/ },
+/* 185 */
+/*!*****************************************!*\
+  !*** ./components/device/deviceList.js ***!
+  \*****************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _react = __webpack_require__(/*! react */ 1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _toggleButton = __webpack_require__(/*! ../toggleButton */ 186);
+	
+	var _toggleButton2 = _interopRequireDefault(_toggleButton);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*
+	https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_switch
+	
+	*/
+	
+	function DeviceList(_ref) {
+	  var _ref$selected = _ref.selected,
+	      selected = _ref$selected === undefined ? {} : _ref$selected,
+	      _ref$devices = _ref.devices,
+	      devices = _ref$devices === undefined ? [] : _ref$devices,
+	      newHub = _ref.newHub,
+	      _ref$visibility = _ref.visibility,
+	      visibility = _ref$visibility === undefined ? {} : _ref$visibility,
+	      _ref$handleDeviceChan = _ref.handleDeviceChange,
+	      handleDeviceChange = _ref$handleDeviceChan === undefined ? function () {} : _ref$handleDeviceChan;
+	
+	  var selectedHub = visibility.devices === 'All' ? { name: 'All' } : selected.hub;
+	
+	  var currentDevices = selectedHub.name === 'All' ? devices : devices.filter(function (x) {
+	    return x.hub && x.hub.name === selectedHub.name || selectedHub.name === 'Generic' && !x.hub;
+	  });
+	
+	  var component = _react2.default.createElement(
+	    'div',
+	    null,
+	    currentDevices.length > 0 && !newHub && visibility.devices && _react2.default.createElement(
+	      'div',
+	      { className: 'panel panel-default panel-success' },
+	      _react2.default.createElement(
+	        'div',
+	        { className: 'panel-heading' },
+	        _react2.default.createElement(
+	          'h2',
+	          { className: 'panel-title' },
+	          selectedHub.name,
+	          ' devices'
+	        )
+	      ),
+	      _react2.default.createElement(
+	        'table',
+	        { className: 'table table-bordered table-striped table-hover' },
+	        _react2.default.createElement(
+	          'tbody',
+	          null,
+	          currentDevices && currentDevices.map(function (device, key) {
+	
+	            var toggleButtonProps = {
+	              clickHandler: function clickHandler() {
+	                return handleDeviceChange('toggle', device.name);
+	              },
+	              state: device.status
+	            };
+	
+	            return _react2.default.createElement(
+	              'tr',
+	              { key: key },
+	              _react2.default.createElement(
+	                'td',
+	                null,
+	                device.name
+	              ),
+	              _react2.default.createElement(
+	                'td',
+	                { className: 'text-center' },
+	                _react2.default.createElement(_toggleButton2.default, toggleButtonProps),
+	                visibility.devices !== 'All' && (!device.hub || device.hub.name === 'Generic') && _react2.default.createElement(
+	                  'button',
+	                  { className: 'btn btn-danger', onClick: function onClick() {
+	                      return handleDeviceChange('edit', device.name);
+	                    } },
+	                  'Edit'
+	                ),
+	                visibility.devices !== 'All' && (!device.hub || device.hub.name === 'Generic') && _react2.default.createElement(
+	                  'button',
+	                  { className: 'btn btn-danger', onClick: function onClick() {
+	                      return handleDeviceChange('delete', device.name);
+	                    } },
+	                  'Delete'
+	                )
+	              )
+	            );
+	          })
+	        )
+	      )
+	    )
+	  );
+	
+	  return component;
+	}
+	
+	DeviceList.propTypes = {
+	  selected: _react2.default.PropTypes.object,
+	  hubs: _react2.default.PropTypes.array,
+	  hubchange: _react2.default.PropTypes.func,
+	  handleAddHubClick: _react2.default.PropTypes.func
+	};
+	
+	exports.default = DeviceList;
+
+/***/ },
+/* 186 */
+/*!******************************************!*\
+  !*** ./components/toggleButton/index.js ***!
+  \******************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _react = __webpack_require__(/*! react */ 1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var ToggleButton = function ToggleButton(_ref) {
+	  var _ref$state = _ref.state,
+	      state = _ref$state === undefined ? 'off' : _ref$state,
+	      _ref$clickHandler = _ref.clickHandler,
+	      clickHandler = _ref$clickHandler === undefined ? function () {} : _ref$clickHandler;
+	
+	  return _react2.default.createElement(
+	    'label',
+	    { className: 'switch' },
+	    _react2.default.createElement('input', { type: 'checkbox', defaultChecked: state === 'on', onClick: clickHandler }),
+	    _react2.default.createElement('div', { className: 'slider round' })
+	  );
+	};
+	
+	ToggleButton.propTypes = {
+	  state: _react2.default.PropTypes.string,
+	  clickHandler: _react2.default.PropTypes.func
+	};
+	
+	exports.default = ToggleButton;
+
+/***/ },
+/* 187 */
+/*!*******************************************!*\
+  !*** ./components/device/modifyDevice.js ***!
+  \*******************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _react = __webpack_require__(/*! react */ 1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function ModifyDevice(_ref) {
+	  var _ref$tempDevice = _ref.tempDevice,
+	      tempDevice = _ref$tempDevice === undefined ? {} : _ref$tempDevice,
+	      newHub = _ref.newHub,
+	      _ref$selected = _ref.selected,
+	      selected = _ref$selected === undefined ? {} : _ref$selected,
+	      _ref$visibility = _ref.visibility,
+	      visibility = _ref$visibility === undefined ? {} : _ref$visibility,
+	      _ref$handleTempDevice = _ref.handleTempDeviceChange,
+	      handleTempDeviceChange = _ref$handleTempDevice === undefined ? function () {} : _ref$handleTempDevice;
+	
+	  var selectedHub = visibility.devices === 'All' ? { name: 'All' } : selected.hub;
+	
+	  var component = _react2.default.createElement(
+	    'div',
+	    null,
+	    selectedHub.name === 'Generic' && !newHub && visibility.devices || visibility.devices && visibility.devices !== 'All' && !!selected.device && _react2.default.createElement(
+	      'div',
+	      { className: 'panel panel-default panel-success' },
+	      _react2.default.createElement(
+	        'div',
+	        { className: 'panel-heading' },
+	        _react2.default.createElement(
+	          'h2',
+	          { className: 'panel-title' },
+	          (selected.device ? "Edit " : "Add ") + selected.hub.name,
+	          ' device'
+	        )
+	      ),
+	      _react2.default.createElement(
+	        'ul',
+	        { className: 'list-group' },
+	        _react2.default.createElement(
+	          'li',
+	          { className: 'list-group-item' },
+	          _react2.default.createElement(
+	            'form',
+	            { className: 'form-horizontal' },
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'form-group' },
+	              _react2.default.createElement(
+	                'div',
+	                { className: 'col-xs-8 col-sm-7' },
+	                _react2.default.createElement('input', { type: 'text', className: 'form-control',
+	                  id: 'device-name', placeholder: 'Device Name',
+	                  value: tempDevice && tempDevice.name || selected.device && selected.device.name || '',
+	                  onChange: function onChange(event) {
+	                    return handleTempDeviceChange('name', event.target.value);
+	                  }
+	                })
+	              ),
+	              _react2.default.createElement(
+	                'button',
+	                { className: 'col-xs-3 col-sm-2 btn btn-primary', type: 'button',
+	                  onClick: function onClick() {
+	                    return handleTempDeviceChange(selected.device ? "update" : "add", tempDevice);
+	                  }
+	                },
+	                selected.device ? "Update" : "Add",
+	                ' Device'
+	              )
+	            ),
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'form-group' },
+	              _react2.default.createElement(
+	                'div',
+	                { className: 'col-xs-8 col-sm-7' },
+	                _react2.default.createElement('input', { type: 'text', className: 'form-control',
+	                  id: 'device-on-url', placeholder: 'URL to turn device on',
+	                  value: tempDevice && tempDevice.onUrl || selected.device && selected.device.onUrl || '',
+	                  onChange: function onChange(event) {
+	                    return handleTempDeviceChange('onUrl', event.target.value);
+	                  }
+	                })
+	              ),
+	              _react2.default.createElement(
+	                'button',
+	                { className: 'col-xs-3 col-sm-2 btn btn-success', type: 'button',
+	                  onClick: function onClick() {
+	                    return handleTempDeviceChange('test', tempDevice && tempDevice.onUrl || selected.device && selected.device.onUrl);
+	                  }
+	                },
+	                'On Test'
+	              )
+	            ),
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'form-group' },
+	              _react2.default.createElement(
+	                'div',
+	                { className: 'col-xs-8 col-sm-7' },
+	                _react2.default.createElement('input', { type: 'text', className: 'form-control',
+	                  id: 'device-off-url', placeholder: 'URL to turn device off',
+	                  value: tempDevice && tempDevice.offUrl || selected.device && selected.device.offUrl || '',
+	                  onChange: function onChange(event) {
+	                    return handleTempDeviceChange('offUrl', event.target.value);
+	                  }
+	                })
+	              ),
+	              _react2.default.createElement(
+	                'button',
+	                { className: 'col-xs-3 col-sm-2 btn btn-success', type: 'button',
+	                  onClick: function onClick() {
+	                    return handleTempDeviceChange('test', tempDevice && tempDevice.offUrl || selected.device && selected.device.offUrl);
+	                  }
+	                },
+	                'Off Test'
+	              )
+	            )
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'cols-xs-12 text-center' },
+	            _react2.default.createElement(
+	              'button',
+	              { className: 'btn',
+	                onClick: function onClick() {
+	                  return handleTempDeviceChange('cancel');
+	                }
+	              },
+	              'Cancel'
+	            )
+	          )
+	        )
+	      )
+	    )
+	  );
+	
+	  return component;
+	}
+	
+	ModifyDevice.propTypes = {
+	  tempDevice: _react2.default.PropTypes.object,
+	  newHub: _react2.default.PropTypes.object,
+	  selected: _react2.default.PropTypes.object,
+	  handleTempDeviceChange: _react2.default.PropTypes.func
+	};
+	
+	exports.default = ModifyDevice;
 
 /***/ }
 /******/ ]);

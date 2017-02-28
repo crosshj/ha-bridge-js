@@ -93,8 +93,13 @@ class App extends React.Component {
     var device = this.state.devices.find(x => x.name === name);
     device && console.log(device); //eslint-disable-line no-console
 
-    if (change === 'on' || change === 'off'){
-      const url = device[change+"Url"];
+    if (change === 'on' || change === 'off' || change === 'toggle'){
+      const thisChange = change !== 'toggle'
+        ? change
+        : !device.status || device.status === 'off'
+          ? 'on'
+          : 'off';
+      const url = device[thisChange+"Url"];
       this.testUrl(url);
       /* eslint-disable no-console*/
       console.log('TODO: change device status to pending, on repsonse change device status properly');

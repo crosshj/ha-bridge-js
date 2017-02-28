@@ -3,7 +3,7 @@ import HomeIcon from './homeIcon';
 var menuRef;
 
 const hideMenu = (menuRef, event) => {
-  if(event && (~event.target.className.indexOf('navbar-toggle') || ~event.target.className.indexOf('icon-bar'))){
+  if(event && (~(event.target.className||'').indexOf('navbar-toggle') || ~(event.target.className||'').indexOf('icon-bar'))){
     return;
   }
   if (!menuRef) return;
