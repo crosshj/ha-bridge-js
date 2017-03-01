@@ -2,6 +2,7 @@ import React from 'react';
 // import Menu from './menu';
 // import Body from './body';
 import Duplicate from './duplicate';
+import getVisible from './visibility';
 
 function testUrl(url){
   fetch(url, {mode: 'no-cors'})
@@ -10,37 +11,23 @@ function testUrl(url){
     .catch(e => console.log('Error:\n', e)); //eslint-disable-line no-console
 }
 
-
-var visibility = { devices: 'All' };
 const menuItems = [
   {
     name: 'Devices',
-    action: function() {
-      var visibility = this.state.visibility;
-      visibility.devices = 'All';
-      visibility.hubs = false;
-      visibility.bridge = false;
-      this.setState({visibility});
+    action: () => {
+      location.hash = 'devices';
     }
   },
   {
     name: 'Hubs',
-    action: function() {
-      var visibility = this.state.visibility;
-      visibility.devices = true;
-      visibility.hubs = true;
-      visibility.bridge = false;
-      this.setState({visibility});
+    action: () => {
+      location.hash = 'hubs';
     }
   },
   {
     name: 'Bridge',
-    action: function() {
-      var visibility = this.state.visibility;
-      visibility.devices = false;
-      visibility.hubs = false;
-      visibility.bridge = true;
-      this.setState({visibility});
+    action: () => {
+      location.hash = 'bridge';
     }
   }
 ];
@@ -54,7 +41,7 @@ class App extends React.Component {
       url: props.url + "devices",
       hubUrl: props.url + "hubs",
       tempDevice: {},
-      visibility,
+      visibility: getVisible(location.hash),
       menuItems
     };
     this.handleReload = props.handleReload || (() => {});
@@ -67,6 +54,10 @@ class App extends React.Component {
       item.action = item.action.bind(this);
       return item;
     });
+    window.onhashchange = () => {
+      var visibility = Object.assign({}, this.state.visibility, getVisible(location.hash));
+      this.setState({visibility});
+    };
   }
 
   componentWillReceiveProps({devices, hubs}){
