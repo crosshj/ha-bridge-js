@@ -23,7 +23,10 @@ function HubsList({
                         <input value={hub.name} type="radio" name="radio"
                           checked={hub.name===selected.hub.name}
                           onChange={event => handleHubChange(null, event)}
-                        />{hub.name}
+                        />
+                        <i className="fa fa-circle-o"></i>
+                        <i className="fa fa-dot-circle-o"></i>
+                        <span>{hub.name}</span>
                     </label>
                   );
                 })}
@@ -42,7 +45,6 @@ function HubsList({
     </div>
   }</div>
   );
-
   return component;
 }
 
