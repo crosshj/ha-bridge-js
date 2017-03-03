@@ -11,6 +11,9 @@ const updateUrl = url => {
   return newUrl;
 };
 
+//base is the hub base
+//deviceId is got from getDevices
+//state is sent by echo
 const Milight = {
   name: "Milight",
   urlPattern: "{base}/milights/{deviceId}/{state}"

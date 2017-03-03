@@ -87,10 +87,11 @@ module.exports.actions = function *actions(hubName, deviceId, state) {
   var templates = yield getTemplatesThunk();
   var hubTemplate = templates.find(x => x.name === hub.type);
 
-  const url = hubTemplate.urlPattern
+  var url = hubTemplate.urlPattern
     .replace('{base}', hub.url)
     .replace('{deviceId}', deviceId)
     .replace('{state}', state);
+  hubTemplate.updateUrl && (url = hubTemplate.updateUrl(url));
 
   var options = {url};
 
