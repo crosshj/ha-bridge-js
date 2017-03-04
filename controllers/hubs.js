@@ -42,9 +42,12 @@ function getTemplatesThunk() {
   return function(callback){
     var normalizedPath = require("path").join(__dirname, "../hubs");
     var templates = [];
-    require("fs").readdirSync(normalizedPath).forEach(function(file) {
-      templates.push(require("../hubs/" + file));
-    });
+    require("fs").readdirSync(normalizedPath)
+      .filter(x=>!!~x.indexOf('.js'))
+      .forEach(function(file) {
+        templates.push(require("../hubs/" + file));
+      }
+    );
     callback(null, templates);
   };
 }
@@ -87,15 +90,21 @@ module.exports.actions = function *actions(hubName, deviceId, state) {
   var templates = yield getTemplatesThunk();
   var hubTemplate = templates.find(x => x.name === hub.type);
 
-  var url = hubTemplate.urlPattern
-    .replace('{base}', hub.url)
-    .replace('{deviceId}', deviceId)
-    .replace('{state}', state);
-  hubTemplate.updateUrl && (url = hubTemplate.updateUrl(url));
+  var response;
+  if(hubTemplate.execute){
+    const executeThunk = ({hub, device, state, deviceId}) => callback => hubTemplate.execute({hub, device, deviceId, state, callback});
+    response = yield executeThunk({hub, device, state, deviceId});
+  }else{
+    var url = hubTemplate.urlPattern
+      .replace('{base}', hub.url)
+      .replace('{deviceId}', deviceId)
+      .replace('{state}', state);
+    hubTemplate.updateUrl && (url = hubTemplate.updateUrl(url));
 
-  var options = {url};
+    var options = {url};
+    response = yield request(options);
+  }
 
-  var response = yield request(options);
   yield devicesUpdateThunk(device.uuid, 'status', state); //lightId, field.name, field.value
   //console.log(JSON.stringify({url, response}, null, '  ')); //{url, hub, hubTemplate, deviceId, state}, null, ' '));
   this.body = response;

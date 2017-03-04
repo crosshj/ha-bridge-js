@@ -26,48 +26,29 @@ class Milight {
     console.log('box: ', this.box.toString());  //eslint-disable-line  no-console
     this.box.command(cmd.rgbw.on(zone), err => {
       if(err){
-        return callback(err, cmd.rgbw.on(zone));
+        return callback(err);
       }
       if (brightness > 0){
         setTimeout(() => {
           this.box.command(
             cmd.rgbw.brightness(Math.floor(100*brightness/255)),
-            err => callback(err, cmd.rgbw.brightness(Math.floor(100*brightness/255)))
+            err => callback(err, 'ok')
           );
         }, 50); //because callback fires after udp packet sent, not received??
       } else {
-        callback(err, cmd.rgbw.on(zone));
+        callback(err, 'ok');
       }
     });
   }
 
   off({zone=0, callback=defaultCallback}){
-    this.box.command(cmd.rgbw.off(zone),
-    err => callback(err, cmd.rgbw.off(zone)));
+    this.box.command(
+      cmd.rgbw.off(zone),
+      err => callback(err, 'ok')
+    );
   }
 }
 
-function off(which, zone, callback) {
-  var theBox = which === 'master'
-    ? masterBox
-    : box;
-  theBox.off({zone, callback});
-}
-
-function on(which, zone, brightness, callback) {
-  var theBox = which === 'master'
-    ? masterBox
-    : box;
-  theBox.on({zone, brightness, callback});
-}
-
-var box = new Milight({ ip: "192.168.1.56"});
-var masterBox = new Milight({ ip: "192.168.1.4"});
-
 module.exports = {
-  create: ({ip, port}) => { return new Milight({ip, port}); },
-  Milight,
-  on,
-  off,
-  brightness: on
+  create: ({ip, port}) => { return new Milight({ip, port}); }
 };
