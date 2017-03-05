@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 61);
+/******/ 	return __webpack_require__(__webpack_require__.s = 67);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -91,7 +91,7 @@ module.exports.databaseFileName = "database.db";
 // see http://blog.stevensanderson.com/2013/12/21/experiments-with-koa-and-javascript-generators/
 
 var db = function db() {
-  console.log('database not initialized');
+  console.log('database not initialized'); //eslint-disable-line no-console
 };
 
 module.exports.attachDatabase = function (database) {
@@ -315,66 +315,500 @@ module.exports = require("path");
 
 /***/ }),
 /* 4 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-module.exports = require("statuses");
+"use strict";
+/* WEBPACK VAR INJECTION */(function(__dirname) {
+// see http://blog.stevensanderson.com/2013/12/21/experiments-with-koa-and-javascript-generators/
+
+var devicesCreateThunk = __webpack_require__(1).createThunk;
+var devicesUpdateThunk = __webpack_require__(1).updateThunk;
+var devicesFindThunk = __webpack_require__(1).findThunk;
+var request = __webpack_require__(13);
+
+var db = function db() {
+  console.log('database not initialized'); //eslint-disable-line no-console
+};
+
+module.exports.attachDatabase = function (database) {
+  db = database;
+  return module.exports;
+};
+
+function createThunk(hub) {
+  return function (callback) {
+    db.createHub(hub, callback);
+  };
+}
+
+function findThunk(hubId) {
+  return function (callback) {
+    db.readHub(hubId, callback);
+  };
+}
+
+function updateThunk(hubId, fieldName, fieldValue) {
+  return function (callback) {
+    db.updateHub(hubId, fieldName, fieldValue, callback);
+  };
+}
+
+function removeThunk(hubId) {
+  return function (callback) {
+    db.deleteHub(hubId, callback);
+  };
+}
+
+function getTemplatesThunk() {
+  return function (callback) {
+    var normalizedPath = __webpack_require__(3).join(__dirname, "../hubs");
+    var templates = [];
+    __webpack_require__(11).readdirSync(normalizedPath).forEach(function (file) {
+      templates.push(__webpack_require__(18)("./" + file));
+    });
+    callback(null, templates);
+  };
+}
+
+module.exports.createThunk = createThunk;
+module.exports.findThunk = findThunk;
+module.exports.updateThunk = updateThunk;
+module.exports.removeThunk = removeThunk;
+module.exports.getTemplatesThunk = getTemplatesThunk;
+
+module.exports.create = regeneratorRuntime.mark(function create() {
+  var hub, templates, hubTemplate, hubDevices, deviceId, device;
+  return regeneratorRuntime.wrap(function create$(_context) {
+    while (1) {
+      switch (_context.prev = _context.next) {
+        case 0:
+          hub = this.request.body;
+          _context.prev = 1;
+          _context.next = 4;
+          return createThunk(hub);
+
+        case 4:
+          _context.next = 6;
+          return getTemplatesThunk();
+
+        case 6:
+          templates = _context.sent;
+          hubTemplate = templates.find(function (x) {
+            return x.name === hub.type;
+          });
+          hubDevices = hubTemplate.getDevices && hubTemplate.getDevices();
+          _context.t0 = regeneratorRuntime.keys(hubDevices);
+
+        case 10:
+          if ((_context.t1 = _context.t0()).done) {
+            _context.next = 17;
+            break;
+          }
+
+          deviceId = _context.t1.value;
+          device = {
+            name: hub.name + ':' + deviceId,
+            onUrl: 'local-api/hubs/' + hub.name + '/' + deviceId + "/on", //TODO: should come from template more...
+            offUrl: 'local-api/hubs/' + hub.name + '/' + deviceId + "/off"
+          };
+          _context.next = 15;
+          return devicesCreateThunk(device);
+
+        case 15:
+          _context.next = 10;
+          break;
+
+        case 17:
+          this.body = "hub created";
+          _context.next = 24;
+          break;
+
+        case 20:
+          _context.prev = 20;
+          _context.t2 = _context['catch'](1);
+
+          this.status = 400; //Bad request
+          this.body = "error creating hub:\n" + JSON.stringify(_context.t2, null, '\t');
+
+        case 24:
+        case 'end':
+          return _context.stop();
+      }
+    }
+  }, create, this, [[1, 20]]);
+});
+
+module.exports.actions = regeneratorRuntime.mark(function actions(hubName, deviceId, state) {
+  var allHubs, deviceName, allDevices, device, hub, templates, hubTemplate, url, options, response;
+  return regeneratorRuntime.wrap(function actions$(_context2) {
+    while (1) {
+      switch (_context2.prev = _context2.next) {
+        case 0:
+          _context2.next = 2;
+          return findThunk();
+
+        case 2:
+          allHubs = _context2.sent;
+          deviceName = hubName + ':' + deviceId;
+          _context2.next = 6;
+          return devicesFindThunk();
+
+        case 6:
+          allDevices = _context2.sent;
+          device = allDevices.find(function (x) {
+            return x.name === deviceName;
+          });
+          hub = allHubs.find(function (x) {
+            return x.name === hubName;
+          });
+          _context2.next = 11;
+          return getTemplatesThunk();
+
+        case 11:
+          templates = _context2.sent;
+          hubTemplate = templates.find(function (x) {
+            return x.name === hub.type;
+          });
+          url = hubTemplate.urlPattern.replace('{base}', hub.url).replace('{deviceId}', deviceId).replace('{state}', state);
+          options = { url: url };
+          _context2.next = 17;
+          return request(options);
+
+        case 17:
+          response = _context2.sent;
+          _context2.next = 20;
+          return devicesUpdateThunk(device.uuid, 'status', state);
+
+        case 20:
+          //lightId, field.name, field.value
+          //console.log(JSON.stringify({url, response}, null, '  ')); //{url, hub, hubTemplate, deviceId, state}, null, ' '));
+          this.body = response;
+
+        case 21:
+        case 'end':
+          return _context2.stop();
+      }
+    }
+  }, actions, this);
+});
+
+module.exports.find = regeneratorRuntime.mark(function find(hubId) {
+  var findResult, templates;
+  return regeneratorRuntime.wrap(function find$(_context3) {
+    while (1) {
+      switch (_context3.prev = _context3.next) {
+        case 0:
+          _context3.prev = 0;
+          _context3.next = 3;
+          return findThunk(hubId);
+
+        case 3:
+          findResult = _context3.sent;
+          _context3.next = 6;
+          return getTemplatesThunk();
+
+        case 6:
+          templates = _context3.sent;
+
+          this.body = {
+            instances: findResult,
+            templates: templates
+          };
+          _context3.next = 14;
+          break;
+
+        case 10:
+          _context3.prev = 10;
+          _context3.t0 = _context3['catch'](0);
+
+          this.status = 400; //Bad request
+          this.body = "error finding hub:\n" + JSON.stringify(_context3.t0, null, '\t');
+
+        case 14:
+        case 'end':
+          return _context3.stop();
+      }
+    }
+  }, find, this, [[0, 10]]);
+});
+
+module.exports.update = regeneratorRuntime.mark(function update(hubId) {
+  var currentHub, updateHub, toUpdate;
+  return regeneratorRuntime.wrap(function update$(_context4) {
+    while (1) {
+      switch (_context4.prev = _context4.next) {
+        case 0:
+          _context4.prev = 0;
+          _context4.next = 3;
+          return findThunk(hubId);
+
+        case 3:
+          currentHub = _context4.sent;
+
+          if (!(!currentHub.length > 0)) {
+            _context4.next = 8;
+            break;
+          }
+
+          throw "could not find hub";
+
+        case 8:
+          currentHub = currentHub[0];
+
+        case 9:
+          updateHub = this.request.body;
+
+          // make array of different fields
+
+          toUpdate = Object.keys(updateHub).reduce(function (all, key) {
+            if (updateHub[key] !== currentHub[key]) {
+              all.push({
+                name: key,
+                value: updateHub[key]
+              });
+            }
+            return all;
+          }, []);
+
+          if (!(toUpdate.length <= 0)) {
+            _context4.next = 13;
+            break;
+          }
+
+          throw "no fields to update";
+
+        case 13:
+          _context4.next = 15;
+          return toUpdate.map(function (field) {
+            return updateThunk(hubId, field.name, field.value);
+          });
+
+        case 15:
+
+          this.body = "hub updated successfully";
+          _context4.next = 22;
+          break;
+
+        case 18:
+          _context4.prev = 18;
+          _context4.t0 = _context4['catch'](0);
+
+          this.status = 400; //Bad request
+          this.body = "error updating hub:\n" + JSON.stringify(_context4.t0, null, '\t');
+
+        case 22:
+        case 'end':
+          return _context4.stop();
+      }
+    }
+  }, update, this, [[0, 18]]);
+});
+
+module.exports.remove = regeneratorRuntime.mark(function remove(hubId) {
+  return regeneratorRuntime.wrap(function remove$(_context5) {
+    while (1) {
+      switch (_context5.prev = _context5.next) {
+        case 0:
+          _context5.prev = 0;
+
+          if (hubId) {
+            _context5.next = 3;
+            break;
+          }
+
+          throw "no hubId specified in URL";
+
+        case 3:
+          _context5.next = 5;
+          return removeThunk(hubId);
+
+        case 5:
+          this.body = "hub deleted successfully";
+          _context5.next = 12;
+          break;
+
+        case 8:
+          _context5.prev = 8;
+          _context5.t0 = _context5['catch'](0);
+
+          this.status = 400; //Bad request
+          this.body = "error deleting hub:\n" + JSON.stringify(_context5.t0, null, '\t');
+
+        case 12:
+        case 'end':
+          return _context5.stop();
+      }
+    }
+  }, remove, this, [[0, 8]]);
+});
+/* WEBPACK VAR INJECTION */}.call(exports, "/"))
 
 /***/ }),
 /* 5 */
 /***/ (function(module, exports) {
 
-module.exports = require("assert");
+module.exports = require("statuses");
 
 /***/ }),
 /* 6 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-module.exports = require("koa-is-json");
+"use strict";
+
+
+var Hue = {
+  name: "Hue",
+  urlPattern: "{base}/hue-DUMMY/{deviceId}/{state}"
+};
+
+module.exports = Hue;
 
 /***/ }),
 /* 7 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-module.exports = require("on-finished");
+"use strict";
+
+
+// TODO: query milight for number of devices ??
+//const getDevices = () => [0, 1, 2, 3, 4];
+var getDevices = function getDevices() {
+  return [0];
+}; //All
+
+var updateUrl = function updateUrl(url) {
+  //NOTE: this really does nothing, but it's a good example
+  var brightness = url.match(/([^\/]*)$/g)[0];
+  var newBrightness = brightness; //NOTE: change to some different value
+  var newUrl = url.replace(new RegExp(brightness + '$'), newBrightness);
+  return newUrl;
+};
+
+//base is the hub base
+//deviceId is got from getDevices
+//state is sent by echo
+var Milight = {
+  name: "Milight",
+  urlPattern: "{base}/milights/{deviceId}/{state}"
+};
+
+Milight.getDevices = getDevices;
+Milight.updateUrl = updateUrl;
+
+module.exports = Milight;
 
 /***/ }),
 /* 8 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-module.exports = require("type-is");
+"use strict";
+
+
+var devices = [{ url: '192.168.1.213' }];
+var getDevices = function getDevices() {
+  return devices.map(function (device, index) {
+    return index;
+  });
+};
+
+var updateUrl = function updateUrl(url) {
+  var deviceId = url.split('wifiplug/')[1].split('/')[0];
+  var state = url.split('wifiplug/')[1].split('/')[1];
+  var newUrl = "http://" + devices[deviceId].url + '/' + state;
+  return newUrl;
+};
+
+var WifiPlug = {
+  name: "WifiPlug",
+  urlPattern: "{base}/wifiplug/{deviceId}/{state}"
+};
+
+WifiPlug.getDevices = getDevices;
+WifiPlug.updateUrl = updateUrl;
+
+module.exports = WifiPlug;
 
 /***/ }),
 /* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+
+
+var Wink = {
+  name: "Wink",
+  urlPattern: "{base}/wink-DUMMY/{deviceId}/{state}"
+};
+
+module.exports = Wink;
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports) {
+
+module.exports = require("assert");
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports) {
+
+module.exports = require("fs");
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports) {
+
+module.exports = require("koa-is-json");
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports) {
+
+module.exports = require("koa-request");
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports) {
+
+module.exports = require("on-finished");
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports) {
+
+module.exports = require("type-is");
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
 /* WEBPACK VAR INJECTION */(function(__dirname, module) {
 
 var serverPort = __webpack_require__(0).serverPort;
-var route = __webpack_require__(47);
-var koa = __webpack_require__(20);
-var koaBodyParser = __webpack_require__(44);
-var koaStatic = __webpack_require__(48);
-var addTrailingSlashes = __webpack_require__(43);
+var route = __webpack_require__(53);
+var koa = __webpack_require__(28);
+var koaBodyParser = __webpack_require__(51);
+var koaStatic = __webpack_require__(54);
+var addTrailingSlashes = __webpack_require__(50);
 
 var app = module.exports = koa();
 
-var upnpListener = __webpack_require__(18);
-
 var config = __webpack_require__(0);
-var database = __webpack_require__(13)(config, function () {} //empty callback swallows errors
+var database = __webpack_require__(21)(config, function () {} //empty callback swallows errors
 );
 
 //controllers
 var devices = __webpack_require__(1).attachDatabase(database);
-var emulator = __webpack_require__(11);
-var upnp = __webpack_require__(12);
+var hubs = __webpack_require__(4).attachDatabase(database);
+var emulator = __webpack_require__(19);
+var upnp = __webpack_require__(20);
 
 app.use(addTrailingSlashes());
 app.use(koaBodyParser());
 
 // serve files in public folder (css, js etc)
-app.use(koaStatic(__dirname + '/public'));
+app.use(koaStatic(__dirname + '/build/client'));
 
 // user interface to modify devices stored internally
 app.use(route.post('/local-api/devices', devices.create));
@@ -383,6 +817,13 @@ app.use(route.put('/local-api/devices/:lightId', devices.update));
 app.use(route.del('/local-api/devices/:lightId', devices.remove));
 app.use(route.get('/local-api/devices/:lightId', devices.find));
 
+app.use(route.post('/local-api/hubs', hubs.create));
+app.use(route.get('/local-api/hubs', hubs.find));
+app.use(route.get('/local-api/hubs/:hubName/:deviceId/:state', hubs.actions));
+app.use(route.put('/local-api/hubs/:hubId', hubs.update));
+app.use(route.del('/local-api/hubs/:hubId', hubs.remove));
+app.use(route.get('/local-api/hubs/:hubId', hubs.find));
+
 // emulate the Hue Hub
 app.use(route.post('/(.*)', emulator.postwildcard));
 app.use(route.put('/(.*)', emulator.wildcard));
@@ -390,31 +831,66 @@ app.use(route.get('/api/:userId', emulator.root));
 app.use(route.get('/api/:userId/lights', emulator.list));
 app.use(route.get('/api/:userId/lights/:lightId', emulator.list));
 app.use(route.put('/api/:userId/lights/:lightId/state', emulator.update));
+__webpack_require__(26);
 app.use(route.get('/upnp/:deviceId/setup.xml', upnp.setup));
 
 if (!module.parent) {
-  var server = app.listen(serverPort);
-  __webpack_require__(19)(server); //lame, lame, lame
-  console.log('listening on port ' + serverPort);
+	var server = app.listen(serverPort);
+	__webpack_require__(27)(server); //lame, lame, lame
+	console.log('listening on port ' + serverPort); //eslint-disable-line no-console
 }
-/* WEBPACK VAR INJECTION */}.call(exports, "/", __webpack_require__(24)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, "/", __webpack_require__(32)(module)))
 
 /***/ }),
-/* 10 */
+/* 17 */
 /***/ (function(module, exports) {
 
 module.exports = require("babel-polyfill");
 
 /***/ }),
-/* 11 */
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var map = {
+	"./hue": 6,
+	"./hue.js": 6,
+	"./milight": 7,
+	"./milight.js": 7,
+	"./wifiplug": 8,
+	"./wifiplug.js": 8,
+	"./wink": 9,
+	"./wink.js": 9
+};
+function webpackContext(req) {
+	return __webpack_require__(webpackContextResolve(req));
+};
+function webpackContextResolve(req) {
+	var id = map[req];
+	if(!(id + 1)) // check for number
+		throw new Error("Cannot find module '" + req + "'.");
+	return id;
+};
+webpackContext.keys = function webpackContextKeys() {
+	return Object.keys(map);
+};
+webpackContext.resolve = webpackContextResolve;
+module.exports = webpackContext;
+webpackContext.id = 18;
+
+
+/***/ }),
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var updateDevice = __webpack_require__(16);
+var updateDevice = __webpack_require__(24);
 var findThunk = __webpack_require__(1).findThunk;
-var getEmulatedDevice = __webpack_require__(14);
+var getEmulatedDevice = __webpack_require__(22);
+
+var ip = __webpack_require__(2);
+var baseUrl = 'http://' + ip.address();
 
 module.exports.wildcard = regeneratorRuntime.mark(function wildcard(path, next) {
   return regeneratorRuntime.wrap(function wildcard$(_context) {
@@ -470,6 +946,15 @@ module.exports.root = regeneratorRuntime.mark(function root(userId) {
 
         case 4:
           findResult = _context3.sent;
+
+          findResult.forEach(function (x) {
+            if (x.onUrl[0] === '/') {
+              x.onUrl = baseUrl + x.onUrl;
+            }
+            if (x.offUrl[0] === '/') {
+              x.offUrl = baseUrl + x.offUrl;
+            }
+          });
           hueDevices = findResult.reduce(function (prev, next) {
             prev[next.uuid] = getEmulatedDevice(next);
             return prev;
@@ -477,22 +962,22 @@ module.exports.root = regeneratorRuntime.mark(function root(userId) {
 
           console.log("emulator.root: ", hueDevices);
           this.body = { lights: hueDevices };
-          _context3.next = 14;
+          _context3.next = 15;
           break;
 
-        case 10:
-          _context3.prev = 10;
+        case 11:
+          _context3.prev = 11;
           _context3.t0 = _context3['catch'](0);
 
           console.log(_context3.t0);
           this.body = "error finding hue devices:\n" + JSON.stringify(_context3.t0, null, '\t');
 
-        case 14:
+        case 15:
         case 'end':
           return _context3.stop();
       }
     }
-  }, root, this, [[0, 10]]);
+  }, root, this, [[0, 11]]);
 });
 
 module.exports.list = regeneratorRuntime.mark(function list(userId, lightId) {
@@ -509,6 +994,15 @@ module.exports.list = regeneratorRuntime.mark(function list(userId, lightId) {
 
         case 4:
           findResult = _context4.sent;
+
+          findResult.forEach(function (x) {
+            if (x.onUrl[0] === '/') {
+              x.onUrl = baseUrl + x.onUrl;
+            }
+            if (x.offUrl[0] === '/') {
+              x.offUrl = baseUrl + x.offUrl;
+            }
+          });
           hueDevices = findResult.reduce(function (prev, next) {
             prev[next.uuid] = lightId ? getEmulatedDevice(next) : next.name;
             return prev;
@@ -517,22 +1011,22 @@ module.exports.list = regeneratorRuntime.mark(function list(userId, lightId) {
           this.body = lightId ? hueDevices[lightId] : hueDevices;
           //this.body.state.on=true;
           console.log("emulator.list: ", this.body);
-          _context4.next = 14;
+          _context4.next = 15;
           break;
 
-        case 10:
-          _context4.prev = 10;
+        case 11:
+          _context4.prev = 11;
           _context4.t0 = _context4['catch'](0);
 
           console.log(_context4.t0);
           this.body = "error finding hue devices:\n" + JSON.stringify(_context4.t0, null, '\t');
 
-        case 14:
+        case 15:
         case 'end':
           return _context4.stop();
       }
     }
-  }, list, this, [[0, 10]]);
+  }, list, this, [[0, 11]]);
 });
 
 module.exports.update = regeneratorRuntime.mark(function update(userId, lightId) {
@@ -561,13 +1055,13 @@ module.exports.update = regeneratorRuntime.mark(function update(userId, lightId)
 });
 
 /***/ }),
-/* 12 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var hueUpnpTemplate = __webpack_require__(15);
+var hueUpnpTemplate = __webpack_require__(23);
 var uuid = __webpack_require__(0).uuid;
 var serverExternalPort = __webpack_require__(0).serverExternalPort;
 var serverRootDir = __webpack_require__(0).serverRootDir;
@@ -602,23 +1096,27 @@ module.exports.setup = regeneratorRuntime.mark(function setup(deviceId) {
 });
 
 /***/ }),
-/* 13 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(__dirname) {
 
-var fs = __webpack_require__(39);
-var async = __webpack_require__(26);
-var Guid = __webpack_require__(52);
-var sqlite3 = __webpack_require__(57).verbose();
+/* eslint-disable no-console */
+
+var fs = __webpack_require__(11);
+var async = __webpack_require__(34);
+var Guid = __webpack_require__(58);
+var sqlite3 = __webpack_require__(63).verbose();
 
 var db;
 var dbClosed = false;
 
 var deviceModel = ["deviceId INTEGER PRIMARY KEY", "status TEXT", "uuid TEXT", "name TEXT", "level TEXT", "deviceType TEXT", "offUrl TEXT", "onUrl TEXT", "httpVerb TEXT", "contentType TEXT", "contentBody TEXT"];
+//var deviceFields = deviceModel.map(x => x.split(' ')[0]);
 
-var deviceFields = ["deviceId", "status", "uuid", "name", "level", "deviceType", "offUrl", "onUrl", "httpVerb", "contentType", "contentBody"];
+var hubModel = ["hubId INTEGER PRIMARY KEY", "uuid TEXT", "name TEXT", "url TEXT", "type TEXT"];
+//var hubFields = hubModel.map(x => x.split(' ')[0]);
 
 function validateUUID(str) {
   return (/[0-9a-f]{22}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i.test(str)
@@ -629,10 +1127,12 @@ function exitHandler(quiet) {
   if (dbClosed) {
     return;
   }
-  if (!quiet) console.log('Closing database...');
+  if (!quiet) console.log('\nClosing database...');
   db.close();
   dbClosed = true;
 }
+
+// --- DEVICES -----------------------------------------------------------------
 
 function createDevice(device, callback) {
   //TODO: validate device before creating
@@ -668,6 +1168,44 @@ function deleteDevice(deviceId, callback) {
   db.all(statement, [], callback);
 }
 
+// --- HUBS --------------------------------------------------------------------
+
+function createHub(hub, callback) {
+  //TODO: validate device before creating
+  hub = hub || {};
+  hub.uuid = validateUUID(hub.uuid) ? hub.uuid : Guid.v1();
+  var values = [hub.hubId || null, hub.uuid, hub.name || '', hub.url || '', hub.type || ''];
+  var template = values.map(function () {
+    return '?';
+  }).join(',');
+  var statement = 'INSERT INTO hubs ' + 'VALUES (' + template + ')';
+  //TODO: would be nice to return id of just created device, as below
+  //statement += "; SELECT last_insert_rowid() AS rowid FROM devices LIMIT 1";
+  var stmt = db.prepare(statement);
+  stmt.run(values, callback);
+  stmt.finalize();
+}
+
+function readHub(hubId, callback) {
+  var statement = 'SELECT * FROM hubs';
+  var hubIdValid = !!hubId && validateUUID(hubId);
+  statement += hubIdValid ? ' WHERE uuid = "' + hubId + '"' : '';
+  var args = [];
+  db.all(statement, args, callback);
+}
+
+function updateHub(hubId, fieldName, fieldValue, callback) {
+  var statement = 'UPDATE hubs SET "' + fieldName + '" = "' + fieldValue + '" WHERE uuid = "' + hubId + '"';
+  db.all(statement, [], callback);
+}
+
+function deleteHub(hubId, callback) {
+  var statement = 'DELETE FROM hubs WHERE uuid = "' + hubId + '"';
+  db.all(statement, [], callback);
+}
+
+// --- database general --------------------------------------------------------
+
 function initDatabase(config, callback) {
   if (!callback) {
     callback = function callback(err, result) {
@@ -678,10 +1216,13 @@ function initDatabase(config, callback) {
     };
   }
   config = config || {};
-  var file = __webpack_require__(3).join(__dirname, config.databaseFileName);
+  var file = '';
   var exists = false;
-  if (file !== ':memory:') {
+  if (config.databaseFileName !== ':memory:') {
+    file = __webpack_require__(3).join(__dirname, config.databaseFileName);
     exists = fs.existsSync(file);
+  } else {
+    file = ':memory:';
   }
 
   //do something when app is closing
@@ -713,6 +1254,14 @@ function initDatabase(config, callback) {
           db.run(statement, [], devicesTableCreateCallback);
         });
       }
+      if (!tables.find(function (x) {
+        return x.name === 'hubs';
+      })) {
+        tableCreators.push(function (hubTableCreateCallback) {
+          var statement = "CREATE TABLE hubs (" + hubModel.join(', ') + ")";
+          db.run(statement, [], hubTableCreateCallback);
+        });
+      }
       async.series(tableCreators, callback);
     });
   });
@@ -723,7 +1272,11 @@ function initDatabase(config, callback) {
     createDevice: createDevice,
     readDevice: readDevice,
     updateDevice: updateDevice,
-    deleteDevice: deleteDevice
+    deleteDevice: deleteDevice,
+    createHub: createHub,
+    readHub: readHub,
+    updateHub: updateHub,
+    deleteHub: deleteHub
   };
 }
 
@@ -731,7 +1284,7 @@ module.exports = initDatabase;
 /* WEBPACK VAR INJECTION */}.call(exports, "/"))
 
 /***/ }),
-/* 14 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -762,7 +1315,7 @@ module.exports = function getEmulatedDevice(device) {
 };
 
 /***/ }),
-/* 15 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -777,24 +1330,29 @@ module.exports = function (urlBase, friendlyName, uuid) {
 };
 
 /***/ }),
-/* 16 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var request = __webpack_require__(46);
+/* eslint-disable no-console*/
+var request = __webpack_require__(13);
 var updateThunk = __webpack_require__(1).updateThunk;
 var findThunk = __webpack_require__(1).findThunk;
-var deviceState = {};
+var hubsFindThunk = __webpack_require__(4).findThunk;
+var getTemplatesThunk = __webpack_require__(4).getTemplatesThunk;
+var ip = __webpack_require__(2);
+var baseUrl = 'http://' + ip.address();
+var serverPort = __webpack_require__(0).serverPort;
 
 module.exports = regeneratorRuntime.mark(function _callee(deviceId, payload) {
-  var status, fieldName, fieldValue, deviceState, deviceMatch, updateUrl, options, response;
+  var status, fieldName, fieldValue, deviceState, deviceMatch, updateUrl, hubName, hubs, hub, templates, template, options, response;
   return regeneratorRuntime.wrap(function _callee$(_context) {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
-          console.log(payload);
+          console.log('updateDevice payload:\n', payload);
           status = JSON.parse(Object.keys(payload)[0]);
           fieldName = Object.keys(status)[0] === "on" ? "status" : undefined;
 
@@ -827,54 +1385,87 @@ module.exports = regeneratorRuntime.mark(function _callee(deviceId, payload) {
           if (status.bri) {
             updateUrl = updateUrl.replace(/on$/g, status.bri);
           }
-          console.log(updateUrl);
+
+          console.log('updateUrl', updateUrl);
+          //TODO: this probably doesn't ever get called, see controllers/hubs
+
+          if (!(updateUrl.indexOf('local-api') === 0)) {
+            _context.next = 28;
+            break;
+          }
+
+          hubName = updateUrl.split('/hubs/')[1].split('/')[0];
+          _context.next = 19;
+          return hubsFindThunk();
+
+        case 19:
+          hubs = _context.sent;
+          hub = hubs.find(function (x) {
+            return x.name === hubName;
+          });
+          _context.next = 23;
+          return getTemplatesThunk();
+
+        case 23:
+          templates = _context.sent;
+          template = templates.find(function (x) {
+            return x.name === hub.type;
+          });
+
+          console.log('template', JSON.stringify(template));
+
+          updateUrl = baseUrl + ':' + serverPort + '/' + updateUrl;
+          template.updateUrl && (updateUrl = template.updateUrl(updateUrl));
+
+        case 28:
+          console.log('updateUrl', updateUrl);
 
           options = {
             url: updateUrl,
             headers: {}
           };
-          _context.next = 18;
+          _context.next = 32;
           return request(options);
 
-        case 18:
+        case 32:
           response = _context.sent;
 
           if (!(response.body !== 'ok')) {
-            _context.next = 22;
+            _context.next = 36;
             break;
           }
 
           console.log('response body of koa request to milight: ', response.body);
           throw 'milights did not return an "okay" response';
 
-        case 22:
-          _context.next = 24;
+        case 36:
+          _context.next = 38;
           return updateThunk(deviceId, fieldName, fieldValue);
 
-        case 24:
+        case 38:
           deviceState[0].success["/lights/" + deviceId + "/state/on"] = fieldValue;
-          _context.next = 30;
+          _context.next = 44;
           break;
 
-        case 27:
-          _context.prev = 27;
+        case 41:
+          _context.prev = 41;
           _context.t0 = _context['catch'](6);
 
           deviceState = { error: _context.t0 };
 
-        case 30:
+        case 44:
           return _context.abrupt('return', deviceState);
 
-        case 31:
+        case 45:
         case 'end':
           return _context.stop();
       }
     }
-  }, _callee, this, [[6, 27]]);
+  }, _callee, this, [[6, 41]]);
 });
 
 /***/ }),
-/* 17 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -938,7 +1529,7 @@ module.exports = function (serviceType, rinfo) {
 };
 
 /***/ }),
-/* 18 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -947,7 +1538,7 @@ module.exports = function (serviceType, rinfo) {
 var uuid = __webpack_require__(0).uuid;
 var ssdpPort = __webpack_require__(0).ssdpPort;
 var serverPort = __webpack_require__(0).serverPort;
-var Server = __webpack_require__(51).Server;
+var Server = __webpack_require__(57).Server;
 
 serverPort = serverPort ? ':' + serverPort : '';
 
@@ -962,7 +1553,7 @@ var options = {
 var server = new Server(options);
 
 // the following is an overrride because node-ssdp is a little too rigid here
-server._respondToSearch = __webpack_require__(17);
+server._respondToSearch = __webpack_require__(25);
 server._nls = uuid;
 server.addUSN('urn:schemas-upnp-org:device:basic:1');
 server.addUSN('uuid:Socket-1_0-221438K0100073::urn:Belkin:device:**\r\n\r\n');
@@ -976,7 +1567,7 @@ process.on('exit', function () {
 module.exports = server;
 
 /***/ }),
-/* 19 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -987,7 +1578,7 @@ module.exports = function (server) {
   // see https://www.bountysource.com/issues/23308082-continuous-ctrl-c-freezes-bash-started-via-git-cmd
   // see http://stackoverflow.com/questions/10021373/what-is-the-windows-equivalent-of-process-onsigint-in-node-js
   if (process.platform === "win32") {
-    global.lameStupid = __webpack_require__(56).createInterface({
+    global.lameStupid = __webpack_require__(62).createInterface({
       input: process.stdin
     });
     global.lameStupid.on("SIGINT", function () {
@@ -1004,7 +1595,7 @@ module.exports = function (server) {
 };
 
 /***/ }),
-/* 20 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1015,23 +1606,23 @@ module.exports = function (server) {
  * Module dependencies.
  */
 
-var debug = __webpack_require__(32)('koa:application');
-var Emitter = __webpack_require__(37).EventEmitter;
-var compose_es7 = __webpack_require__(28);
-var onFinished = __webpack_require__(7);
-var response = __webpack_require__(23);
-var compose = __webpack_require__(45);
-var isJSON = __webpack_require__(6);
-var context = __webpack_require__(21);
-var request = __webpack_require__(22);
-var statuses = __webpack_require__(4);
-var Cookies = __webpack_require__(31);
-var accepts = __webpack_require__(25);
-var assert = __webpack_require__(5);
-var Stream = __webpack_require__(58);
-var http = __webpack_require__(40);
-var only = __webpack_require__(53);
-var co = __webpack_require__(27);
+var debug = __webpack_require__(40)('koa:application');
+var Emitter = __webpack_require__(45).EventEmitter;
+var compose_es7 = __webpack_require__(36);
+var onFinished = __webpack_require__(14);
+var response = __webpack_require__(31);
+var compose = __webpack_require__(52);
+var isJSON = __webpack_require__(12);
+var context = __webpack_require__(29);
+var request = __webpack_require__(30);
+var statuses = __webpack_require__(5);
+var Cookies = __webpack_require__(39);
+var accepts = __webpack_require__(33);
+var assert = __webpack_require__(10);
+var Stream = __webpack_require__(64);
+var http = __webpack_require__(47);
+var only = __webpack_require__(59);
+var co = __webpack_require__(35);
 
 /**
  * Application prototype.
@@ -1236,7 +1827,7 @@ function respond() {
 }
 
 /***/ }),
-/* 21 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1247,10 +1838,10 @@ function respond() {
  * Module dependencies.
  */
 
-var createError = __webpack_require__(42);
-var httpAssert = __webpack_require__(41);
-var delegate = __webpack_require__(33);
-var statuses = __webpack_require__(4);
+var createError = __webpack_require__(49);
+var httpAssert = __webpack_require__(48);
+var delegate = __webpack_require__(41);
+var statuses = __webpack_require__(5);
 
 /**
  * Context prototype.
@@ -1394,7 +1985,7 @@ delegate(proto, 'response').method('attachment').method('redirect').method('remo
 delegate(proto, 'request').method('acceptsLanguages').method('acceptsEncodings').method('acceptsCharsets').method('accepts').method('get').method('is').access('querystring').access('idempotent').access('socket').access('search').access('method').access('query').access('path').access('url').getter('origin').getter('href').getter('subdomains').getter('protocol').getter('host').getter('hostname').getter('header').getter('headers').getter('secure').getter('stale').getter('fresh').getter('ips').getter('ip');
 
 /***/ }),
-/* 22 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1405,13 +1996,13 @@ delegate(proto, 'request').method('acceptsLanguages').method('acceptsEncodings')
  * Module dependencies.
  */
 
-var net = __webpack_require__(50);
-var contentType = __webpack_require__(30);
-var stringify = __webpack_require__(59).format;
-var parse = __webpack_require__(54);
-var qs = __webpack_require__(55);
-var typeis = __webpack_require__(8);
-var fresh = __webpack_require__(38);
+var net = __webpack_require__(56);
+var contentType = __webpack_require__(38);
+var stringify = __webpack_require__(65).format;
+var parse = __webpack_require__(60);
+var qs = __webpack_require__(61);
+var typeis = __webpack_require__(15);
+var fresh = __webpack_require__(46);
 
 /**
  * Prototype.
@@ -2025,7 +2616,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 23 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2036,18 +2627,18 @@ module.exports = {
  * Module dependencies.
  */
 
-var contentDisposition = __webpack_require__(29);
-var ensureErrorHandler = __webpack_require__(35);
-var getType = __webpack_require__(49).contentType;
-var onFinish = __webpack_require__(7);
-var isJSON = __webpack_require__(6);
-var escape = __webpack_require__(36);
-var typeis = __webpack_require__(8).is;
-var statuses = __webpack_require__(4);
-var destroy = __webpack_require__(34);
-var assert = __webpack_require__(5);
+var contentDisposition = __webpack_require__(37);
+var ensureErrorHandler = __webpack_require__(43);
+var getType = __webpack_require__(55).contentType;
+var onFinish = __webpack_require__(14);
+var isJSON = __webpack_require__(12);
+var escape = __webpack_require__(44);
+var typeis = __webpack_require__(15).is;
+var statuses = __webpack_require__(5);
+var destroy = __webpack_require__(42);
+var assert = __webpack_require__(10);
 var path = __webpack_require__(3);
-var _vary = __webpack_require__(60);
+var _vary = __webpack_require__(66);
 var extname = path.extname;
 
 /**
@@ -2553,7 +3144,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 24 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2583,227 +3174,215 @@ module.exports = function (module) {
 };
 
 /***/ }),
-/* 25 */
+/* 33 */
 /***/ (function(module, exports) {
 
 module.exports = require("accepts");
 
 /***/ }),
-/* 26 */
+/* 34 */
 /***/ (function(module, exports) {
 
 module.exports = require("async");
 
 /***/ }),
-/* 27 */
+/* 35 */
 /***/ (function(module, exports) {
 
 module.exports = require("co");
 
 /***/ }),
-/* 28 */
+/* 36 */
 /***/ (function(module, exports) {
 
 module.exports = require("composition");
 
 /***/ }),
-/* 29 */
+/* 37 */
 /***/ (function(module, exports) {
 
 module.exports = require("content-disposition");
 
 /***/ }),
-/* 30 */
+/* 38 */
 /***/ (function(module, exports) {
 
 module.exports = require("content-type");
 
 /***/ }),
-/* 31 */
+/* 39 */
 /***/ (function(module, exports) {
 
 module.exports = require("cookies");
 
 /***/ }),
-/* 32 */
+/* 40 */
 /***/ (function(module, exports) {
 
 module.exports = require("debug");
 
 /***/ }),
-/* 33 */
+/* 41 */
 /***/ (function(module, exports) {
 
 module.exports = require("delegates");
 
 /***/ }),
-/* 34 */
+/* 42 */
 /***/ (function(module, exports) {
 
 module.exports = require("destroy");
 
 /***/ }),
-/* 35 */
+/* 43 */
 /***/ (function(module, exports) {
 
 module.exports = require("error-inject");
 
 /***/ }),
-/* 36 */
+/* 44 */
 /***/ (function(module, exports) {
 
 module.exports = require("escape-html");
 
 /***/ }),
-/* 37 */
+/* 45 */
 /***/ (function(module, exports) {
 
 module.exports = require("events");
 
 /***/ }),
-/* 38 */
+/* 46 */
 /***/ (function(module, exports) {
 
 module.exports = require("fresh");
 
 /***/ }),
-/* 39 */
-/***/ (function(module, exports) {
-
-module.exports = require("fs");
-
-/***/ }),
-/* 40 */
+/* 47 */
 /***/ (function(module, exports) {
 
 module.exports = require("http");
 
 /***/ }),
-/* 41 */
+/* 48 */
 /***/ (function(module, exports) {
 
 module.exports = require("http-assert");
 
 /***/ }),
-/* 42 */
+/* 49 */
 /***/ (function(module, exports) {
 
 module.exports = require("http-errors");
 
 /***/ }),
-/* 43 */
+/* 50 */
 /***/ (function(module, exports) {
 
 module.exports = require("koa-add-trailing-slashes");
 
 /***/ }),
-/* 44 */
+/* 51 */
 /***/ (function(module, exports) {
 
 module.exports = require("koa-bodyparser");
 
 /***/ }),
-/* 45 */
+/* 52 */
 /***/ (function(module, exports) {
 
 module.exports = require("koa-compose");
 
 /***/ }),
-/* 46 */
-/***/ (function(module, exports) {
-
-module.exports = require("koa-request");
-
-/***/ }),
-/* 47 */
+/* 53 */
 /***/ (function(module, exports) {
 
 module.exports = require("koa-route");
 
 /***/ }),
-/* 48 */
+/* 54 */
 /***/ (function(module, exports) {
 
 module.exports = require("koa-static");
 
 /***/ }),
-/* 49 */
+/* 55 */
 /***/ (function(module, exports) {
 
 module.exports = require("mime-types");
 
 /***/ }),
-/* 50 */
+/* 56 */
 /***/ (function(module, exports) {
 
 module.exports = require("net");
 
 /***/ }),
-/* 51 */
+/* 57 */
 /***/ (function(module, exports) {
 
 module.exports = require("node-ssdp");
 
 /***/ }),
-/* 52 */
+/* 58 */
 /***/ (function(module, exports) {
 
 module.exports = require("node-uuid");
 
 /***/ }),
-/* 53 */
+/* 59 */
 /***/ (function(module, exports) {
 
 module.exports = require("only");
 
 /***/ }),
-/* 54 */
+/* 60 */
 /***/ (function(module, exports) {
 
 module.exports = require("parseurl");
 
 /***/ }),
-/* 55 */
+/* 61 */
 /***/ (function(module, exports) {
 
 module.exports = require("querystring");
 
 /***/ }),
-/* 56 */
+/* 62 */
 /***/ (function(module, exports) {
 
 module.exports = require("readline");
 
 /***/ }),
-/* 57 */
+/* 63 */
 /***/ (function(module, exports) {
 
 module.exports = require("sqlite3");
 
 /***/ }),
-/* 58 */
+/* 64 */
 /***/ (function(module, exports) {
 
 module.exports = require("stream");
 
 /***/ }),
-/* 59 */
+/* 65 */
 /***/ (function(module, exports) {
 
 module.exports = require("url");
 
 /***/ }),
-/* 60 */
+/* 66 */
 /***/ (function(module, exports) {
 
 module.exports = require("vary");
 
 /***/ }),
-/* 61 */
+/* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(10);
-module.exports = __webpack_require__(9);
+__webpack_require__(17);
+module.exports = __webpack_require__(16);
 
 
 /***/ })

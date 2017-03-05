@@ -8,10 +8,13 @@ var BUILD_DIR = path.resolve(__dirname, '../build/client');
 var APP_DIR = path.resolve(__dirname);
 
 var config = {
-  entry: APP_DIR + '/index.js',
+  entry: {
+    bundle: APP_DIR + '/index.js',
+    sw: APP_DIR + '/serviceworker/index.js'
+  },
   output: {
     path: BUILD_DIR,
-    filename: 'bundle.js'
+    filename: "[name].js"
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -22,7 +25,8 @@ var config = {
     new CopyWebpackPlugin([
       { from: 'icons', to: 'icons' },
       { from: 'css', to: 'css' },
-      { from: 'manifest.json', to: 'manifest.json'}
+      { from: 'manifest.json', to: 'manifest.json'},
+      { from: 'offline.html', to: 'offline.html'}
     ])
   ],
   module : {
@@ -34,7 +38,6 @@ var config = {
       }
     ]
   }
-
 };
 
 module.exports = config;

@@ -61,6 +61,18 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
+	if ('serviceWorker' in navigator) {
+	  window.addEventListener('load', function () {
+	    navigator.serviceWorker.register('sw.js', { scope: './' }).then(function (registration) {
+	      // Registration was successful
+	      console.log('ServiceWorker registration successful with scope: ', registration.scope); //eslint-disable-line no-console
+	    }).catch(function (err) {
+	      // registration failed :(
+	      console.log('ServiceWorker registration failed: ', err); //eslint-disable-line no-console
+	    });
+	  });
+	}
+	
 	var apiUrl = location.origin + location.pathname + "local-api/";
 	
 	var addHubToDevices = function addHubToDevices(devices) {
@@ -22128,6 +22140,10 @@
 	
 	var _duplicate2 = _interopRequireDefault(_duplicate);
 	
+	var _visibility = __webpack_require__(/*! ./visibility */ 188);
+	
+	var _visibility2 = _interopRequireDefault(_visibility);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -22150,33 +22166,20 @@
 	  }); //eslint-disable-line no-console
 	}
 	
-	var visibility = { devices: 'All' };
 	var menuItems = [{
 	  name: 'Devices',
 	  action: function action() {
-	    var visibility = this.state.visibility;
-	    visibility.devices = 'All';
-	    visibility.hubs = false;
-	    visibility.bridge = false;
-	    this.setState({ visibility: visibility });
+	    location.hash = 'devices';
 	  }
 	}, {
 	  name: 'Hubs',
 	  action: function action() {
-	    var visibility = this.state.visibility;
-	    visibility.devices = true;
-	    visibility.hubs = true;
-	    visibility.bridge = false;
-	    this.setState({ visibility: visibility });
+	    location.hash = 'hubs';
 	  }
 	}, {
 	  name: 'Bridge',
 	  action: function action() {
-	    var visibility = this.state.visibility;
-	    visibility.devices = false;
-	    visibility.hubs = false;
-	    visibility.bridge = true;
-	    this.setState({ visibility: visibility });
+	    location.hash = 'bridge';
 	  }
 	}];
 	
@@ -22194,7 +22197,7 @@
 	      url: props.url + "devices",
 	      hubUrl: props.url + "hubs",
 	      tempDevice: {},
-	      visibility: visibility,
+	      visibility: (0, _visibility2.default)(location.hash),
 	      menuItems: menuItems
 	    };
 	    _this.handleReload = props.handleReload || function () {};
@@ -22207,6 +22210,10 @@
 	      item.action = item.action.bind(_this);
 	      return item;
 	    });
+	    window.onhashchange = function () {
+	      var visibility = Object.assign({}, _this.state.visibility, (0, _visibility2.default)(location.hash));
+	      _this.setState({ visibility: visibility });
+	    };
 	    return _this;
 	  }
 	
@@ -22253,6 +22260,7 @@
 	        var thisChange = change !== 'toggle' ? change : !device.status || device.status === 'off' ? 'on' : 'off';
 	        var url = device[thisChange + "Url"];
 	        this.testUrl(url);
+	        device.status = thisChange;
 	        /* eslint-disable no-console*/
 	        console.log('TODO: change device status to pending, on repsonse change device status properly');
 	
@@ -22875,23 +22883,28 @@
 	        { className: 'panel-body' },
 	        _react2.default.createElement(
 	          'div',
-	          { className: 'col-xs-7 col-sm-7' },
+	          { className: 'col-m-12' },
 	          _react2.default.createElement('input', { id: 'bridge-base', className: 'form-control',
 	            defaultValue: url, type: 'text', placeholder: 'URL to bridge' })
 	        ),
 	        _react2.default.createElement(
 	          'div',
-	          { className: 'btn-toolbar' },
+	          { className: 'col-m-12 text-center' },
+	          '\xA0'
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'col-m-12 text-center' },
 	          _react2.default.createElement(
 	            'button',
-	            { className: 'col-xs-2 btn btn-primary btn',
+	            { className: 'btn btn-primary btn',
 	              onClick: handleReload
 	            },
 	            'Load'
 	          ),
 	          _react2.default.createElement(
 	            'button',
-	            { className: 'col-xs-2 btn btn-primary',
+	            { className: 'btn btn-primary',
 	              onClick: function onClick() {
 	                return window.open(url);
 	              }
@@ -22982,7 +22995,13 @@
 	                    return handleHubChange(null, event);
 	                  }
 	                }),
-	                hub.name
+	                _react2.default.createElement("i", { className: "fa fa-circle-o" }),
+	                _react2.default.createElement("i", { className: "fa fa-dot-circle-o" }),
+	                _react2.default.createElement(
+	                  "span",
+	                  null,
+	                  hub.name
+	                )
 	              );
 	            })
 	          ),
@@ -23013,7 +23032,6 @@
 	      )
 	    )
 	  );
-	
 	  return component;
 	}
 	
@@ -23542,6 +23560,62 @@
 	};
 	
 	exports.default = ModifyDevice;
+
+/***/ },
+/* 188 */
+/*!**********************************!*\
+  !*** ./components/visibility.js ***!
+  \**********************************/
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	function showOnlyDevices() {
+	  var visibility = {};
+	  visibility.devices = 'All';
+	  visibility.hubs = false;
+	  visibility.bridge = false;
+	  return visibility;
+	}
+	
+	function showOnlyHubs() {
+	  var visibility = {};
+	  visibility.devices = true;
+	  visibility.hubs = true;
+	  visibility.bridge = false;
+	  return visibility;
+	}
+	
+	function showOnlyBridge() {
+	  var visibility = {};
+	  visibility.devices = false;
+	  visibility.hubs = false;
+	  visibility.bridge = true;
+	  return visibility;
+	}
+	
+	function getVisibility(hash) {
+	  var visibility = { devices: 'All' };
+	  switch (hash) {
+	    case '#devices':
+	      visibility = showOnlyDevices();
+	      break;
+	    case '#hubs':
+	      visibility = showOnlyHubs();
+	      break;
+	    case '#bridge':
+	      visibility = showOnlyBridge();
+	      break;
+	    default:
+	      break;
+	  }
+	  return visibility;
+	}
+	
+	exports.default = getVisibility;
 
 /***/ }
 /******/ ]);

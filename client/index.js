@@ -2,6 +2,18 @@ import React from 'react';
 import {render} from 'react-dom';
 import App from './components/app.js';
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js', {scope: './'}).then(function(registration) {
+      // Registration was successful
+      console.log('ServiceWorker registration successful with scope: ', registration.scope); //eslint-disable-line no-console
+    }).catch(function(err) {
+      // registration failed :(
+      console.log('ServiceWorker registration failed: ', err); //eslint-disable-line no-console
+    });
+  });
+}
+
 const apiUrl = location.origin + location.pathname + "local-api/";
 
 const addHubToDevices = devices => devices.map(device => {

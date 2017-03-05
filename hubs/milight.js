@@ -14,7 +14,7 @@ const execute = ({hub, deviceId, state, callback}) => {
   const brightness = Number(state);
   const status = isNaN(brightness) ? state : 'on';
   const zone = deviceId;
-  console.log('----\n', JSON.stringify({hub, ip, port, status, brightness},null,'  '));
+  //console.log('----\n', JSON.stringify({hub, ip, port, status, brightness},null,'  '));
 
 
   if (!thisHub[hub.hubId]) thisHub[hub.hubId] = milight.create({ip, port});
