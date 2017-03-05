@@ -1,6 +1,6 @@
 var milight = require('./milight/');
 
-var thisHub = undefined;
+var thisHub = {};
 
 // TODO: query milight for number of devices ??
 //const getDevices = () => [0, 1, 2, 3, 4];
@@ -14,11 +14,11 @@ const execute = ({hub, deviceId, state, callback}) => {
   const brightness = Number(state);
   const status = isNaN(brightness) ? state : 'on';
   const zone = deviceId;
-  console.log('----\n', JSON.stringify({ip, port, status, brightness},null,'  '));
+  console.log('----\n', JSON.stringify({hub, ip, port, status, brightness},null,'  '));
 
 
-  if (!thisHub) thisHub = milight.create({ip, port});
-  thisHub[status]({zone, brightness, callback});
+  if (!thisHub[hub.hubId]) thisHub[hub.hubId] = milight.create({ip, port});
+  thisHub[hub.hubId][status]({zone, brightness, callback});
 };
 
 //base is the hub base

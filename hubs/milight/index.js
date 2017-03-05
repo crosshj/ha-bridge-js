@@ -1,3 +1,12 @@
+/*
+
+Milight LED bulbs and OEM equivalents such as:
+
+Rocket LED, Limitless LED Applamp, Easybulb, s`luce, iLight, iBulb, and Kreuzer
+
+*/
+
+
 var WifiBoxModule = require('./wifibox.js');
 var cmd = require('./commands.js');
 
@@ -34,7 +43,7 @@ class Milight {
             cmd.rgbw.brightness(Math.floor(100*brightness/255)),
             err => callback(err, 'ok')
           );
-        }, 50); //because callback fires after udp packet sent, not received??
+        }, 500); //because callback fires after udp packet sent, not received??
       } else {
         callback(err, 'ok');
       }
@@ -42,6 +51,7 @@ class Milight {
   }
 
   off({zone=0, callback=defaultCallback}){
+    console.log('box: ', this.box.toString());  //eslint-disable-line  no-console
     this.box.command(
       cmd.rgbw.off(zone),
       err => callback(err, 'ok')
