@@ -27,12 +27,24 @@ const addHubToDevices = devices => devices.map(device => {
 });
 
 function reload(){
-  fetch(apiUrl + "devices")
+  fetch(apiUrl + "devices", {
+    method: 'get',
+    headers: {
+      'Accept': 'application/json'
+    },
+    mode: 'no-cors'
+  })
     .then(r => r.json())
     .then(data => render(<App devices={addHubToDevices(data)}/>, document.getElementById('app')))
     .catch(e => console.log("Error:\n", e)); //eslint-disable-line no-console
 
-  fetch(apiUrl + "hubs")
+  fetch(apiUrl + "hubs", {
+    method: 'get',
+    headers: {
+      'Accept': 'application/json'
+    },
+    mode: 'no-cors'
+  })
     .then(r => r.json())
     .then(data => render(<App hubs={data}/>, document.getElementById('app')))
     .catch(e => console.log("Error:\n", e)); //eslint-disable-line no-console

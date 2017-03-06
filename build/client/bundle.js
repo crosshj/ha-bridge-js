@@ -88,7 +88,13 @@
 	};
 	
 	function reload() {
-	  fetch(apiUrl + "devices").then(function (r) {
+	  fetch(apiUrl + "devices", {
+	    method: 'get',
+	    headers: {
+	      'Accept': 'application/json'
+	    },
+	    mode: 'no-cors'
+	  }).then(function (r) {
 	    return r.json();
 	  }).then(function (data) {
 	    return (0, _reactDom.render)(_react2.default.createElement(_app2.default, { devices: addHubToDevices(data) }), document.getElementById('app'));
@@ -96,7 +102,13 @@
 	    return console.log("Error:\n", e);
 	  }); //eslint-disable-line no-console
 	
-	  fetch(apiUrl + "hubs").then(function (r) {
+	  fetch(apiUrl + "hubs", {
+	    method: 'get',
+	    headers: {
+	      'Accept': 'application/json'
+	    },
+	    mode: 'no-cors'
+	  }).then(function (r) {
 	    return r.json();
 	  }).then(function (data) {
 	    return (0, _reactDom.render)(_react2.default.createElement(_app2.default, { hubs: data }), document.getElementById('app'));
@@ -22156,7 +22168,13 @@
 	
 	
 	function testUrl(url) {
-	  fetch(url, { mode: 'no-cors' }).then(function (r) {
+	  fetch(url, {
+	    method: 'get',
+	    headers: {
+	      'Accept': 'application/json'
+	    },
+	    mode: 'no-cors'
+	  }).then(function (r) {
 	    return r.status;
 	  }).then(function (status) {
 	    return console.log('Response from ' + url + ' : ' + status);
@@ -22262,7 +22280,7 @@
 	        this.testUrl(url);
 	        device.status = thisChange;
 	        /* eslint-disable no-console*/
-	        console.log('TODO: change device status to pending, on repsonse change device status properly');
+	        console.log('TODO: change device status to pending, on response change device status properly');
 	
 	        console.log(change + " device: " + name);
 	        /* eslint-enable no-console*/

@@ -5,7 +5,13 @@ import Duplicate from './duplicate';
 import getVisible from './visibility';
 
 function testUrl(url){
-  fetch(url, {mode: 'no-cors'})
+  fetch(url, {
+    method: 'get',
+    headers: {
+      'Accept': 'application/json'
+    },
+    mode: 'no-cors'
+  })
     .then(r => r.status)
     .then(status => console.log(`Response from ${url} : ${status}`)) //eslint-disable-line no-console
     .catch(e => console.log('Error:\n', e)); //eslint-disable-line no-console
@@ -94,7 +100,7 @@ class App extends React.Component {
       this.testUrl(url);
       device.status = thisChange;
       /* eslint-disable no-console*/
-      console.log('TODO: change device status to pending, on repsonse change device status properly');
+      console.log('TODO: change device status to pending, on response change device status properly');
 
       console.log(change + " device: " + name);
       /* eslint-enable no-console*/

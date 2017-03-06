@@ -53,12 +53,12 @@
 	
 	// Update 'version' if you need to refresh the cache
 	var staticCacheName = 'static';
-	var version = 'v1::';
+	var version = 'v2::';
 	
 	// Store core files in a cache (including a page to display when offline)
 	function updateStaticCache() {
 	    return caches.open(version + staticCacheName).then(function (cache) {
-	        return cache.addAll(['https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css', 'https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css', 'https://fonts.googleapis.com/css?family=Open+Sans', 'https://fonts.gstatic.com/s/opensans/v13/cJZKeOuBrn4kERxqtaUH3VtXRa8TVwTICgirnJhmVJw.woff2', 'https://netdna.bootstrapcdn.com/font-awesome/4.0.3/fonts/fontawesome-webfont.woff?v=4.0.3', '/home', 'offline.html']);
+	        return cache.addAll(['https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css', 'https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css', 'https://fonts.googleapis.com/css?family=Open+Sans', 'https://fonts.gstatic.com/s/opensans/v13/cJZKeOuBrn4kERxqtaUH3VtXRa8TVwTICgirnJhmVJw.woff2', 'https://netdna.bootstrapcdn.com/font-awesome/4.0.3/fonts/fontawesome-webfont.woff?v=4.0.3', 'offline.html']);
 	    });
 	}
 	
@@ -88,7 +88,7 @@
 	    }
 	
 	    // For HTML requests, try the network first, fall back to the cache, finally the offline page
-	    if (request.headers.get('Accept').indexOf('text/html') !== -1) {
+	    if (!!~request.headers.get('Accept').indexOf('text/html') || !!~request.headers.get('Accept').indexOf('application/json')) {
 	        // Fix for Chrome bug: https://code.google.com/p/chromium/issues/detail?id=573937
 	        if (request.mode != 'navigate') {
 	            request = new Request(request.url, {
