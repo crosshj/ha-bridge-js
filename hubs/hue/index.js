@@ -1,11 +1,13 @@
+//https://www.developers.meethue.com/documentation/core-concepts
+
 //import {HueApi, lightState} from "node-hue-api";
 const hue = require('node-hue-api');
 const lightState = hue.lightState;
-//https://www.developers.meethue.com/documentation/core-concepts
 const HueApi = hue.HueApi;
 
-//const findHubs = () => {};
-//const getFields = () => {};  // for the UI, what fields are required
+const findHubsThunk = () => {};
+  // for the UI, what fields are required
+const getFields = () => [];
 
 const displayResult = function(location, result){
   console.log(location, ':\n', JSON.stringify(result, null, ' ')); //eslint-disable-line no-console
