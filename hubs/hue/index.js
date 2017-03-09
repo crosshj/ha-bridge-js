@@ -2,12 +2,8 @@
 
 //import {HueApi, lightState} from "node-hue-api";
 const hue = require('node-hue-api');
-const lightState = hue.lightState;
+//const lightState = hue.lightState;
 const HueApi = hue.HueApi;
-
-const findHubsThunk = () => {};
-  // for the UI, what fields are required
-const getFields = () => [];
 
 const displayResult = function(location, result){
   console.log(location, ':\n', JSON.stringify(result, null, ' ')); //eslint-disable-line no-console
@@ -30,10 +26,11 @@ api.lights(function(err, lights) {
 });
 
 //const state = lightState.create().on().white(500, 100).colorLoop();
-const state = lightState.create().on();
 //const state = lightState.create().on();
+//const state = lightState.create().on();
+const state = {"on":true, "bri":255, "sat":255, "hue":12750};
 const deviceId = 1;
-api.setLightState(deviceId, {"on":true,"bri":255,"sat":255,"hue":12750}, function(err, lights) {
+api.setLightState(deviceId, state, function(err, lights) {
     if (err) displayResult('setLightState:ERR', err);
     displayResult('setLightState', lights);
 });
@@ -42,26 +39,63 @@ api.setLightState(deviceId, {"on":true,"bri":255,"sat":255,"hue":12750}, functio
 // let thisHub = {};
 
 // const create = () => {};
-// const getDevices = () => {};
 
-// const execute = ({hub, deviceId, state, callback}) => {
-//   const ip = hub.url.split('//')[1].split(':')[0];
-//   const port = hub.url.split('//')[1].split(':')[1];
-//   const brightness = Number(state);
-//   const status = isNaN(brightness) ? state : 'on';
-//   const zone = deviceId;
+// for the UI, what fields are required
+const getFields = () => [];
 
-//   if (!thisHub[hub.hubId]) thisHub[hub.hubId] = create({ip, port});
-//   thisHub[hub.hubId][status]({zone, brightness, callback});
-// };
+const findHubsThunk = callback => {
+  return () => callback();
+};
 
-// const Hue = {
-//   name: "Hue",
-//   urlPattern: "{base}/milights/{deviceId}/{state}"
-// };
+const executeThunk = callback => {
+  // const execute = ({hub, deviceId, state, callback}) => {
+  //   const ip = hub.url.split('//')[1].split(':')[0];
+  //   const port = hub.url.split('//')[1].split(':')[1];
+  //   const brightness = Number(state);
+  //   const status = isNaN(brightness) ? state : 'on';
+  //   const zone = deviceId;
 
-// Hue.getDevices = getDevices;
-// Hue.updateUrl = undefined;
-// Hue.execute = execute;
+  //   if (!thisHub[hub.hubId]) thisHub[hub.hubId] = create({ip, port});
+  //   thisHub[hub.hubId][status]({zone, brightness, callback});
+  // };
 
-// module.exports = Hue;
+  //const state = lightState.create().on().white(500, 100).colorLoop();
+  //const state = lightState.create().on();
+  //const state = lightState.create().on();
+  const state = {"on":true,"bri":255,"sat":255,"hue":12750};
+  const deviceId = 1;
+  api.setLightState(deviceId, state, function(err, lights) {
+      if (err) callback('setLightState:ERR - ' + err);
+      displayResult('setLightState', lights);
+  });
+  return () => callback();
+};
+
+
+const getDevicesThunk = callback => {
+  return () => {
+    api.lights(function(err, lights) {
+        if (err) callback('lights:ERR - ' + err);
+        callback(null, lights
+          .lights.map(x => ({
+            name: x.name,
+            id: x.id,
+            on: x.state.on,
+            brightness: x.state.bri
+          }))
+        );
+    });
+  };
+};
+
+const Hue = {
+  name: "Hue",
+  urlPattern: "{base}/hue/{deviceId}/{state}"
+};
+
+Hue.getDevicesThunk = getDevicesThunk;
+Hue.getFields = getFields;
+Hue.updateUrl = undefined;
+Hue.executeThunk = executeThunk;
+Hue.findHubsThunk = findHubsThunk;
+module.exports = Hue;
