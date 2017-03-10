@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 67);
+/******/ 	return __webpack_require__(__webpack_require__.s = 74);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -73,7 +73,7 @@
 "use strict";
 
 
-var path = __webpack_require__(3);
+var path = __webpack_require__(4);
 
 module.exports.uuid = '88f6698f-2c83-4393-bd03-cd54a9f8595';
 module.exports.ssdpPort = '1900'; //default
@@ -309,12 +309,122 @@ module.exports = require("ip");
 
 /***/ }),
 /* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/*
+
+Milight LED bulbs and OEM equivalents such as:
+
+Rocket LED, Limitless LED Applamp, Easybulb, s`luce, iLight, iBulb, and Kreuzer
+
+*/
+
+var WifiBoxModule = __webpack_require__(8);
+var cmd = __webpack_require__(7);
+
+var defaultCallback = function defaultCallback(err, threeByteArray) {
+  //eslint-disable-line  no-unused-vars
+  if (err) {
+    console.log("udp error:" + err); //eslint-disable-line  no-console
+  } else {
+    console.log('defaultCallback: send success'); //eslint-disable-line  no-console
+  }
+  return;
+};
+
+var Milight = function () {
+  function Milight(_ref) {
+    var ip = _ref.ip,
+        _ref$port = _ref.port,
+        port = _ref$port === undefined ? 8899 : _ref$port;
+
+    _classCallCheck(this, Milight);
+
+    if (!ip) {
+      return { error: 'must pass ip to constructor' };
+    }
+    this.box = new WifiBoxModule(ip, port);
+  }
+
+  _createClass(Milight, [{
+    key: 'brightness',
+    value: function brightness(_ref2) {
+      var _ref2$zone = _ref2.zone,
+          zone = _ref2$zone === undefined ? 0 : _ref2$zone,
+          level = _ref2.level,
+          _ref2$callback = _ref2.callback,
+          callback = _ref2$callback === undefined ? defaultCallback : _ref2$callback;
+
+      this.on({ zone: zone, level: level, callback: callback });
+    }
+  }, {
+    key: 'on',
+    value: function on(_ref3) {
+      var _this = this;
+
+      var _ref3$zone = _ref3.zone,
+          zone = _ref3$zone === undefined ? 0 : _ref3$zone,
+          brightness = _ref3.brightness,
+          _ref3$callback = _ref3.callback,
+          callback = _ref3$callback === undefined ? defaultCallback : _ref3$callback;
+
+      console.log('box: ', this.box.toString()); //eslint-disable-line  no-console
+      this.box.command(cmd.rgbw.on(zone), function (err) {
+        if (err) {
+          return callback(err);
+        }
+        if (brightness > 0) {
+          setTimeout(function () {
+            _this.box.command(cmd.rgbw.brightness(Math.floor(100 * brightness / 255)), function (err) {
+              return callback(err, 'ok');
+            });
+          }, 500); //because callback fires after udp packet sent, not received??
+        } else {
+          callback(err, 'ok');
+        }
+      });
+    }
+  }, {
+    key: 'off',
+    value: function off(_ref4) {
+      var _ref4$zone = _ref4.zone,
+          zone = _ref4$zone === undefined ? 0 : _ref4$zone,
+          _ref4$callback = _ref4.callback,
+          callback = _ref4$callback === undefined ? defaultCallback : _ref4$callback;
+
+      console.log('box: ', this.box.toString()); //eslint-disable-line  no-console
+      this.box.command(cmd.rgbw.off(zone), function (err) {
+        return callback(err, 'ok');
+      });
+    }
+  }]);
+
+  return Milight;
+}();
+
+module.exports = {
+  create: function create(_ref5) {
+    var ip = _ref5.ip,
+        port = _ref5.port;
+    return new Milight({ ip: ip, port: port });
+  }
+};
+
+/***/ }),
+/* 4 */
 /***/ (function(module, exports) {
 
 module.exports = require("path");
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -324,7 +434,7 @@ module.exports = require("path");
 var devicesCreateThunk = __webpack_require__(1).createThunk;
 var devicesUpdateThunk = __webpack_require__(1).updateThunk;
 var devicesFindThunk = __webpack_require__(1).findThunk;
-var request = __webpack_require__(13);
+var request = __webpack_require__(18);
 
 var db = function db() {
   console.log('database not initialized'); //eslint-disable-line no-console
@@ -361,10 +471,12 @@ function removeThunk(hubId) {
 
 function getTemplatesThunk() {
   return function (callback) {
-    var normalizedPath = __webpack_require__(3).join(__dirname, "../hubs");
+    var normalizedPath = __webpack_require__(4).join(__dirname, "../hubs");
     var templates = [];
-    __webpack_require__(11).readdirSync(normalizedPath).forEach(function (file) {
-      templates.push(__webpack_require__(18)("./" + file));
+    __webpack_require__(16).readdirSync(normalizedPath).filter(function (x) {
+      return !!~x.indexOf('.js');
+    }).forEach(function (file) {
+      templates.push(__webpack_require__(23)("./" + file));
     });
     callback(null, templates);
   };
@@ -439,7 +551,7 @@ module.exports.create = regeneratorRuntime.mark(function create() {
 });
 
 module.exports.actions = regeneratorRuntime.mark(function actions(hubName, deviceId, state) {
-  var allHubs, deviceName, allDevices, device, hub, templates, hubTemplate, url, options, response;
+  var allHubs, deviceName, allDevices, device, hub, templates, hubTemplate, response, executeThunk, url, options;
   return regeneratorRuntime.wrap(function actions$(_context2) {
     while (1) {
       switch (_context2.prev = _context2.next) {
@@ -469,22 +581,52 @@ module.exports.actions = regeneratorRuntime.mark(function actions(hubName, devic
           hubTemplate = templates.find(function (x) {
             return x.name === hub.type;
           });
-          url = hubTemplate.urlPattern.replace('{base}', hub.url).replace('{deviceId}', deviceId).replace('{state}', state);
-          options = { url: url };
+
+          if (!hubTemplate.execute) {
+            _context2.next = 20;
+            break;
+          }
+
+          executeThunk = function executeThunk(_ref) {
+            var hub = _ref.hub,
+                device = _ref.device,
+                state = _ref.state,
+                deviceId = _ref.deviceId;
+            return function (callback) {
+              return hubTemplate.execute({ hub: hub, device: device, deviceId: deviceId, state: state, callback: callback });
+            };
+          };
+
           _context2.next = 17;
-          return request(options);
+          return executeThunk({ hub: hub, device: device, state: state, deviceId: deviceId });
 
         case 17:
           response = _context2.sent;
-          _context2.next = 20;
-          return devicesUpdateThunk(device.uuid, 'status', state);
+          _context2.next = 26;
+          break;
 
         case 20:
+          url = hubTemplate.urlPattern.replace('{base}', hub.url).replace('{deviceId}', deviceId).replace('{state}', state);
+
+          hubTemplate.updateUrl && (url = hubTemplate.updateUrl(url));
+
+          options = { url: url };
+          _context2.next = 25;
+          return request(options);
+
+        case 25:
+          response = _context2.sent;
+
+        case 26:
+          _context2.next = 28;
+          return devicesUpdateThunk(device.uuid, 'status', state);
+
+        case 28:
           //lightId, field.name, field.value
           //console.log(JSON.stringify({url, response}, null, '  ')); //{url, hub, hubTemplate, deviceId, state}, null, ' '));
           this.body = response;
 
-        case 21:
+        case 29:
         case 'end':
           return _context2.stop();
       }
@@ -644,22 +786,118 @@ module.exports.remove = regeneratorRuntime.mark(function remove(hubId) {
 /* WEBPACK VAR INJECTION */}.call(exports, "/"))
 
 /***/ }),
-/* 5 */
-/***/ (function(module, exports) {
-
-module.exports = require("statuses");
-
-/***/ }),
 /* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+//https://www.developers.meethue.com/documentation/core-concepts
+
+//import {HueApi, lightState} from "node-hue-api";
+var hue = __webpack_require__(63);
+//const lightState = hue.lightState;
+var HueApi = hue.HueApi;
+
+var displayResult = function displayResult(location, result) {
+  console.log(location, ':\n', JSON.stringify(result, null, ' ')); //eslint-disable-line no-console
+};
+
+var hostname = "192.168.1.77";
+var username = "YGg7xeGD6w7Rbw7sLa8Y2qxv3rITaSM02Fym5NHk";
+
+var api = new HueApi(hostname, username);
+
+// api.getConfig(function(err, config) {
+//     if (err) displayResult('getConfig:ERR', err);
+//     displayResult('getConfig', config);
+// });
+
+api.lights(function (err, lights) {
+  if (err) displayResult('lights:ERR', err);
+  //displayResult('lights', lights);
+  displayResult('lights', lights.lights.map(function (x) {
+    return { name: x.name, id: x.id, on: x.state.on, brightness: x.state.bri };
+  }));
+});
+
+//const state = lightState.create().on().white(500, 100).colorLoop();
+//const state = lightState.create().on();
+//const state = lightState.create().on();
+var state = { "on": true, "bri": 255, "sat": 255, "hue": 12750 };
+var deviceId = 1;
+api.setLightState(deviceId, state, function (err, lights) {
+  if (err) displayResult('setLightState:ERR', err);
+  displayResult('setLightState', lights);
+});
+
+// ----------------------------------------------------------------------------
+// let thisHub = {};
+// const create = () => {};
+
+// for the UI, what fields are required
+var getFields = function getFields() {
+  return [];
+};
+
+var findHubsThunk = function findHubsThunk(callback) {
+  return function () {
+    return callback();
+  };
+};
+
+var executeThunk = function executeThunk(callback) {
+  // const execute = ({hub, deviceId, state, callback}) => {
+  //   const ip = hub.url.split('//')[1].split(':')[0];
+  //   const port = hub.url.split('//')[1].split(':')[1];
+  //   const brightness = Number(state);
+  //   const status = isNaN(brightness) ? state : 'on';
+  //   const zone = deviceId;
+
+  //   if (!thisHub[hub.hubId]) thisHub[hub.hubId] = create({ip, port});
+  //   thisHub[hub.hubId][status]({zone, brightness, callback});
+  // };
+
+  //const state = lightState.create().on().white(500, 100).colorLoop();
+  //const state = lightState.create().on();
+  //const state = lightState.create().on();
+  var state = { "on": true, "bri": 255, "sat": 255, "hue": 12750 };
+  var deviceId = 1;
+  api.setLightState(deviceId, state, function (err, lights) {
+    if (err) callback('setLightState:ERR - ' + err);
+    displayResult('setLightState', lights);
+  });
+  return function () {
+    return callback();
+  };
+};
+
+var getDevicesThunk = function getDevicesThunk(callback) {
+  return function () {
+    api.lights(function (err, lights) {
+      if (err) callback('lights:ERR - ' + err);
+      callback(null, lights.lights.map(function (x) {
+        return {
+          name: x.name,
+          id: x.id,
+          on: x.state.on,
+          brightness: x.state.bri
+        };
+      }));
+    });
+  };
+};
+
 var Hue = {
   name: "Hue",
-  urlPattern: "{base}/hue-DUMMY/{deviceId}/{state}"
+  urlPattern: "{base}/hue/{deviceId}/{state}"
 };
+
+Hue.getDevicesThunk = getDevicesThunk;
+Hue.getFields = getFields;
+Hue.updateUrl = undefined;
+Hue.executeThunk = executeThunk;
+Hue.findHubsThunk = findHubsThunk;
 
 module.exports = Hue;
 
@@ -670,18 +908,279 @@ module.exports = Hue;
 "use strict";
 
 
+/**
+ http://www.applamp.nl/service/applamp-api/
+ Filename: commands.js
+ AppLamp.nl led light API: wifi box byte commands
+ © AppLamp.nl: you can share,modify and use this code (commercially) as long as you
+ keep the referer "AppLamp.nl led light API" in the file header.
+
+ RESPECT AT LEAST 50 MS BETWEEN EACH SEND COMMAND TO PREVENT PACKAGE LOSS
+ The functions in this file will return the appropriate hex commands as 3 byte array
+ to send to an UDP-socket towards WIFI BOX-IP:8899 (see wifibox.js)
+
+ Example Usage in Node JS:
+ var cmd = require('commands.js');
+ example turn on all white bulbs on:
+ cmd.white.allOn();
+ set the hue of a color bulb to yellow
+ cmd.rgbw.hue(128);
+
+ **/
+
+var ColorRgbwCmd = function ColorRgbwCmd() {};
+var WhiteCmd = function WhiteCmd() {};
+var ColorRgbCmd = function ColorRgbCmd() {};
+//makes the rgb/rgbw/white variables globally available in NodeJS
+// for ex. use: commands.rgbw.hue(64);
+
+module.exports = { rgb: new ColorRgbCmd(),
+  rgbw: new ColorRgbwCmd(),
+  white: new WhiteCmd() };
+
+/*RGBW BULBS AND CONTROLLERS, 4-CHANNEL/ZONE MODELS */
+
+/* Switch ON() your light or make it ACTIVE
+* use function parameter `zone` with value '0' to target ALL zones,
+* value '1' for zone 1, value '2' for zone 2,... to 4
+* You can also use this command to link your bulbs
+* Prepend this command once for the appropriate zone to activate the zone
+* before using hue() / brightness() / whiteMode() / effectModeNext()
+*/
+ColorRgbwCmd.prototype.on = function (zone) {
+  return [[0x42, 0x45, 0x47, 0x49, 0x4B][zone], 0x00, 0x55];
+};
+
+/* use function parameter `zone` with value '0' to target ALL zones,
+* value '1' for zone 1, value '2' for zone 2,... to 4 */
+ColorRgbwCmd.prototype.off = function (zone) {
+  return [[0x41, 0x46, 0x48, 0x4A, 0x4C][zone], 0x00, 0x55];
+};
+
+/* Shortcut to ON(0) */
+ColorRgbwCmd.prototype.allOn = function () {
+  this.on(0);
+};
+ColorRgbwCmd.prototype.allOff = function () {
+  this.off(0);
+};
+
+/* Hue range 0-255 [targets last ON() activated bulb(s)] */
+ColorRgbwCmd.prototype.hue = function (decimal) {
+  var hex = decimal.toString(16);
+  hex = hex.length < 2 ? '0x0' + hex : '0x' + hex;
+  return [0x40, hex, 0x55];
+};
+/* Switch to white mode [targets last ON() activated bulb(s)] */
+ColorRgbwCmd.prototype.whiteMode = function () {
+  return [0xC2, 0x00, 0x55];
+};
+/* Brightness range 1-100 [targets last ON() activated bulb(s)]*/
+ColorRgbwCmd.prototype.brightness = function (percent) {
+
+  var brightnessIndex = Math.max(0, Math.ceil(percent / 100 * 20) - 1); //19 steps
+  return [0x4E, [0x02, 0x03, 0x04, 0x05, 0x08, 0x09, 0x0A, 0x0B, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x17, 0x18, 0x19][brightnessIndex], 0x55];
+};
+
+/* Effect mode next [targets last ON() activated bulb(s)] */
+ColorRgbwCmd.prototype.effectModeNext = function () {
+  return [0x4D, 0x00, 0x55];
+};
+ColorRgbwCmd.prototype.effectSpeedUp = function () {
+  return [0x44, 0x00, 0x55];
+};
+ColorRgbwCmd.prototype.effectSpeedDown = function () {
+  return [0x44, 0x00, 0x55];
+};
+
+/* DUAL WHITE BULBS & CONTROLLERS */
+
+/* Switch ON() your light or make it ACTIVE
+* use function parameter `zone` with value '0' to target ALL zones,
+* value '1' for zone 1, value '2' for zone 2,... to 4
+* You can also use this command to link your bulbs
+* Prepend this command once for the appropriate zone to activate the zone
+* before using brightUp() / brightDown() / warmer() / cooler() */
+WhiteCmd.prototype.on = function (zone) {
+  return [[0x45, 0x38, 0x3D, 0x37, 0x32][zone], 0x00, 0x55];
+};
+
+/* Switch OFF zone with value '0' to target ALL zones,
+* , value '1' for zone 1, value '2' for zone 2,... to 4 */
+WhiteCmd.prototype.off = function (zone) {
+  return [[0x39, 0x3B, 0x33, 0x3A, 0x36][zone], 0x00, 0x55];
+};
+
+/* Switch zone to Night Light Mode with value '0' to target ALL zones,
+* , value '1' for zone 1, value '2' for zone 2,... to 4 */
+WhiteCmd.prototype.nightMode = function (zone) {
+  return [[0xB9, 0x3B, 0x33, 0x3A, 0x36][zone], 0x00, 0x55];
+};
+WhiteCmd.prototype.allOn = function () {
+  return [0x45, 0x00, 0x55];
+};
+WhiteCmd.prototype.allOff = function () {
+  return [0x39, 0x00, 0x55];
+};
+WhiteCmd.prototype.brightUp = function () {
+  return [0x3c, 0x00, 0x55];
+};
+WhiteCmd.prototype.brightDown = function () {
+  return [0x34, 0x00, 0x55];
+};
+WhiteCmd.prototype.warmer = function () {
+  return [0x3E, 0x00, 0x55];
+};
+WhiteCmd.prototype.cooler = function () {
+  return [0x3F, 0x00, 0x55];
+};
+
+/* RGB BULBS & CONTROLLERS, PREVIOUS GNERATION SINGLE CHANNEL/ZONE*/
+
+ColorRgbCmd.prototype.off = function () {
+  return [0x21, 0x00, 0x55];
+};
+ColorRgbCmd.prototype.on = function () {
+  return [0x22, 0x00, 0x55];
+};
+ColorRgbCmd.prototype.hue = function (decimal) {
+  var hex = Number(decimal).toString(16);
+  hex = hex.length < 2 ? '0x0' + hex : '0x' + hex;
+  return [0x20, hex];
+};
+ColorRgbCmd.prototype.brightUp = function () {
+  return [0x23, 0x00];
+};
+ColorRgbCmd.prototype.brightDown = function () {
+  return [0x24, 0x00];
+};
+ColorRgbCmd.prototype.speedUp = function () {
+  return [0x25, 0x00];
+};
+ColorRgbCmd.prototype.speedDown = function () {
+  return [0x26, 0x00];
+};
+ColorRgbCmd.prototype.effectSpeedUp = function () {
+  return [0x27, 0x00];
+};
+ColorRgbCmd.prototype.effectSpeedDown = function () {
+  return [0x28, 0x00];
+};
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ http://www.applamp.nl/service/applamp-api/
+ Filename: wifibox.js
+ //AppLamp.nl Wifi LED light API: wifi box UDP socket, command sender
+ © AppLamp.nl: you can share,modify and use this code (commercially) as long as you
+ keep the referer "AppLamp.nl led light API" in the file header.
+
+
+ Usage in Node JS:
+     //load this wifi box class
+     var WifiBoxModule = require('wifibox.js');
+     var cmd = require('commands.js');
+     //create instance with wifi box ip and port
+     var box = new WifiBoxModule("192.168.1.255", 8899);
+     //send a command ( see commands.js )
+     box.command(cmd.rgbw.hue(180));
+     box.command(cmd.white.allOn());
+
+     TIP: You don't need to know the exact IP of your Wifi Box.
+          If you know your DHCP IP range, just replace the last digit to .255
+          That way you wil perform a UDP multicast and the wifi box will receive it.
+          So for example your network range is 192.168.1.1  to 192.18.1.254,
+          then use 192.18.1.255 to perform a multicast.
+ **/
+
+//var http = require('http');
+var dgram = __webpack_require__(48);
+
+var WifiBox = function WifiBox(ip, port) {
+    this.client = dgram.createSocket('udp4');
+    var default_ip = '192.168.1.255';
+    var default_port = 8899;
+    this.ip = ip != undefined && ip.length > 6 ? ip : default_ip;
+    this.port = port != undefined && port > 0 ? port : default_port;
+    return this;
+};
+
+WifiBox.prototype.command = function (threeByteArray, callback) {
+    var buffer = new Buffer(threeByteArray);
+    this.client.send(buffer, 0, buffer.length, this.port, this.ip, callback || function (err) {
+        if (err) {
+            //console.log("udp error:" + err);
+            throw err;
+        } else {
+            //console.log('bytes send: ' + [threeByteArray[0], threeByteArray[1], threeByteArray[2]])
+        }
+    });
+};
+
+WifiBox.prototype.toString = function () {
+    return 'WifiBox: { ip:' + this.ip + ':' + this.port + '}';
+};
+
+module.exports = WifiBox;
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports) {
+
+module.exports = require("statuses");
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var hue = __webpack_require__(6);
+
+module.exports = hue;
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var milight = __webpack_require__(3);
+
+var thisHub = {};
+
 // TODO: query milight for number of devices ??
 //const getDevices = () => [0, 1, 2, 3, 4];
 var getDevices = function getDevices() {
   return [0];
 }; //All
 
-var updateUrl = function updateUrl(url) {
-  //NOTE: this really does nothing, but it's a good example
-  var brightness = url.match(/([^\/]*)$/g)[0];
-  var newBrightness = brightness; //NOTE: change to some different value
-  var newUrl = url.replace(new RegExp(brightness + '$'), newBrightness);
-  return newUrl;
+var updateUrl = undefined;
+
+var execute = function execute(_ref) {
+  var hub = _ref.hub,
+      deviceId = _ref.deviceId,
+      state = _ref.state,
+      callback = _ref.callback;
+
+  var ip = hub.url.split('//')[1].split(':')[0];
+  var port = hub.url.split('//')[1].split(':')[1];
+  var brightness = Number(state);
+  var status = isNaN(brightness) ? state : 'on';
+  var zone = deviceId;
+  //console.log('----\n', JSON.stringify({hub, ip, port, status, brightness},null,'  '));
+
+
+  if (!thisHub[hub.hubId]) thisHub[hub.hubId] = milight.create({ ip: ip, port: port });
+  thisHub[hub.hubId][status]({ zone: zone, brightness: brightness, callback: callback });
 };
 
 //base is the hub base
@@ -694,11 +1193,37 @@ var Milight = {
 
 Milight.getDevices = getDevices;
 Milight.updateUrl = updateUrl;
+Milight.execute = execute;
 
 module.exports = Milight;
 
 /***/ }),
-/* 8 */
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var test = __webpack_require__(3);
+var milight = test.create({ ip: "192.168.1.56" });
+
+if (process.argv[2] === 'on') milight.on({
+	zone: 0,
+	brightness: process.argv[3] || 0,
+	callback: function callback(err, data) {
+		console.log('results: ', { err: err, data: [data[0] || 0, data[1] || 0, data[2] || 0] }); //eslint-disable-line  no-console
+		process.exit(err ? 1 : 0);
+	}
+});else milight.off({
+	zone: 0,
+	callback: function callback(err, data) {
+		console.log('results : ', { err: err, data: [data[0] || 0, data[1] || 0, data[2] || 0] }); //eslint-disable-line  no-console
+		process.exit(err ? 1 : 0);
+	}
+});
+
+/***/ }),
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -712,8 +1237,9 @@ var getDevices = function getDevices() {
 };
 
 var updateUrl = function updateUrl(url) {
-  var deviceId = url.split('wifiplug/')[1].split('/')[0];
-  var state = url.split('wifiplug/')[1].split('/')[1];
+  var deviceId = url.toLowerCase().split('wifiplug/')[1].split('/')[0];
+  var state = url.toLowerCase().split('wifiplug/')[1].split('/')[1];
+  state = state === 'on' ? 'off' : 'on'; //because wifi firmware is backwards
   var newUrl = "http://" + devices[deviceId].url + '/' + state;
   return newUrl;
 };
@@ -729,7 +1255,7 @@ WifiPlug.updateUrl = updateUrl;
 module.exports = WifiPlug;
 
 /***/ }),
-/* 9 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -743,66 +1269,66 @@ var Wink = {
 module.exports = Wink;
 
 /***/ }),
-/* 10 */
+/* 15 */
 /***/ (function(module, exports) {
 
 module.exports = require("assert");
 
 /***/ }),
-/* 11 */
+/* 16 */
 /***/ (function(module, exports) {
 
 module.exports = require("fs");
 
 /***/ }),
-/* 12 */
+/* 17 */
 /***/ (function(module, exports) {
 
 module.exports = require("koa-is-json");
 
 /***/ }),
-/* 13 */
+/* 18 */
 /***/ (function(module, exports) {
 
 module.exports = require("koa-request");
 
 /***/ }),
-/* 14 */
+/* 19 */
 /***/ (function(module, exports) {
 
 module.exports = require("on-finished");
 
 /***/ }),
-/* 15 */
+/* 20 */
 /***/ (function(module, exports) {
 
 module.exports = require("type-is");
 
 /***/ }),
-/* 16 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(__dirname, module) {
 
 var serverPort = __webpack_require__(0).serverPort;
-var route = __webpack_require__(53);
-var koa = __webpack_require__(28);
-var koaBodyParser = __webpack_require__(51);
-var koaStatic = __webpack_require__(54);
-var addTrailingSlashes = __webpack_require__(50);
+var route = __webpack_require__(59);
+var koa = __webpack_require__(33);
+var koaBodyParser = __webpack_require__(57);
+var koaStatic = __webpack_require__(60);
+var addTrailingSlashes = __webpack_require__(56);
 
 var app = module.exports = koa();
 
 var config = __webpack_require__(0);
-var database = __webpack_require__(21)(config, function () {} //empty callback swallows errors
+var database = __webpack_require__(26)(config, function () {} //empty callback swallows errors
 );
 
 //controllers
 var devices = __webpack_require__(1).attachDatabase(database);
-var hubs = __webpack_require__(4).attachDatabase(database);
-var emulator = __webpack_require__(19);
-var upnp = __webpack_require__(20);
+var hubs = __webpack_require__(5).attachDatabase(database);
+var emulator = __webpack_require__(24);
+var upnp = __webpack_require__(25);
 
 app.use(addTrailingSlashes());
 app.use(koaBodyParser());
@@ -831,35 +1357,45 @@ app.use(route.get('/api/:userId', emulator.root));
 app.use(route.get('/api/:userId/lights', emulator.list));
 app.use(route.get('/api/:userId/lights/:lightId', emulator.list));
 app.use(route.put('/api/:userId/lights/:lightId/state', emulator.update));
-__webpack_require__(26);
+__webpack_require__(31);
 app.use(route.get('/upnp/:deviceId/setup.xml', upnp.setup));
 
 if (!module.parent) {
 	var server = app.listen(serverPort);
-	__webpack_require__(27)(server); //lame, lame, lame
+	__webpack_require__(32)(server); //lame, lame, lame
 	console.log('listening on port ' + serverPort); //eslint-disable-line no-console
 }
-/* WEBPACK VAR INJECTION */}.call(exports, "/", __webpack_require__(32)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, "/", __webpack_require__(37)(module)))
 
 /***/ }),
-/* 17 */
+/* 22 */
 /***/ (function(module, exports) {
 
 module.exports = require("babel-polyfill");
 
 /***/ }),
-/* 18 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var map = {
-	"./hue": 6,
-	"./hue.js": 6,
-	"./milight": 7,
-	"./milight.js": 7,
-	"./wifiplug": 8,
-	"./wifiplug.js": 8,
-	"./wink": 9,
-	"./wink.js": 9
+	"./hue": 10,
+	"./hue.js": 10,
+	"./hue/index": 6,
+	"./hue/index.js": 6,
+	"./milight": 11,
+	"./milight.js": 11,
+	"./milight/commands": 7,
+	"./milight/commands.js": 7,
+	"./milight/index": 3,
+	"./milight/index.js": 3,
+	"./milight/test": 12,
+	"./milight/test.js": 12,
+	"./milight/wifibox": 8,
+	"./milight/wifibox.js": 8,
+	"./wifiplug": 13,
+	"./wifiplug.js": 13,
+	"./wink": 14,
+	"./wink.js": 14
 };
 function webpackContext(req) {
 	return __webpack_require__(webpackContextResolve(req));
@@ -875,19 +1411,19 @@ webpackContext.keys = function webpackContextKeys() {
 };
 webpackContext.resolve = webpackContextResolve;
 module.exports = webpackContext;
-webpackContext.id = 18;
+webpackContext.id = 23;
 
 
 /***/ }),
-/* 19 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var updateDevice = __webpack_require__(24);
+var updateDevice = __webpack_require__(29);
 var findThunk = __webpack_require__(1).findThunk;
-var getEmulatedDevice = __webpack_require__(22);
+var getEmulatedDevice = __webpack_require__(27);
 
 var ip = __webpack_require__(2);
 var baseUrl = 'http://' + ip.address();
@@ -1055,13 +1591,13 @@ module.exports.update = regeneratorRuntime.mark(function update(userId, lightId)
 });
 
 /***/ }),
-/* 20 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var hueUpnpTemplate = __webpack_require__(23);
+var hueUpnpTemplate = __webpack_require__(28);
 var uuid = __webpack_require__(0).uuid;
 var serverExternalPort = __webpack_require__(0).serverExternalPort;
 var serverRootDir = __webpack_require__(0).serverRootDir;
@@ -1096,7 +1632,7 @@ module.exports.setup = regeneratorRuntime.mark(function setup(deviceId) {
 });
 
 /***/ }),
-/* 21 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1104,10 +1640,10 @@ module.exports.setup = regeneratorRuntime.mark(function setup(deviceId) {
 
 /* eslint-disable no-console */
 
-var fs = __webpack_require__(11);
-var async = __webpack_require__(34);
-var Guid = __webpack_require__(58);
-var sqlite3 = __webpack_require__(63).verbose();
+var fs = __webpack_require__(16);
+var async = __webpack_require__(39);
+var Guid = __webpack_require__(65);
+var sqlite3 = __webpack_require__(70).verbose();
 
 var db;
 var dbClosed = false;
@@ -1219,7 +1755,7 @@ function initDatabase(config, callback) {
   var file = '';
   var exists = false;
   if (config.databaseFileName !== ':memory:') {
-    file = __webpack_require__(3).join(__dirname, config.databaseFileName);
+    file = __webpack_require__(4).join(__dirname, config.databaseFileName);
     exists = fs.existsSync(file);
   } else {
     file = ':memory:';
@@ -1284,7 +1820,7 @@ module.exports = initDatabase;
 /* WEBPACK VAR INJECTION */}.call(exports, "/"))
 
 /***/ }),
-/* 22 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1315,7 +1851,7 @@ module.exports = function getEmulatedDevice(device) {
 };
 
 /***/ }),
-/* 23 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1330,18 +1866,18 @@ module.exports = function (urlBase, friendlyName, uuid) {
 };
 
 /***/ }),
-/* 24 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 /* eslint-disable no-console*/
-var request = __webpack_require__(13);
+var request = __webpack_require__(18);
 var updateThunk = __webpack_require__(1).updateThunk;
 var findThunk = __webpack_require__(1).findThunk;
-var hubsFindThunk = __webpack_require__(4).findThunk;
-var getTemplatesThunk = __webpack_require__(4).getTemplatesThunk;
+var hubsFindThunk = __webpack_require__(5).findThunk;
+var getTemplatesThunk = __webpack_require__(5).getTemplatesThunk;
 var ip = __webpack_require__(2);
 var baseUrl = 'http://' + ip.address();
 var serverPort = __webpack_require__(0).serverPort;
@@ -1388,6 +1924,7 @@ module.exports = regeneratorRuntime.mark(function _callee(deviceId, payload) {
 
           console.log('updateUrl', updateUrl);
           //TODO: this probably doesn't ever get called, see controllers/hubs
+          //NOTE: this does get called when echo is updating device!
 
           if (!(updateUrl.indexOf('local-api') === 0)) {
             _context.next = 28;
@@ -1430,13 +1967,13 @@ module.exports = regeneratorRuntime.mark(function _callee(deviceId, payload) {
         case 32:
           response = _context.sent;
 
-          if (!(response.body !== 'ok')) {
+          if (~response.body.toLowerCase().indexOf('ok')) {
             _context.next = 36;
             break;
           }
 
-          console.log('response body of koa request to milight: ', response.body);
-          throw 'milights did not return an "okay" response';
+          console.log('response body of koa request to device: ', response.body);
+          throw 'device did not return an "okay" response';
 
         case 36:
           _context.next = 38;
@@ -1465,7 +2002,7 @@ module.exports = regeneratorRuntime.mark(function _callee(deviceId, payload) {
 });
 
 /***/ }),
-/* 25 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1529,7 +2066,7 @@ module.exports = function (serviceType, rinfo) {
 };
 
 /***/ }),
-/* 26 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1538,7 +2075,7 @@ module.exports = function (serviceType, rinfo) {
 var uuid = __webpack_require__(0).uuid;
 var ssdpPort = __webpack_require__(0).ssdpPort;
 var serverPort = __webpack_require__(0).serverPort;
-var Server = __webpack_require__(57).Server;
+var Server = __webpack_require__(64).Server;
 
 serverPort = serverPort ? ':' + serverPort : '';
 
@@ -1553,7 +2090,7 @@ var options = {
 var server = new Server(options);
 
 // the following is an overrride because node-ssdp is a little too rigid here
-server._respondToSearch = __webpack_require__(25);
+server._respondToSearch = __webpack_require__(30);
 server._nls = uuid;
 server.addUSN('urn:schemas-upnp-org:device:basic:1');
 server.addUSN('uuid:Socket-1_0-221438K0100073::urn:Belkin:device:**\r\n\r\n');
@@ -1567,7 +2104,7 @@ process.on('exit', function () {
 module.exports = server;
 
 /***/ }),
-/* 27 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1578,7 +2115,7 @@ module.exports = function (server) {
   // see https://www.bountysource.com/issues/23308082-continuous-ctrl-c-freezes-bash-started-via-git-cmd
   // see http://stackoverflow.com/questions/10021373/what-is-the-windows-equivalent-of-process-onsigint-in-node-js
   if (process.platform === "win32") {
-    global.lameStupid = __webpack_require__(62).createInterface({
+    global.lameStupid = __webpack_require__(69).createInterface({
       input: process.stdin
     });
     global.lameStupid.on("SIGINT", function () {
@@ -1595,7 +2132,7 @@ module.exports = function (server) {
 };
 
 /***/ }),
-/* 28 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1606,23 +2143,23 @@ module.exports = function (server) {
  * Module dependencies.
  */
 
-var debug = __webpack_require__(40)('koa:application');
-var Emitter = __webpack_require__(45).EventEmitter;
-var compose_es7 = __webpack_require__(36);
-var onFinished = __webpack_require__(14);
-var response = __webpack_require__(31);
-var compose = __webpack_require__(52);
-var isJSON = __webpack_require__(12);
-var context = __webpack_require__(29);
-var request = __webpack_require__(30);
-var statuses = __webpack_require__(5);
-var Cookies = __webpack_require__(39);
-var accepts = __webpack_require__(33);
-var assert = __webpack_require__(10);
-var Stream = __webpack_require__(64);
-var http = __webpack_require__(47);
-var only = __webpack_require__(59);
-var co = __webpack_require__(35);
+var debug = __webpack_require__(45)('koa:application');
+var Emitter = __webpack_require__(51).EventEmitter;
+var compose_es7 = __webpack_require__(41);
+var onFinished = __webpack_require__(19);
+var response = __webpack_require__(36);
+var compose = __webpack_require__(58);
+var isJSON = __webpack_require__(17);
+var context = __webpack_require__(34);
+var request = __webpack_require__(35);
+var statuses = __webpack_require__(9);
+var Cookies = __webpack_require__(44);
+var accepts = __webpack_require__(38);
+var assert = __webpack_require__(15);
+var Stream = __webpack_require__(71);
+var http = __webpack_require__(53);
+var only = __webpack_require__(66);
+var co = __webpack_require__(40);
 
 /**
  * Application prototype.
@@ -1827,7 +2364,7 @@ function respond() {
 }
 
 /***/ }),
-/* 29 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1838,10 +2375,10 @@ function respond() {
  * Module dependencies.
  */
 
-var createError = __webpack_require__(49);
-var httpAssert = __webpack_require__(48);
-var delegate = __webpack_require__(41);
-var statuses = __webpack_require__(5);
+var createError = __webpack_require__(55);
+var httpAssert = __webpack_require__(54);
+var delegate = __webpack_require__(46);
+var statuses = __webpack_require__(9);
 
 /**
  * Context prototype.
@@ -1985,7 +2522,7 @@ delegate(proto, 'response').method('attachment').method('redirect').method('remo
 delegate(proto, 'request').method('acceptsLanguages').method('acceptsEncodings').method('acceptsCharsets').method('accepts').method('get').method('is').access('querystring').access('idempotent').access('socket').access('search').access('method').access('query').access('path').access('url').getter('origin').getter('href').getter('subdomains').getter('protocol').getter('host').getter('hostname').getter('header').getter('headers').getter('secure').getter('stale').getter('fresh').getter('ips').getter('ip');
 
 /***/ }),
-/* 30 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1996,13 +2533,13 @@ delegate(proto, 'request').method('acceptsLanguages').method('acceptsEncodings')
  * Module dependencies.
  */
 
-var net = __webpack_require__(56);
-var contentType = __webpack_require__(38);
-var stringify = __webpack_require__(65).format;
-var parse = __webpack_require__(60);
-var qs = __webpack_require__(61);
-var typeis = __webpack_require__(15);
-var fresh = __webpack_require__(46);
+var net = __webpack_require__(62);
+var contentType = __webpack_require__(43);
+var stringify = __webpack_require__(72).format;
+var parse = __webpack_require__(67);
+var qs = __webpack_require__(68);
+var typeis = __webpack_require__(20);
+var fresh = __webpack_require__(52);
 
 /**
  * Prototype.
@@ -2616,7 +3153,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 31 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2627,18 +3164,18 @@ module.exports = {
  * Module dependencies.
  */
 
-var contentDisposition = __webpack_require__(37);
-var ensureErrorHandler = __webpack_require__(43);
-var getType = __webpack_require__(55).contentType;
-var onFinish = __webpack_require__(14);
-var isJSON = __webpack_require__(12);
-var escape = __webpack_require__(44);
-var typeis = __webpack_require__(15).is;
-var statuses = __webpack_require__(5);
-var destroy = __webpack_require__(42);
-var assert = __webpack_require__(10);
-var path = __webpack_require__(3);
-var _vary = __webpack_require__(66);
+var contentDisposition = __webpack_require__(42);
+var ensureErrorHandler = __webpack_require__(49);
+var getType = __webpack_require__(61).contentType;
+var onFinish = __webpack_require__(19);
+var isJSON = __webpack_require__(17);
+var escape = __webpack_require__(50);
+var typeis = __webpack_require__(20).is;
+var statuses = __webpack_require__(9);
+var destroy = __webpack_require__(47);
+var assert = __webpack_require__(15);
+var path = __webpack_require__(4);
+var _vary = __webpack_require__(73);
 var extname = path.extname;
 
 /**
@@ -3144,7 +3681,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 32 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3174,215 +3711,227 @@ module.exports = function (module) {
 };
 
 /***/ }),
-/* 33 */
+/* 38 */
 /***/ (function(module, exports) {
 
 module.exports = require("accepts");
 
 /***/ }),
-/* 34 */
+/* 39 */
 /***/ (function(module, exports) {
 
 module.exports = require("async");
 
 /***/ }),
-/* 35 */
+/* 40 */
 /***/ (function(module, exports) {
 
 module.exports = require("co");
 
 /***/ }),
-/* 36 */
+/* 41 */
 /***/ (function(module, exports) {
 
 module.exports = require("composition");
 
 /***/ }),
-/* 37 */
+/* 42 */
 /***/ (function(module, exports) {
 
 module.exports = require("content-disposition");
 
 /***/ }),
-/* 38 */
+/* 43 */
 /***/ (function(module, exports) {
 
 module.exports = require("content-type");
 
 /***/ }),
-/* 39 */
+/* 44 */
 /***/ (function(module, exports) {
 
 module.exports = require("cookies");
 
 /***/ }),
-/* 40 */
+/* 45 */
 /***/ (function(module, exports) {
 
 module.exports = require("debug");
 
 /***/ }),
-/* 41 */
+/* 46 */
 /***/ (function(module, exports) {
 
 module.exports = require("delegates");
 
 /***/ }),
-/* 42 */
+/* 47 */
 /***/ (function(module, exports) {
 
 module.exports = require("destroy");
 
 /***/ }),
-/* 43 */
-/***/ (function(module, exports) {
-
-module.exports = require("error-inject");
-
-/***/ }),
-/* 44 */
-/***/ (function(module, exports) {
-
-module.exports = require("escape-html");
-
-/***/ }),
-/* 45 */
-/***/ (function(module, exports) {
-
-module.exports = require("events");
-
-/***/ }),
-/* 46 */
-/***/ (function(module, exports) {
-
-module.exports = require("fresh");
-
-/***/ }),
-/* 47 */
-/***/ (function(module, exports) {
-
-module.exports = require("http");
-
-/***/ }),
 /* 48 */
 /***/ (function(module, exports) {
 
-module.exports = require("http-assert");
+module.exports = require("dgram");
 
 /***/ }),
 /* 49 */
 /***/ (function(module, exports) {
 
-module.exports = require("http-errors");
+module.exports = require("error-inject");
 
 /***/ }),
 /* 50 */
 /***/ (function(module, exports) {
 
-module.exports = require("koa-add-trailing-slashes");
+module.exports = require("escape-html");
 
 /***/ }),
 /* 51 */
 /***/ (function(module, exports) {
 
-module.exports = require("koa-bodyparser");
+module.exports = require("events");
 
 /***/ }),
 /* 52 */
 /***/ (function(module, exports) {
 
-module.exports = require("koa-compose");
+module.exports = require("fresh");
 
 /***/ }),
 /* 53 */
 /***/ (function(module, exports) {
 
-module.exports = require("koa-route");
+module.exports = require("http");
 
 /***/ }),
 /* 54 */
 /***/ (function(module, exports) {
 
-module.exports = require("koa-static");
+module.exports = require("http-assert");
 
 /***/ }),
 /* 55 */
 /***/ (function(module, exports) {
 
-module.exports = require("mime-types");
+module.exports = require("http-errors");
 
 /***/ }),
 /* 56 */
 /***/ (function(module, exports) {
 
-module.exports = require("net");
+module.exports = require("koa-add-trailing-slashes");
 
 /***/ }),
 /* 57 */
 /***/ (function(module, exports) {
 
-module.exports = require("node-ssdp");
+module.exports = require("koa-bodyparser");
 
 /***/ }),
 /* 58 */
 /***/ (function(module, exports) {
 
-module.exports = require("node-uuid");
+module.exports = require("koa-compose");
 
 /***/ }),
 /* 59 */
 /***/ (function(module, exports) {
 
-module.exports = require("only");
+module.exports = require("koa-route");
 
 /***/ }),
 /* 60 */
 /***/ (function(module, exports) {
 
-module.exports = require("parseurl");
+module.exports = require("koa-static");
 
 /***/ }),
 /* 61 */
 /***/ (function(module, exports) {
 
-module.exports = require("querystring");
+module.exports = require("mime-types");
 
 /***/ }),
 /* 62 */
 /***/ (function(module, exports) {
 
-module.exports = require("readline");
+module.exports = require("net");
 
 /***/ }),
 /* 63 */
 /***/ (function(module, exports) {
 
-module.exports = require("sqlite3");
+module.exports = require("node-hue-api");
 
 /***/ }),
 /* 64 */
 /***/ (function(module, exports) {
 
-module.exports = require("stream");
+module.exports = require("node-ssdp");
 
 /***/ }),
 /* 65 */
 /***/ (function(module, exports) {
 
-module.exports = require("url");
+module.exports = require("node-uuid");
 
 /***/ }),
 /* 66 */
 /***/ (function(module, exports) {
 
-module.exports = require("vary");
+module.exports = require("only");
 
 /***/ }),
 /* 67 */
+/***/ (function(module, exports) {
+
+module.exports = require("parseurl");
+
+/***/ }),
+/* 68 */
+/***/ (function(module, exports) {
+
+module.exports = require("querystring");
+
+/***/ }),
+/* 69 */
+/***/ (function(module, exports) {
+
+module.exports = require("readline");
+
+/***/ }),
+/* 70 */
+/***/ (function(module, exports) {
+
+module.exports = require("sqlite3");
+
+/***/ }),
+/* 71 */
+/***/ (function(module, exports) {
+
+module.exports = require("stream");
+
+/***/ }),
+/* 72 */
+/***/ (function(module, exports) {
+
+module.exports = require("url");
+
+/***/ }),
+/* 73 */
+/***/ (function(module, exports) {
+
+module.exports = require("vary");
+
+/***/ }),
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(17);
-module.exports = __webpack_require__(16);
+__webpack_require__(22);
+module.exports = __webpack_require__(21);
 
 
 /***/ })

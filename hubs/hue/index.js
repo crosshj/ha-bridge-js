@@ -37,7 +37,6 @@ api.setLightState(deviceId, state, function(err, lights) {
 
 // ----------------------------------------------------------------------------
 // let thisHub = {};
-
 // const create = () => {};
 
 // for the UI, what fields are required
@@ -98,4 +97,5 @@ Hue.getFields = getFields;
 Hue.updateUrl = undefined;
 Hue.executeThunk = executeThunk;
 Hue.findHubsThunk = findHubsThunk;
+
 module.exports = Hue;
