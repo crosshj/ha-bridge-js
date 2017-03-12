@@ -66,7 +66,7 @@ module.exports.create = function *create() {
     var hubTemplate = templates.find(x => x.name === hub.type);
     var hubDevices = hubTemplate.getDevices && hubTemplate.getDevices();
     if (hubTemplate.getDevicesThunk){
-      hubDevices = yield hubTemplate.getDevicesThunk();
+      hubDevices = yield hubTemplate.getDevicesThunk(hub);
     }
     for (var deviceId in hubDevices) {
       const device = {
