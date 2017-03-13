@@ -5,11 +5,11 @@ const HueApi = hue.HueApi;
 let thisHub = {};
 
 // for the UI, what fields are required
-// const getFields = () => [];
+const getFields = () => [];
 
-// const findHubsThunk = callback => {
-//   return () => callback();
-// };
+const findHubsThunk = callback => {
+  return () => callback();
+};
 
 const execute = ({hub, deviceId, state, callback}) => {
   if (!thisHub[hub.hubId]) {
@@ -59,7 +59,7 @@ const Hue = {
 Hue.getDevicesThunk = getDevicesThunk;
 Hue.updateUrl = undefined;
 Hue.execute = execute;
-//Hue.findHubsThunk = findHubsThunk;
-//Hue.getFields = getFields;
+Hue.findHubsThunk = findHubsThunk;
+Hue.getFields = getFields;
 
 module.exports = Hue;
