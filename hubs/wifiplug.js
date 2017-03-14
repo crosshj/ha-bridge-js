@@ -6,7 +6,7 @@ const getDevices = () => devices.map((device, index) => index);
 const updateUrl = url => {
   const deviceId = url.toLowerCase().split('wifiplug/')[1].split('/')[0];
   var state = url.toLowerCase().split('wifiplug/')[1].split('/')[1];
-  state = state === 'on' ? 'off' : 'on'; //because wifi firmware is backwards
+  state = state === 'off' ? 'on' : 'off'; //because wifi firmware is backwards
   var newUrl = "http://" + devices[deviceId].url + '/' + state;
   return newUrl;
 };
