@@ -22,10 +22,12 @@ const execute = ({hub, deviceId, state, callback}) => {
   const id = Number(deviceId) + 1;
   const brightness = Number(state);
   const status = isNaN(brightness) ? state : 'on';
-  const _state = {
-    on: status === 'on',
-    bri: brightness
+  let _state = {
+    on: status === 'on'
   };
+  if (status === 'on' && brightness){
+    _state.bri = brightness;
+  }
 
   thisHub[hub.uuid].setLightState(id, _state, function(err) {
       if (err) callback('setLightState:ERR - ' + err);
