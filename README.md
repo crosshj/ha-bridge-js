@@ -20,6 +20,7 @@ Ask Alexa to turn your device(s) on/off or change brightness
 - [X] configurator / UI in react
 - [X] plugin architecture and example hub plugins
 - [X] Milight plugin
+- [ ] https://github.com/WeeJeWel/node-hyperion-client
 - [ ] rooted Wink Hub plugin
 - [ ] easily add devices to hubs via mobile interface (discovery for plugins)
 - [ ] replace my Smartthings Hub functionality/usage
