@@ -27,6 +27,7 @@ Ask Alexa to turn your device(s) on/off or change brightness
 - [ ] color control of lights/scenes using Alexa/Echo
 - [ ] solid mobile/desktop experience
 - [ ] compatibilty with Hue apps
+- [ ] group lights
 
 ## credits / influence / direction / thank you
 https://github.com/armzilla/amazon-echo-ha-bridge   
