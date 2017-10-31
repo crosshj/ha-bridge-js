@@ -10,7 +10,8 @@
   };
 
   const getDevices = () => devices.map((device, index) => index);
-
+  const updateUrl = url => url;
+  
   Sonoff.getDevices = getDevices;
   Sonoff.updateUrl = updateUrl;
   
