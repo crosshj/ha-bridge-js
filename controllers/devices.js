@@ -53,9 +53,19 @@ module.exports.create = function *create() {
 module.exports.find = function *find(lightId) {
   try {
     var findResult = yield findThunk(lightId);
+    findResult.sort((a, b) => {
+      var textA = a.name.toUpperCase();
+      var textB = b.name.toUpperCase();
+      return (textA < textB)
+        ? -1 
+        : (textA > textB) 
+          ? 1 
+          : 0;
+    });
+
     this.body = findResult;
   } catch (error) {
-    this.status = 400; //Bad request
+    this.status = 200; //Bad request
     this.body = "error finding device:\n" + JSON.stringify(error, null, '\t');
   }
 };

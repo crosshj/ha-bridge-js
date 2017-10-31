@@ -61,17 +61,17 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	if ('serviceWorker' in navigator) {
-	  window.addEventListener('load', function () {
-	    navigator.serviceWorker.register('sw.js', { scope: './' }).then(function (registration) {
-	      // Registration was successful
-	      console.log('ServiceWorker registration successful with scope: ', registration.scope); //eslint-disable-line no-console
-	    }).catch(function (err) {
-	      // registration failed :(
-	      console.log('ServiceWorker registration failed: ', err); //eslint-disable-line no-console
-	    });
-	  });
-	}
+	// if ('serviceWorker' in navigator) {
+	//   window.addEventListener('load', function() {
+	//     navigator.serviceWorker.register('sw.js', {scope: './'}).then(function(registration) {
+	//       // Registration was successful
+	//       console.log('ServiceWorker registration successful with scope: ', registration.scope); //eslint-disable-line no-console
+	//     }).catch(function(err) {
+	//       // registration failed :(
+	//       console.log('ServiceWorker registration failed: ', err); //eslint-disable-line no-console
+	//     });
+	//   });
+	// }
 	
 	var apiUrl = location.origin + location.pathname + "local-api/";
 	

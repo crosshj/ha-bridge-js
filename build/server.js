@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 74);
+/******/ 	return __webpack_require__(__webpack_require__.s = 76);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -160,7 +160,7 @@ module.exports.create = regeneratorRuntime.mark(function create() {
 });
 
 module.exports.find = regeneratorRuntime.mark(function find(lightId) {
-  var findResult;
+  var findResult, sorted;
   return regeneratorRuntime.wrap(function find$(_context2) {
     while (1) {
       switch (_context2.prev = _context2.next) {
@@ -171,24 +171,28 @@ module.exports.find = regeneratorRuntime.mark(function find(lightId) {
 
         case 3:
           findResult = _context2.sent;
+          sorted = findResult.sort(function (a, b) {
+            return a.name - b.name;
+          });
+          //console.log(findResult);
 
-          this.body = findResult;
-          _context2.next = 11;
+          this.body = sorted;
+          _context2.next = 12;
           break;
 
-        case 7:
-          _context2.prev = 7;
+        case 8:
+          _context2.prev = 8;
           _context2.t0 = _context2['catch'](0);
 
-          this.status = 400; //Bad request
+          this.status = 200; //Bad request
           this.body = "error finding device:\n" + JSON.stringify(_context2.t0, null, '\t');
 
-        case 11:
+        case 12:
         case 'end':
           return _context2.stop();
       }
     }
-  }, find, this, [[0, 7]]);
+  }, find, this, [[0, 8]]);
 });
 
 module.exports.update = regeneratorRuntime.mark(function update(lightId) {
@@ -434,7 +438,7 @@ module.exports = require("path");
 var devicesCreateThunk = __webpack_require__(1).createThunk;
 var devicesUpdateThunk = __webpack_require__(1).updateThunk;
 var devicesFindThunk = __webpack_require__(1).findThunk;
-var request = __webpack_require__(18);
+var request = __webpack_require__(20);
 
 var db = function db() {
   console.log('database not initialized'); //eslint-disable-line no-console
@@ -473,10 +477,10 @@ function getTemplatesThunk() {
   return function (callback) {
     var normalizedPath = __webpack_require__(4).join(__dirname, "../hubs");
     var templates = [];
-    __webpack_require__(16).readdirSync(normalizedPath).filter(function (x) {
+    __webpack_require__(18).readdirSync(normalizedPath).filter(function (x) {
       return !!~x.indexOf('.js');
     }).forEach(function (file) {
-      templates.push(__webpack_require__(23)("./" + file));
+      templates.push(__webpack_require__(26)("./" + file));
     });
     callback(null, templates);
   };
@@ -509,11 +513,24 @@ module.exports.create = regeneratorRuntime.mark(function create() {
             return x.name === hub.type;
           });
           hubDevices = hubTemplate.getDevices && hubTemplate.getDevices();
+
+          if (!hubTemplate.getDevicesThunk) {
+            _context.next = 13;
+            break;
+          }
+
+          _context.next = 12;
+          return hubTemplate.getDevicesThunk(hub);
+
+        case 12:
+          hubDevices = _context.sent;
+
+        case 13:
           _context.t0 = regeneratorRuntime.keys(hubDevices);
 
-        case 10:
+        case 14:
           if ((_context.t1 = _context.t0()).done) {
-            _context.next = 17;
+            _context.next = 21;
             break;
           }
 
@@ -523,31 +540,31 @@ module.exports.create = regeneratorRuntime.mark(function create() {
             onUrl: 'local-api/hubs/' + hub.name + '/' + deviceId + "/on", //TODO: should come from template more...
             offUrl: 'local-api/hubs/' + hub.name + '/' + deviceId + "/off"
           };
-          _context.next = 15;
+          _context.next = 19;
           return devicesCreateThunk(device);
 
-        case 15:
-          _context.next = 10;
+        case 19:
+          _context.next = 14;
           break;
 
-        case 17:
+        case 21:
           this.body = "hub created";
-          _context.next = 24;
+          _context.next = 28;
           break;
 
-        case 20:
-          _context.prev = 20;
+        case 24:
+          _context.prev = 24;
           _context.t2 = _context['catch'](1);
 
           this.status = 400; //Bad request
           this.body = "error creating hub:\n" + JSON.stringify(_context.t2, null, '\t');
 
-        case 24:
+        case 28:
         case 'end':
           return _context.stop();
       }
     }
-  }, create, this, [[1, 20]]);
+  }, create, this, [[1, 24]]);
 });
 
 module.exports.actions = regeneratorRuntime.mark(function actions(hubName, deviceId, state) {
@@ -793,47 +810,10 @@ module.exports.remove = regeneratorRuntime.mark(function remove(hubId) {
 
 
 //https://www.developers.meethue.com/documentation/core-concepts
-
-//import {HueApi, lightState} from "node-hue-api";
-var hue = __webpack_require__(63);
-//const lightState = hue.lightState;
+var hue = __webpack_require__(21);
 var HueApi = hue.HueApi;
 
-var displayResult = function displayResult(location, result) {
-  console.log(location, ':\n', JSON.stringify(result, null, ' ')); //eslint-disable-line no-console
-};
-
-var hostname = "192.168.1.77";
-var username = "YGg7xeGD6w7Rbw7sLa8Y2qxv3rITaSM02Fym5NHk";
-
-var api = new HueApi(hostname, username);
-
-// api.getConfig(function(err, config) {
-//     if (err) displayResult('getConfig:ERR', err);
-//     displayResult('getConfig', config);
-// });
-
-api.lights(function (err, lights) {
-  if (err) displayResult('lights:ERR', err);
-  //displayResult('lights', lights);
-  displayResult('lights', lights.lights.map(function (x) {
-    return { name: x.name, id: x.id, on: x.state.on, brightness: x.state.bri };
-  }));
-});
-
-//const state = lightState.create().on().white(500, 100).colorLoop();
-//const state = lightState.create().on();
-//const state = lightState.create().on();
-var state = { "on": true, "bri": 255, "sat": 255, "hue": 12750 };
-var deviceId = 1;
-api.setLightState(deviceId, state, function (err, lights) {
-  if (err) displayResult('setLightState:ERR', err);
-  displayResult('setLightState', lights);
-});
-
-// ----------------------------------------------------------------------------
-// let thisHub = {};
-// const create = () => {};
+var thisHub = {};
 
 // for the UI, what fields are required
 var getFields = function getFields() {
@@ -846,44 +826,50 @@ var findHubsThunk = function findHubsThunk(callback) {
   };
 };
 
-var executeThunk = function executeThunk(callback) {
-  // const execute = ({hub, deviceId, state, callback}) => {
-  //   const ip = hub.url.split('//')[1].split(':')[0];
-  //   const port = hub.url.split('//')[1].split(':')[1];
-  //   const brightness = Number(state);
-  //   const status = isNaN(brightness) ? state : 'on';
-  //   const zone = deviceId;
+var execute = function execute(_ref) {
+  var hub = _ref.hub,
+      deviceId = _ref.deviceId,
+      state = _ref.state,
+      callback = _ref.callback;
 
-  //   if (!thisHub[hub.hubId]) thisHub[hub.hubId] = create({ip, port});
-  //   thisHub[hub.hubId][status]({zone, brightness, callback});
-  // };
+  if (!thisHub[hub.hubId]) {
+    var hostname = hub.url.split('//')[1].split(':')[0].split('/')[0];
+    var username = "YGg7xeGD6w7Rbw7sLa8Y2qxv3rITaSM02Fym5NHk";
+    var api = new HueApi(hostname, username);
+    thisHub[hub.uuid] = api;
+  }
 
-  //const state = lightState.create().on().white(500, 100).colorLoop();
-  //const state = lightState.create().on();
-  //const state = lightState.create().on();
-  var state = { "on": true, "bri": 255, "sat": 255, "hue": 12750 };
-  var deviceId = 1;
-  api.setLightState(deviceId, state, function (err, lights) {
-    if (err) callback('setLightState:ERR - ' + err);
-    displayResult('setLightState', lights);
-  });
-  return function () {
-    return callback();
+  var id = Number(deviceId) + 1;
+  var brightness = Number(state);
+  var status = isNaN(brightness) ? state : 'on';
+  var _state = {
+    on: status === 'on'
   };
+  if (status === 'on' && brightness) {
+    _state.bri = brightness;
+  }
+
+  thisHub[hub.uuid].setLightState(id, _state, function (err) {
+    if (err) callback('setLightState:ERR - ' + err);
+    callback(null, 'ok');
+  });
 };
 
-var getDevicesThunk = function getDevicesThunk(callback) {
-  return function () {
-    api.lights(function (err, lights) {
+var getDevicesThunk = function getDevicesThunk(hub) {
+  return function (callback) {
+    if (!thisHub[hub.hubId]) {
+      var hostname = hub.url.split('//')[1].split(':')[0].split('/')[0];
+      var username = "YGg7xeGD6w7Rbw7sLa8Y2qxv3rITaSM02Fym5NHk";
+      var api = new HueApi(hostname, username);
+      thisHub[hub.uuid] = api;
+    }
+
+    thisHub[hub.uuid].lights(function (err, lights) {
       if (err) callback('lights:ERR - ' + err);
-      callback(null, lights.lights.map(function (x) {
-        return {
-          name: x.name,
-          id: x.id,
-          on: x.state.on,
-          brightness: x.state.bri
-        };
-      }));
+      var devices = lights.lights.map(function (x) {
+        return x.name + '_' + x.id;
+      });
+      callback(null, devices);
     });
   };
 };
@@ -894,10 +880,10 @@ var Hue = {
 };
 
 Hue.getDevicesThunk = getDevicesThunk;
-Hue.getFields = getFields;
 Hue.updateUrl = undefined;
-Hue.executeThunk = executeThunk;
+Hue.execute = execute;
 Hue.findHubsThunk = findHubsThunk;
+Hue.getFields = getFields;
 
 module.exports = Hue;
 
@@ -1100,7 +1086,7 @@ ColorRgbCmd.prototype.effectSpeedDown = function () {
  **/
 
 //var http = require('http');
-var dgram = __webpack_require__(48);
+var dgram = __webpack_require__(51);
 
 var WifiBox = function WifiBox(ip, port) {
     this.client = dgram.createSocket('udp4');
@@ -1153,6 +1139,50 @@ module.exports = hue;
 "use strict";
 
 
+//import {HueApi, lightState} from "node-hue-api";
+var hue = __webpack_require__(21);
+//const lightState = hue.lightState;
+var HueApi = hue.HueApi;
+
+var displayResult = function displayResult(location, result) {
+    console.log(location, ':\n', JSON.stringify(result, null, ' ')); //eslint-disable-line no-console
+};
+
+var hostname = "192.168.1.77";
+var username = "YGg7xeGD6w7Rbw7sLa8Y2qxv3rITaSM02Fym5NHk";
+
+var api = new HueApi(hostname, username);
+
+// api.getConfig(function(err, config) {
+//     if (err) displayResult('getConfig:ERR', err);
+//     displayResult('getConfig', config);
+// });
+
+api.lights(function (err, lights) {
+    if (err) displayResult('lights:ERR', err);
+    //displayResult('lights', lights);
+    displayResult('lights', lights.lights.map(function (x) {
+        return { name: x.name, id: x.id, on: x.state.on, brightness: x.state.bri };
+    }));
+});
+
+//const state = lightState.create().on().white(500, 100).colorLoop();
+//const state = lightState.create().on();
+//const state = lightState.create().on();
+var state = { "on": true, "bri": 255, "sat": 255, "hue": 12750 };
+var deviceId = 1;
+api.setLightState(deviceId, state, function (err, lights) {
+    if (err) displayResult('setLightState:ERR', err);
+    displayResult('setLightState', lights);
+});
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 var milight = __webpack_require__(3);
 
 var thisHub = {};
@@ -1198,7 +1228,7 @@ Milight.execute = execute;
 module.exports = Milight;
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1223,7 +1253,37 @@ if (process.argv[2] === 'on') milight.on({
 });
 
 /***/ }),
-/* 13 */
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+// {host}/cm?cmnd=Power%20{on|off}
+
+var devices = [{ url: '192.168.1.113' }];
+
+var Sonoff = {
+  name: "Sonoff",
+  urlPattern: "{base}/cm?cmnd=Power%20{state}"
+};
+
+var getDevices = function getDevices() {
+  return devices.map(function (device, index) {
+    return index;
+  });
+};
+var updateUrl = function updateUrl(url) {
+  return url;
+};
+
+Sonoff.getDevices = getDevices;
+Sonoff.updateUrl = updateUrl;
+
+module.exports = Sonoff;
+
+/***/ }),
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1239,7 +1299,7 @@ var getDevices = function getDevices() {
 var updateUrl = function updateUrl(url) {
   var deviceId = url.toLowerCase().split('wifiplug/')[1].split('/')[0];
   var state = url.toLowerCase().split('wifiplug/')[1].split('/')[1];
-  state = state === 'on' ? 'off' : 'on'; //because wifi firmware is backwards
+  state = state === 'off' ? 'on' : 'off'; //because wifi firmware is backwards
   var newUrl = "http://" + devices[deviceId].url + '/' + state;
   return newUrl;
 };
@@ -1255,7 +1315,7 @@ WifiPlug.updateUrl = updateUrl;
 module.exports = WifiPlug;
 
 /***/ }),
-/* 14 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1269,66 +1329,72 @@ var Wink = {
 module.exports = Wink;
 
 /***/ }),
-/* 15 */
+/* 17 */
 /***/ (function(module, exports) {
 
 module.exports = require("assert");
 
 /***/ }),
-/* 16 */
+/* 18 */
 /***/ (function(module, exports) {
 
 module.exports = require("fs");
 
 /***/ }),
-/* 17 */
+/* 19 */
 /***/ (function(module, exports) {
 
 module.exports = require("koa-is-json");
 
 /***/ }),
-/* 18 */
+/* 20 */
 /***/ (function(module, exports) {
 
 module.exports = require("koa-request");
 
 /***/ }),
-/* 19 */
+/* 21 */
+/***/ (function(module, exports) {
+
+module.exports = require("node-hue-api");
+
+/***/ }),
+/* 22 */
 /***/ (function(module, exports) {
 
 module.exports = require("on-finished");
 
 /***/ }),
-/* 20 */
+/* 23 */
 /***/ (function(module, exports) {
 
 module.exports = require("type-is");
 
 /***/ }),
-/* 21 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(__dirname, module) {
 
 var serverPort = __webpack_require__(0).serverPort;
-var route = __webpack_require__(59);
-var koa = __webpack_require__(33);
-var koaBodyParser = __webpack_require__(57);
-var koaStatic = __webpack_require__(60);
-var addTrailingSlashes = __webpack_require__(56);
+var route = __webpack_require__(62);
+var koa = __webpack_require__(36);
+var koaBodyParser = __webpack_require__(60);
+var koaStatic = __webpack_require__(63);
+var addTrailingSlashes = __webpack_require__(59);
 
 var app = module.exports = koa();
 
 var config = __webpack_require__(0);
-var database = __webpack_require__(26)(config, function () {} //empty callback swallows errors
+var database = __webpack_require__(29)(config, function () {} //empty callback swallows errors
 );
 
 //controllers
 var devices = __webpack_require__(1).attachDatabase(database);
 var hubs = __webpack_require__(5).attachDatabase(database);
-var emulator = __webpack_require__(24);
-var upnp = __webpack_require__(25);
+var emulator = __webpack_require__(27);
+var upnp = __webpack_require__(28);
 
 app.use(addTrailingSlashes());
 app.use(koaBodyParser());
@@ -1357,24 +1423,24 @@ app.use(route.get('/api/:userId', emulator.root));
 app.use(route.get('/api/:userId/lights', emulator.list));
 app.use(route.get('/api/:userId/lights/:lightId', emulator.list));
 app.use(route.put('/api/:userId/lights/:lightId/state', emulator.update));
-__webpack_require__(31);
+__webpack_require__(34);
 app.use(route.get('/upnp/:deviceId/setup.xml', upnp.setup));
 
 if (!module.parent) {
 	var server = app.listen(serverPort);
-	__webpack_require__(32)(server); //lame, lame, lame
+	__webpack_require__(35)(server); //lame, lame, lame
 	console.log('listening on port ' + serverPort); //eslint-disable-line no-console
 }
-/* WEBPACK VAR INJECTION */}.call(exports, "/", __webpack_require__(37)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, "/", __webpack_require__(40)(module)))
 
 /***/ }),
-/* 22 */
+/* 25 */
 /***/ (function(module, exports) {
 
 module.exports = require("babel-polyfill");
 
 /***/ }),
-/* 23 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var map = {
@@ -1382,20 +1448,24 @@ var map = {
 	"./hue.js": 10,
 	"./hue/index": 6,
 	"./hue/index.js": 6,
-	"./milight": 11,
-	"./milight.js": 11,
+	"./hue/test": 11,
+	"./hue/test.js": 11,
+	"./milight": 12,
+	"./milight.js": 12,
 	"./milight/commands": 7,
 	"./milight/commands.js": 7,
 	"./milight/index": 3,
 	"./milight/index.js": 3,
-	"./milight/test": 12,
-	"./milight/test.js": 12,
+	"./milight/test": 13,
+	"./milight/test.js": 13,
 	"./milight/wifibox": 8,
 	"./milight/wifibox.js": 8,
-	"./wifiplug": 13,
-	"./wifiplug.js": 13,
-	"./wink": 14,
-	"./wink.js": 14
+	"./sonoff": 14,
+	"./sonoff.js": 14,
+	"./wifiplug": 15,
+	"./wifiplug.js": 15,
+	"./wink": 16,
+	"./wink.js": 16
 };
 function webpackContext(req) {
 	return __webpack_require__(webpackContextResolve(req));
@@ -1411,19 +1481,19 @@ webpackContext.keys = function webpackContextKeys() {
 };
 webpackContext.resolve = webpackContextResolve;
 module.exports = webpackContext;
-webpackContext.id = 23;
+webpackContext.id = 26;
 
 
 /***/ }),
-/* 24 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var updateDevice = __webpack_require__(29);
+var updateDevice = __webpack_require__(32);
 var findThunk = __webpack_require__(1).findThunk;
-var getEmulatedDevice = __webpack_require__(27);
+var getEmulatedDevice = __webpack_require__(30);
 
 var ip = __webpack_require__(2);
 var baseUrl = 'http://' + ip.address();
@@ -1591,13 +1661,13 @@ module.exports.update = regeneratorRuntime.mark(function update(userId, lightId)
 });
 
 /***/ }),
-/* 25 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var hueUpnpTemplate = __webpack_require__(28);
+var hueUpnpTemplate = __webpack_require__(31);
 var uuid = __webpack_require__(0).uuid;
 var serverExternalPort = __webpack_require__(0).serverExternalPort;
 var serverRootDir = __webpack_require__(0).serverRootDir;
@@ -1632,7 +1702,7 @@ module.exports.setup = regeneratorRuntime.mark(function setup(deviceId) {
 });
 
 /***/ }),
-/* 26 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1640,10 +1710,10 @@ module.exports.setup = regeneratorRuntime.mark(function setup(deviceId) {
 
 /* eslint-disable no-console */
 
-var fs = __webpack_require__(16);
-var async = __webpack_require__(39);
-var Guid = __webpack_require__(65);
-var sqlite3 = __webpack_require__(70).verbose();
+var fs = __webpack_require__(18);
+var async = __webpack_require__(42);
+var Guid = __webpack_require__(67);
+var sqlite3 = __webpack_require__(72).verbose();
 
 var db;
 var dbClosed = false;
@@ -1820,7 +1890,7 @@ module.exports = initDatabase;
 /* WEBPACK VAR INJECTION */}.call(exports, "/"))
 
 /***/ }),
-/* 27 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1851,7 +1921,7 @@ module.exports = function getEmulatedDevice(device) {
 };
 
 /***/ }),
-/* 28 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1866,14 +1936,14 @@ module.exports = function (urlBase, friendlyName, uuid) {
 };
 
 /***/ }),
-/* 29 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 /* eslint-disable no-console*/
-var request = __webpack_require__(18);
+var request = __webpack_require__(20);
 var updateThunk = __webpack_require__(1).updateThunk;
 var findThunk = __webpack_require__(1).findThunk;
 var hubsFindThunk = __webpack_require__(5).findThunk;
@@ -2002,7 +2072,7 @@ module.exports = regeneratorRuntime.mark(function _callee(deviceId, payload) {
 });
 
 /***/ }),
-/* 30 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2066,7 +2136,7 @@ module.exports = function (serviceType, rinfo) {
 };
 
 /***/ }),
-/* 31 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2075,7 +2145,7 @@ module.exports = function (serviceType, rinfo) {
 var uuid = __webpack_require__(0).uuid;
 var ssdpPort = __webpack_require__(0).ssdpPort;
 var serverPort = __webpack_require__(0).serverPort;
-var Server = __webpack_require__(64).Server;
+var Server = __webpack_require__(66).Server;
 
 serverPort = serverPort ? ':' + serverPort : '';
 
@@ -2090,7 +2160,7 @@ var options = {
 var server = new Server(options);
 
 // the following is an overrride because node-ssdp is a little too rigid here
-server._respondToSearch = __webpack_require__(30);
+server._respondToSearch = __webpack_require__(33);
 server._nls = uuid;
 server.addUSN('urn:schemas-upnp-org:device:basic:1');
 server.addUSN('uuid:Socket-1_0-221438K0100073::urn:Belkin:device:**\r\n\r\n');
@@ -2104,7 +2174,7 @@ process.on('exit', function () {
 module.exports = server;
 
 /***/ }),
-/* 32 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2115,7 +2185,7 @@ module.exports = function (server) {
   // see https://www.bountysource.com/issues/23308082-continuous-ctrl-c-freezes-bash-started-via-git-cmd
   // see http://stackoverflow.com/questions/10021373/what-is-the-windows-equivalent-of-process-onsigint-in-node-js
   if (process.platform === "win32") {
-    global.lameStupid = __webpack_require__(69).createInterface({
+    global.lameStupid = __webpack_require__(71).createInterface({
       input: process.stdin
     });
     global.lameStupid.on("SIGINT", function () {
@@ -2132,7 +2202,7 @@ module.exports = function (server) {
 };
 
 /***/ }),
-/* 33 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2143,23 +2213,23 @@ module.exports = function (server) {
  * Module dependencies.
  */
 
-var debug = __webpack_require__(45)('koa:application');
-var Emitter = __webpack_require__(51).EventEmitter;
-var compose_es7 = __webpack_require__(41);
-var onFinished = __webpack_require__(19);
-var response = __webpack_require__(36);
-var compose = __webpack_require__(58);
-var isJSON = __webpack_require__(17);
-var context = __webpack_require__(34);
-var request = __webpack_require__(35);
+var debug = __webpack_require__(48)('koa:application');
+var Emitter = __webpack_require__(54).EventEmitter;
+var compose_es7 = __webpack_require__(44);
+var onFinished = __webpack_require__(22);
+var response = __webpack_require__(39);
+var compose = __webpack_require__(61);
+var isJSON = __webpack_require__(19);
+var context = __webpack_require__(37);
+var request = __webpack_require__(38);
 var statuses = __webpack_require__(9);
-var Cookies = __webpack_require__(44);
-var accepts = __webpack_require__(38);
-var assert = __webpack_require__(15);
-var Stream = __webpack_require__(71);
-var http = __webpack_require__(53);
-var only = __webpack_require__(66);
-var co = __webpack_require__(40);
+var Cookies = __webpack_require__(47);
+var accepts = __webpack_require__(41);
+var assert = __webpack_require__(17);
+var Stream = __webpack_require__(73);
+var http = __webpack_require__(56);
+var only = __webpack_require__(68);
+var co = __webpack_require__(43);
 
 /**
  * Application prototype.
@@ -2364,7 +2434,7 @@ function respond() {
 }
 
 /***/ }),
-/* 34 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2375,9 +2445,9 @@ function respond() {
  * Module dependencies.
  */
 
-var createError = __webpack_require__(55);
-var httpAssert = __webpack_require__(54);
-var delegate = __webpack_require__(46);
+var createError = __webpack_require__(58);
+var httpAssert = __webpack_require__(57);
+var delegate = __webpack_require__(49);
 var statuses = __webpack_require__(9);
 
 /**
@@ -2522,7 +2592,7 @@ delegate(proto, 'response').method('attachment').method('redirect').method('remo
 delegate(proto, 'request').method('acceptsLanguages').method('acceptsEncodings').method('acceptsCharsets').method('accepts').method('get').method('is').access('querystring').access('idempotent').access('socket').access('search').access('method').access('query').access('path').access('url').getter('origin').getter('href').getter('subdomains').getter('protocol').getter('host').getter('hostname').getter('header').getter('headers').getter('secure').getter('stale').getter('fresh').getter('ips').getter('ip');
 
 /***/ }),
-/* 35 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2533,13 +2603,13 @@ delegate(proto, 'request').method('acceptsLanguages').method('acceptsEncodings')
  * Module dependencies.
  */
 
-var net = __webpack_require__(62);
-var contentType = __webpack_require__(43);
-var stringify = __webpack_require__(72).format;
-var parse = __webpack_require__(67);
-var qs = __webpack_require__(68);
-var typeis = __webpack_require__(20);
-var fresh = __webpack_require__(52);
+var net = __webpack_require__(65);
+var contentType = __webpack_require__(46);
+var stringify = __webpack_require__(74).format;
+var parse = __webpack_require__(69);
+var qs = __webpack_require__(70);
+var typeis = __webpack_require__(23);
+var fresh = __webpack_require__(55);
 
 /**
  * Prototype.
@@ -3153,7 +3223,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 36 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3164,18 +3234,18 @@ module.exports = {
  * Module dependencies.
  */
 
-var contentDisposition = __webpack_require__(42);
-var ensureErrorHandler = __webpack_require__(49);
-var getType = __webpack_require__(61).contentType;
-var onFinish = __webpack_require__(19);
-var isJSON = __webpack_require__(17);
-var escape = __webpack_require__(50);
-var typeis = __webpack_require__(20).is;
+var contentDisposition = __webpack_require__(45);
+var ensureErrorHandler = __webpack_require__(52);
+var getType = __webpack_require__(64).contentType;
+var onFinish = __webpack_require__(22);
+var isJSON = __webpack_require__(19);
+var escape = __webpack_require__(53);
+var typeis = __webpack_require__(23).is;
 var statuses = __webpack_require__(9);
-var destroy = __webpack_require__(47);
-var assert = __webpack_require__(15);
+var destroy = __webpack_require__(50);
+var assert = __webpack_require__(17);
 var path = __webpack_require__(4);
-var _vary = __webpack_require__(73);
+var _vary = __webpack_require__(75);
 var extname = path.extname;
 
 /**
@@ -3681,7 +3751,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 37 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3711,227 +3781,221 @@ module.exports = function (module) {
 };
 
 /***/ }),
-/* 38 */
+/* 41 */
 /***/ (function(module, exports) {
 
 module.exports = require("accepts");
 
 /***/ }),
-/* 39 */
+/* 42 */
 /***/ (function(module, exports) {
 
 module.exports = require("async");
 
 /***/ }),
-/* 40 */
+/* 43 */
 /***/ (function(module, exports) {
 
 module.exports = require("co");
 
 /***/ }),
-/* 41 */
+/* 44 */
 /***/ (function(module, exports) {
 
 module.exports = require("composition");
 
 /***/ }),
-/* 42 */
+/* 45 */
 /***/ (function(module, exports) {
 
 module.exports = require("content-disposition");
 
 /***/ }),
-/* 43 */
+/* 46 */
 /***/ (function(module, exports) {
 
 module.exports = require("content-type");
 
 /***/ }),
-/* 44 */
+/* 47 */
 /***/ (function(module, exports) {
 
 module.exports = require("cookies");
 
 /***/ }),
-/* 45 */
+/* 48 */
 /***/ (function(module, exports) {
 
 module.exports = require("debug");
 
 /***/ }),
-/* 46 */
+/* 49 */
 /***/ (function(module, exports) {
 
 module.exports = require("delegates");
 
 /***/ }),
-/* 47 */
+/* 50 */
 /***/ (function(module, exports) {
 
 module.exports = require("destroy");
 
 /***/ }),
-/* 48 */
+/* 51 */
 /***/ (function(module, exports) {
 
 module.exports = require("dgram");
 
 /***/ }),
-/* 49 */
+/* 52 */
 /***/ (function(module, exports) {
 
 module.exports = require("error-inject");
 
 /***/ }),
-/* 50 */
+/* 53 */
 /***/ (function(module, exports) {
 
 module.exports = require("escape-html");
 
 /***/ }),
-/* 51 */
+/* 54 */
 /***/ (function(module, exports) {
 
 module.exports = require("events");
 
 /***/ }),
-/* 52 */
+/* 55 */
 /***/ (function(module, exports) {
 
 module.exports = require("fresh");
 
 /***/ }),
-/* 53 */
+/* 56 */
 /***/ (function(module, exports) {
 
 module.exports = require("http");
 
 /***/ }),
-/* 54 */
+/* 57 */
 /***/ (function(module, exports) {
 
 module.exports = require("http-assert");
 
 /***/ }),
-/* 55 */
+/* 58 */
 /***/ (function(module, exports) {
 
 module.exports = require("http-errors");
 
 /***/ }),
-/* 56 */
+/* 59 */
 /***/ (function(module, exports) {
 
 module.exports = require("koa-add-trailing-slashes");
 
 /***/ }),
-/* 57 */
+/* 60 */
 /***/ (function(module, exports) {
 
 module.exports = require("koa-bodyparser");
 
 /***/ }),
-/* 58 */
+/* 61 */
 /***/ (function(module, exports) {
 
 module.exports = require("koa-compose");
 
 /***/ }),
-/* 59 */
+/* 62 */
 /***/ (function(module, exports) {
 
 module.exports = require("koa-route");
 
 /***/ }),
-/* 60 */
+/* 63 */
 /***/ (function(module, exports) {
 
 module.exports = require("koa-static");
 
 /***/ }),
-/* 61 */
+/* 64 */
 /***/ (function(module, exports) {
 
 module.exports = require("mime-types");
 
 /***/ }),
-/* 62 */
+/* 65 */
 /***/ (function(module, exports) {
 
 module.exports = require("net");
 
 /***/ }),
-/* 63 */
-/***/ (function(module, exports) {
-
-module.exports = require("node-hue-api");
-
-/***/ }),
-/* 64 */
+/* 66 */
 /***/ (function(module, exports) {
 
 module.exports = require("node-ssdp");
 
 /***/ }),
-/* 65 */
+/* 67 */
 /***/ (function(module, exports) {
 
 module.exports = require("node-uuid");
 
 /***/ }),
-/* 66 */
+/* 68 */
 /***/ (function(module, exports) {
 
 module.exports = require("only");
 
 /***/ }),
-/* 67 */
+/* 69 */
 /***/ (function(module, exports) {
 
 module.exports = require("parseurl");
 
 /***/ }),
-/* 68 */
+/* 70 */
 /***/ (function(module, exports) {
 
 module.exports = require("querystring");
 
 /***/ }),
-/* 69 */
+/* 71 */
 /***/ (function(module, exports) {
 
 module.exports = require("readline");
 
 /***/ }),
-/* 70 */
+/* 72 */
 /***/ (function(module, exports) {
 
 module.exports = require("sqlite3");
 
 /***/ }),
-/* 71 */
+/* 73 */
 /***/ (function(module, exports) {
 
 module.exports = require("stream");
 
 /***/ }),
-/* 72 */
+/* 74 */
 /***/ (function(module, exports) {
 
 module.exports = require("url");
 
 /***/ }),
-/* 73 */
+/* 75 */
 /***/ (function(module, exports) {
 
 module.exports = require("vary");
 
 /***/ }),
-/* 74 */
+/* 76 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(22);
-module.exports = __webpack_require__(21);
+__webpack_require__(25);
+module.exports = __webpack_require__(24);
 
 
 /***/ })
