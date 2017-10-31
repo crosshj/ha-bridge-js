@@ -1,6 +1,6 @@
 // {host}/cm?cmnd=Power%20{on|off}
 
-  const devices = [
+const devices = [
     { url: '192.168.1.113' }
   ];
   
