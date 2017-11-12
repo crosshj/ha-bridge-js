@@ -36,7 +36,7 @@ function DeviceList({
 
                 return (
                   <tr key={key}>
-                      <td>{device.name}</td>
+                      <td>{device.displayName}</td>
                       <td className="text-center">
                           {/*
                           <button className="btn btn-info" onClick={() => handleDeviceChange('on', device.name)}>ON</button>
