@@ -28,6 +28,7 @@ Ask Alexa to turn your device(s) on/off or change brightness
 - [ ] solid mobile/desktop experience
 - [ ] compatibilty with Hue apps
 - [ ] group lights
+- [ ] Sonoff - https://github.com/arendst/Sonoff-Tasmota/wiki/Commands
 
 ## credits / influence / direction / thank you
 https://github.com/armzilla/amazon-echo-ha-bridge   
