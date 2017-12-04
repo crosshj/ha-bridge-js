@@ -23261,7 +23261,7 @@
 	              _react2.default.createElement(
 	                'td',
 	                null,
-	                device.name
+	                device.displayName
 	              ),
 	              _react2.default.createElement(
 	                'td',

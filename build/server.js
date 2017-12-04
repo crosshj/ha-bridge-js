@@ -160,7 +160,7 @@ module.exports.create = regeneratorRuntime.mark(function create() {
 });
 
 module.exports.find = regeneratorRuntime.mark(function find(lightId) {
-  var findResult, sorted;
+  var findResult;
   return regeneratorRuntime.wrap(function find$(_context2) {
     while (1) {
       switch (_context2.prev = _context2.next) {
@@ -171,12 +171,14 @@ module.exports.find = regeneratorRuntime.mark(function find(lightId) {
 
         case 3:
           findResult = _context2.sent;
-          sorted = findResult.sort(function (a, b) {
-            return a.name - b.name;
-          });
-          //console.log(findResult);
 
-          this.body = sorted;
+          findResult.sort(function (a, b) {
+            var textA = a.displayName.toUpperCase();
+            var textB = b.displayName.toUpperCase();
+            return textA < textB ? -1 : textA > textB ? 1 : 0;
+          });
+
+          this.body = findResult;
           _context2.next = 12;
           break;
 
@@ -184,7 +186,7 @@ module.exports.find = regeneratorRuntime.mark(function find(lightId) {
           _context2.prev = 8;
           _context2.t0 = _context2['catch'](0);
 
-          this.status = 200; //Bad request
+          this.status = 400; //Bad request
           this.body = "error finding device:\n" + JSON.stringify(_context2.t0, null, '\t');
 
         case 12:
