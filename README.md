@@ -30,6 +30,8 @@ Ask Alexa to turn your device(s) on/off or change brightness
 - [ ] group lights
 - [ ] Sonoff - https://github.com/arendst/Sonoff-Tasmota/wiki/Commands
 
+also see https://trello.com/b/C0Ao3HRg/home-automation for project status and TODO's
+
 ## credits / influence / direction / thank you
 https://github.com/armzilla/amazon-echo-ha-bridge   
 https://github.com/bwssytems/ha-bridge
