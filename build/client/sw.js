@@ -51,11 +51,11 @@
 	
 	/*
 	from https://gist.github.com/adactio/fbaa3a5952774553f5e7
-	 https://googlechrome.github.io/samples/service-worker/custom-offline-page/
+	  https://googlechrome.github.io/samples/service-worker/custom-offline-page/
 	https://github.com/phamann/embrace-the-network/blob/master/src/stale-while-revalidate/sw.js
 	https://github.com/GoogleChrome/sw-toolbox#defining-routes
 	https://github.com/mozilla/serviceworker-cookbook/tree/master/virtual-server
-	 OTHER:
+	  OTHER:
 	https://googlechrome.github.io/samples/service-worker/post-message/index.html
 	*/
 	

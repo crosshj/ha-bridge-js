@@ -61,17 +61,17 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	// if ('serviceWorker' in navigator) {
-	//   window.addEventListener('load', function() {
-	//     navigator.serviceWorker.register('sw.js', {scope: './'}).then(function(registration) {
-	//       // Registration was successful
-	//       console.log('ServiceWorker registration successful with scope: ', registration.scope); //eslint-disable-line no-console
-	//     }).catch(function(err) {
-	//       // registration failed :(
-	//       console.log('ServiceWorker registration failed: ', err); //eslint-disable-line no-console
-	//     });
-	//   });
-	// }
+	if ('serviceWorker' in navigator) {
+	  window.addEventListener('load', function () {
+	    navigator.serviceWorker.register('sw.js', { scope: './' }).then(function (registration) {
+	      // Registration was successful
+	      console.log('ServiceWorker registration successful with scope: ', registration.scope); //eslint-disable-line no-console
+	    }).catch(function (err) {
+	      // registration failed :(
+	      console.log('ServiceWorker registration failed: ', err); //eslint-disable-line no-console
+	    });
+	  });
+	}
 	
 	var apiUrl = location.origin + location.pathname + "local-api/";
 	
@@ -402,6 +402,12 @@
 	process.removeListener = noop;
 	process.removeAllListeners = noop;
 	process.emit = noop;
+	process.prependListener = noop;
+	process.prependOnceListener = noop;
+	
+	process.listeners = function (name) {
+	    return [];
+	};
 	
 	process.binding = function (name) {
 	    throw new Error('process.binding is not supported');
@@ -887,11 +893,9 @@
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 */
 	
@@ -1340,12 +1344,10 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
-	 * Copyright 2014-2015, Facebook, Inc.
-	 * All rights reserved.
+	 * Copyright (c) 2014-present, Facebook, Inc.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 */
 	
@@ -1363,45 +1365,43 @@
 	var warning = emptyFunction;
 	
 	if (process.env.NODE_ENV !== 'production') {
-	  (function () {
-	    var printWarning = function printWarning(format) {
-	      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-	        args[_key - 1] = arguments[_key];
+	  var printWarning = function printWarning(format) {
+	    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+	      args[_key - 1] = arguments[_key];
+	    }
+	
+	    var argIndex = 0;
+	    var message = 'Warning: ' + format.replace(/%s/g, function () {
+	      return args[argIndex++];
+	    });
+	    if (typeof console !== 'undefined') {
+	      console.error(message);
+	    }
+	    try {
+	      // --- Welcome to debugging React ---
+	      // This error was thrown as a convenience so that you can use this stack
+	      // to find the callsite that caused this warning to fire.
+	      throw new Error(message);
+	    } catch (x) {}
+	  };
+	
+	  warning = function warning(condition, format) {
+	    if (format === undefined) {
+	      throw new Error('`warning(condition, format, ...args)` requires a warning ' + 'message argument');
+	    }
+	
+	    if (format.indexOf('Failed Composite propType: ') === 0) {
+	      return; // Ignore CompositeComponent proptype check.
+	    }
+	
+	    if (!condition) {
+	      for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
+	        args[_key2 - 2] = arguments[_key2];
 	      }
 	
-	      var argIndex = 0;
-	      var message = 'Warning: ' + format.replace(/%s/g, function () {
-	        return args[argIndex++];
-	      });
-	      if (typeof console !== 'undefined') {
-	        console.error(message);
-	      }
-	      try {
-	        // --- Welcome to debugging React ---
-	        // This error was thrown as a convenience so that you can use this stack
-	        // to find the callsite that caused this warning to fire.
-	        throw new Error(message);
-	      } catch (x) {}
-	    };
-	
-	    warning = function warning(condition, format) {
-	      if (format === undefined) {
-	        throw new Error('`warning(condition, format, ...args)` requires a warning ' + 'message argument');
-	      }
-	
-	      if (format.indexOf('Failed Composite propType: ') === 0) {
-	        return; // Ignore CompositeComponent proptype check.
-	      }
-	
-	      if (!condition) {
-	        for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
-	          args[_key2 - 2] = arguments[_key2];
-	        }
-	
-	        printWarning.apply(undefined, [format].concat(args));
-	      }
-	    };
-	  })();
+	      printWarning.apply(undefined, [format].concat(args));
+	    }
+	  };
 	}
 	
 	module.exports = warning;
@@ -1418,11 +1418,9 @@
 	
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 * 
 	 */
@@ -2055,11 +2053,9 @@
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 */
 	
@@ -6594,11 +6590,9 @@
 
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 */
 	
@@ -8872,11 +8866,9 @@
 	
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 * @typechecks
 	 */
@@ -8911,11 +8903,9 @@
 
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 * @typechecks
 	 */
@@ -10742,11 +10732,9 @@
 	
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 * @typechecks
 	 */
@@ -10834,11 +10822,9 @@
 	
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 * @typechecks
 	 */
@@ -10971,11 +10957,9 @@
 	
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 */
 	
@@ -12155,11 +12139,9 @@
 
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 */
 	
@@ -12561,11 +12543,9 @@
 
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 * @typechecks
 	 */
@@ -12610,11 +12590,9 @@
 	
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 * @typechecks
 	 */
@@ -12734,11 +12712,9 @@
 
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 * @typechecks
 	 */
@@ -12782,11 +12758,9 @@
 	
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 * @typechecks
 	 */
@@ -12820,11 +12794,9 @@
 
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 * 
 	 * @typechecks static-only
@@ -16535,11 +16507,9 @@
 
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 * @typechecks
 	 * 
@@ -18710,17 +18680,8 @@
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
 	 *
-	 * Licensed under the Apache License, Version 2.0 (the "License");
-	 * you may not use this file except in compliance with the License.
-	 * You may obtain a copy of the License at
-	 *
-	 * http://www.apache.org/licenses/LICENSE-2.0
-	 *
-	 * Unless required by applicable law or agreed to in writing, software
-	 * distributed under the License is distributed on an "AS IS" BASIS,
-	 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	 * See the License for the specific language governing permissions and
-	 * limitations under the License.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 * @typechecks
 	 */
@@ -18799,11 +18760,9 @@
 
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 * @typechecks
 	 */
@@ -18822,10 +18781,10 @@
 	 */
 	
 	function getUnboundedScrollPosition(scrollable) {
-	  if (scrollable === window) {
+	  if (scrollable.Window && scrollable instanceof scrollable.Window) {
 	    return {
-	      x: window.pageXOffset || document.documentElement.scrollLeft,
-	      y: window.pageYOffset || document.documentElement.scrollTop
+	      x: scrollable.pageXOffset || scrollable.document.documentElement.scrollLeft,
+	      y: scrollable.pageYOffset || scrollable.document.documentElement.scrollTop
 	    };
 	  }
 	  return {
@@ -19505,11 +19464,9 @@
 	
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 * 
 	 */
@@ -19552,11 +19509,9 @@
 	
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 * @typechecks
 	 */
@@ -19584,11 +19539,9 @@
 	
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 * @typechecks
 	 */
@@ -19601,7 +19554,9 @@
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	function isNode(object) {
-	  return !!(object && (typeof Node === 'function' ? object instanceof Node : (typeof object === 'undefined' ? 'undefined' : _typeof(object)) === 'object' && typeof object.nodeType === 'number' && typeof object.nodeName === 'string'));
+	  var doc = object ? object.ownerDocument || object : document;
+	  var defaultView = doc.defaultView || window;
+	  return !!(object && (typeof defaultView.Node === 'function' ? object instanceof defaultView.Node : (typeof object === 'undefined' ? 'undefined' : _typeof(object)) === 'object' && typeof object.nodeType === 'number' && typeof object.nodeName === 'string'));
 	}
 	
 	module.exports = isNode;
@@ -19617,11 +19572,9 @@
 	
 	/**
 	 * Copyright (c) 2013-present, Facebook, Inc.
-	 * All rights reserved.
 	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
+	 * This source code is licensed under the MIT license found in the
+	 * LICENSE file in the root directory of this source tree.
 	 *
 	 * @typechecks
 	 */
@@ -19634,16 +19587,20 @@
 	 *
 	 * The activeElement will be null only if the document or document body is not
 	 * yet defined.
+	 *
+	 * @param {?DOMDocument} doc Defaults to current document.
+	 * @return {?DOMElement}
 	 */
 	
-	function getActiveElement() /*?DOMElement*/{
-	  if (typeof document === 'undefined') {
+	function getActiveElement(doc) /*?DOMElement*/{
+	  doc = doc || (typeof document !== 'undefined' ? document : undefined);
+	  if (typeof doc === 'undefined') {
 	    return null;
 	  }
 	  try {
-	    return document.activeElement || document.body;
+	    return doc.activeElement || doc.body;
 	  } catch (e) {
-	    return document.body;
+	    return doc.body;
 	  }
 	}
 	
@@ -22140,8 +22097,6 @@
 	  value: true
 	});
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
 	var _react = __webpack_require__(/*! react */ 1);
@@ -22294,32 +22249,26 @@
 	      }
 	
 	      if (change === 'delete') {
-	        var _ret = function () {
-	          //DELETE
-	          var url = _this3.state.url + '/' + device.uuid;
-	          var config = {
-	            method: 'DELETE'
-	          };
-	          fetch(url, config).then(function (r) {
-	            return r.text();
-	          }).then(function (body) {
-	            console.log('Response from ' + url + ' : ' + body); //eslint-disable-line no-console
-	            _this3.setState({ tempDevice: {}, selectedDevice: undefined });
-	            _this3.handleReload();
-	          }).catch(function (e) {
-	            return console.log('Error:\n', e);
-	          }); //eslint-disable-line no-console
+	        //DELETE
+	        var _url = this.state.url + '/' + device.uuid;
+	        var config = {
+	          method: 'DELETE'
+	        };
+	        fetch(_url, config).then(function (r) {
+	          return r.text();
+	        }).then(function (body) {
+	          console.log('Response from ' + _url + ' : ' + body); //eslint-disable-line no-console
+	          _this3.setState({ tempDevice: {}, selectedDevice: undefined });
+	          _this3.handleReload();
+	        }).catch(function (e) {
+	          return console.log('Error:\n', e);
+	        }); //eslint-disable-line no-console
 	
-	          /* eslint-disable no-console*/
-	          console.log('TODO: change device status to pending, on repsonse change device status properly');
-	          console.log(change + " device: " + device.name);
-	          /* eslint-enable no-console*/
-	          return {
-	            v: void 0
-	          };
-	        }();
-	
-	        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+	        /* eslint-disable no-console*/
+	        console.log('TODO: change device status to pending, on repsonse change device status properly');
+	        console.log(change + " device: " + device.name);
+	        /* eslint-enable no-console*/
+	        return;
 	      }
 	    }
 	  }, {
@@ -22328,74 +22277,62 @@
 	      var _this4 = this;
 	
 	      if (prop === 'add') {
-	        var _ret2 = function () {
-	          //POST
-	          var url = _this4.state.url;
-	          var config = {
-	            method: 'POST',
-	            headers: new Headers({
-	              'Content-Type': 'application/json'
-	            }),
-	            body: JSON.stringify(value)
-	          };
-	          fetch(url, config).then(function (r) {
-	            return r.text();
-	          }).then(function (body) {
-	            console.log('Response from ' + url + ' : ' + body); //eslint-disable-line no-console
-	            _this4.setState({ tempDevice: {}, selectedDevice: undefined });
-	            _this4.handleReload();
-	          }).catch(function (e) {
-	            return console.log('Error:\n', e);
-	          }); //eslint-disable-line no-console
+	        //POST
+	        var url = this.state.url;
+	        var config = {
+	          method: 'POST',
+	          headers: new Headers({
+	            'Content-Type': 'application/json'
+	          }),
+	          body: JSON.stringify(value)
+	        };
+	        fetch(url, config).then(function (r) {
+	          return r.text();
+	        }).then(function (body) {
+	          console.log('Response from ' + url + ' : ' + body); //eslint-disable-line no-console
+	          _this4.setState({ tempDevice: {}, selectedDevice: undefined });
+	          _this4.handleReload();
+	        }).catch(function (e) {
+	          return console.log('Error:\n', e);
+	        }); //eslint-disable-line no-console
 	
-	          /* eslint-disable no-console*/
-	          console.log('TODO: change device status to pending, on repsonse change device status properly');
+	        /* eslint-disable no-console*/
+	        console.log('TODO: change device status to pending, on repsonse change device status properly');
 	
-	          console.log(prop + " device: " + value.name);
-	          /* eslint-enable no-console*/
-	          return {
-	            v: void 0
-	          };
-	        }();
-	
-	        if ((typeof _ret2 === 'undefined' ? 'undefined' : _typeof(_ret2)) === "object") return _ret2.v;
+	        console.log(prop + " device: " + value.name);
+	        /* eslint-enable no-console*/
+	        return;
 	      }
 	
 	      if (prop === 'update') {
-	        var _ret3 = function () {
-	          //PUT
-	          var url = _this4.state.url + '/' + value.uuid;
-	          var config = {
-	            method: 'PUT',
-	            headers: new Headers({
-	              'Content-Type': 'application/json'
-	            }),
-	            body: JSON.stringify({
-	              name: value.name,
-	              onUrl: value.onUrl,
-	              offUrl: value.offUrl
-	            })
-	          };
-	          fetch(url, config).then(function (r) {
-	            return r.text();
-	          }).then(function (body) {
-	            console.log('Response from ' + url + ' : ' + body); //eslint-disable-line no-console
-	            _this4.setState({ tempDevice: {}, selectedDevice: undefined });
-	            _this4.handleReload();
-	          }).catch(function (e) {
-	            return console.log('Error:\n', e);
-	          }); //eslint-disable-line no-console
+	        //PUT
+	        var _url2 = this.state.url + '/' + value.uuid;
+	        var _config = {
+	          method: 'PUT',
+	          headers: new Headers({
+	            'Content-Type': 'application/json'
+	          }),
+	          body: JSON.stringify({
+	            name: value.name,
+	            onUrl: value.onUrl,
+	            offUrl: value.offUrl
+	          })
+	        };
+	        fetch(_url2, _config).then(function (r) {
+	          return r.text();
+	        }).then(function (body) {
+	          console.log('Response from ' + _url2 + ' : ' + body); //eslint-disable-line no-console
+	          _this4.setState({ tempDevice: {}, selectedDevice: undefined });
+	          _this4.handleReload();
+	        }).catch(function (e) {
+	          return console.log('Error:\n', e);
+	        }); //eslint-disable-line no-console
 	
-	          /* eslint-disable no-console*/
-	          console.log('TODO: change device status to pending, on repsonse change device status properly');
-	          console.log(prop + " device: " + value.name);
-	          /* eslint-enable no-console*/
-	          return {
-	            v: void 0
-	          };
-	        }();
-	
-	        if ((typeof _ret3 === 'undefined' ? 'undefined' : _typeof(_ret3)) === "object") return _ret3.v;
+	        /* eslint-disable no-console*/
+	        console.log('TODO: change device status to pending, on repsonse change device status properly');
+	        console.log(prop + " device: " + value.name);
+	        /* eslint-enable no-console*/
+	        return;
 	      }
 	
 	      if (prop === 'test') {
@@ -22422,30 +22359,24 @@
 	      this.setState({ tempDevice: {}, selectedDevice: undefined });
 	
 	      if (change === 'delete') {
-	        var _ret4 = function () {
-	          //PUT
-	          var url = _this5.state.hubUrl + "/" + _this5.state.selectedHub.uuid;
-	          var config = {
-	            method: 'DELETE',
-	            headers: new Headers({
-	              'Content-Type': 'application/json'
-	            })
-	          };
-	          fetch(url, config).then(function (r) {
-	            return r.text();
-	          }).then(function (body) {
-	            console.log('Response from ' + url + ' : ' + body); //eslint-disable-line no-console
-	            _this5.setState({ newHub: undefined });
-	            _this5.handleReload();
-	          }).catch(function (e) {
-	            return console.log('Error:\n', e);
-	          }); //eslint-disable-line no-console
-	          return {
-	            v: void 0
-	          };
-	        }();
-	
-	        if ((typeof _ret4 === 'undefined' ? 'undefined' : _typeof(_ret4)) === "object") return _ret4.v;
+	        //PUT
+	        var url = this.state.hubUrl + "/" + this.state.selectedHub.uuid;
+	        var config = {
+	          method: 'DELETE',
+	          headers: new Headers({
+	            'Content-Type': 'application/json'
+	          })
+	        };
+	        fetch(url, config).then(function (r) {
+	          return r.text();
+	        }).then(function (body) {
+	          console.log('Response from ' + url + ' : ' + body); //eslint-disable-line no-console
+	          _this5.setState({ newHub: undefined });
+	          _this5.handleReload();
+	        }).catch(function (e) {
+	          return console.log('Error:\n', e);
+	        }); //eslint-disable-line no-console
+	        return;
 	      }
 	
 	      if (change === 'cancel') {
@@ -22461,32 +22392,26 @@
 	      }
 	
 	      if (change === 'update') {
-	        var _ret5 = function () {
-	          //PUT
-	          newHub.type = newHub.type || _this5.state.hubTypes[0].name;
-	          var url = _this5.state.hubUrl + "/" + _this5.state.selectedHub.uuid;
-	          var config = {
-	            method: 'PUT',
-	            headers: new Headers({
-	              'Content-Type': 'application/json'
-	            }),
-	            body: JSON.stringify(newHub)
-	          };
-	          fetch(url, config).then(function (r) {
-	            return r.text();
-	          }).then(function (body) {
-	            console.log('Response from ' + url + ' : ' + body); //eslint-disable-line no-console
-	            _this5.setState({ newHub: undefined });
-	            _this5.handleReload();
-	          }).catch(function (e) {
-	            return console.log('Error:\n', e);
-	          }); //eslint-disable-line no-console
-	          return {
-	            v: void 0
-	          };
-	        }();
-	
-	        if ((typeof _ret5 === 'undefined' ? 'undefined' : _typeof(_ret5)) === "object") return _ret5.v;
+	        //PUT
+	        newHub.type = newHub.type || this.state.hubTypes[0].name;
+	        var _url3 = this.state.hubUrl + "/" + this.state.selectedHub.uuid;
+	        var _config2 = {
+	          method: 'PUT',
+	          headers: new Headers({
+	            'Content-Type': 'application/json'
+	          }),
+	          body: JSON.stringify(newHub)
+	        };
+	        fetch(_url3, _config2).then(function (r) {
+	          return r.text();
+	        }).then(function (body) {
+	          console.log('Response from ' + _url3 + ' : ' + body); //eslint-disable-line no-console
+	          _this5.setState({ newHub: undefined });
+	          _this5.handleReload();
+	        }).catch(function (e) {
+	          return console.log('Error:\n', e);
+	        }); //eslint-disable-line no-console
+	        return;
 	      }
 	
 	      if (!newHub) {
@@ -22497,27 +22422,25 @@
 	            types: this.state.hubTypes
 	          } });
 	      } else {
-	        (function () {
-	          //POST
-	          newHub.type = newHub.type || _this5.state.hubTypes[0].name;
-	          var url = _this5.state.hubUrl;
-	          var config = {
-	            method: 'POST',
-	            headers: new Headers({
-	              'Content-Type': 'application/json'
-	            }),
-	            body: JSON.stringify(newHub)
-	          };
-	          fetch(url, config).then(function (r) {
-	            return r.text();
-	          }).then(function (body) {
-	            console.log('Response from ' + url + ' : ' + body); //eslint-disable-line no-console
-	            _this5.setState({ newHub: undefined });
-	            _this5.handleReload();
-	          }).catch(function (e) {
-	            return console.log('Error:\n', e);
-	          }); //eslint-disable-line no-console
-	        })();
+	        //POST
+	        newHub.type = newHub.type || this.state.hubTypes[0].name;
+	        var _url4 = this.state.hubUrl;
+	        var _config3 = {
+	          method: 'POST',
+	          headers: new Headers({
+	            'Content-Type': 'application/json'
+	          }),
+	          body: JSON.stringify(newHub)
+	        };
+	        fetch(_url4, _config3).then(function (r) {
+	          return r.text();
+	        }).then(function (body) {
+	          console.log('Response from ' + _url4 + ' : ' + body); //eslint-disable-line no-console
+	          _this5.setState({ newHub: undefined });
+	          _this5.handleReload();
+	        }).catch(function (e) {
+	          return console.log('Error:\n', e);
+	        }); //eslint-disable-line no-console
 	      }
 	    }
 	  }, {
