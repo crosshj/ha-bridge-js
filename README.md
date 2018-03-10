@@ -32,6 +32,18 @@ Ask Alexa to turn your device(s) on/off or change brightness
 
 also see https://trello.com/b/C0Ao3HRg/home-automation for project status and TODO's
 
+## Docker / node / Ubuntu gotcha
+Won't be able to bind node or Docker to port < 1024 unless...
+``` 
+sudo setcap 'cap_net_bind_service=+ep' `which node`
+```
+AND / OR
+```
+sudo setcap 'cap_net_bind_service=+ep' `which docker`
+```
+
 ## credits / influence / direction / thank you
 https://github.com/armzilla/amazon-echo-ha-bridge   
 https://github.com/bwssytems/ha-bridge
+
+

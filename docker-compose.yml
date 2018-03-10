@@ -1,0 +1,15 @@
+version: "2"
+services:
+  node:
+    image: "node:8"
+    user: "node"
+    working_dir: /home/harrison/repos/ha-bridge-js
+    environment:
+      - NODE_ENV=production
+      - PORT=8282
+    volumes:
+      - ./:/home/harrison/repos/ha-bridge-js
+    ports:
+      - "82:8282"
+      - "1900:1900"
+    command: "node app"
