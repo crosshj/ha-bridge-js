@@ -1,17 +1,17 @@
 version: "2"
 services:
-  ha-bridge:
+  home:
     image: "node:8-alpine"
     user: "node"
     working_dir: /home/harrison/repos/ha-bridge-js
-    container_name: ha-bridge
+    container_name: home
     environment:
       - NODE_ENV=production
       - PORT=8282
     volumes:
       - ./:/home/harrison/repos/ha-bridge-js
     ports:
-      - "82:8282"
+      - "8282:8282"
       - "1900:1900"
     command: "node app"
 networks:
