@@ -98,9 +98,10 @@ module.exports.actions = function *actions(hubName, deviceId, state) {
     const executeThunk = ({hub, device, state, deviceId}) => callback => hubTemplate.execute({hub, device, deviceId, state, callback});
     response = yield executeThunk({hub, device, state, deviceId});
   }else{
+    var translatedDeviceId = hubTemplate.getDevices && hubTemplate.getDevices()[deviceId];
     var url = hubTemplate.urlPattern
       .replace('{base}', hub.url)
-      .replace('{deviceId}', deviceId)
+      .replace('{deviceId}', translatedDeviceId || deviceId)
       .replace('{state}', state);
     hubTemplate.updateUrl && (url = hubTemplate.updateUrl(url));
 
