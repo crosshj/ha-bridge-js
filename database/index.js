@@ -56,6 +56,7 @@ function createDevice(device, callback) {
     device.status || "off",
     device.uuid,
     device.name || '',
+    device.displayName || device.name || '',
     device.level || 100,
     device.deviceType || '',
     device.offUrl || '',

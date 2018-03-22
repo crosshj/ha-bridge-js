@@ -1,10 +1,14 @@
 
+const getDevices = () => [5];
+const updateUrl = url => url;
+
 var Wink = {
   name: "Wink",
   urlPattern: "{base}/change/{deviceId}/1/{state}"
 };
 
-Wink.getDevices = () => [5];
+Wink.getDevices = getDevices;
+Wink.updateUrl = url => url;
 
 module.exports = Wink;
 
