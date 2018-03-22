@@ -3,7 +3,7 @@
 
 Use an emulated Philips Hue bridge to tie your home automation together, complete with voice control via Amazon Echo/Dot.   
 
-This bridge allows you to customize control of your devices *locally* using TCP and UDP with pending support for ZWave / ZigBee / Bluetooth using Wink hub radios and IR using IR blaster.
+This bridge allows you to customize control of your devices *locally* using TCP and UDP with support for ZWave / ZigBee / Bluetooth using Wink hub radios (via plugin) and IR using IR blaster (pending).
 
 ![image](https://cloud.githubusercontent.com/assets/1816471/23290958/cb9ad8ac-fa22-11e6-933e-d006e1657538.png)
 
@@ -20,15 +20,17 @@ Ask Alexa to turn your device(s) on/off or change brightness
 - [X] configurator / UI in react
 - [X] plugin architecture and example hub plugins
 - [X] Milight plugin
-- [ ] https://github.com/WeeJeWel/node-hyperion-client
-- [ ] rooted Wink Hub plugin
-- [ ] easily add devices to hubs via mobile interface (discovery for plugins)
+- [X] Sonoff - https://github.com/arendst/Sonoff-Tasmota/wiki/Commands
+- [X] rooted Wink Hub plugin
+- [ ] hyperion plugin - https://github.com/WeeJeWel/node-hyperion-client
 - [ ] replace my Smartthings Hub functionality/usage
-- [ ] color control of lights/scenes using Alexa/Echo
-- [ ] solid mobile/desktop experience
+- [ ] brightness control
+- [ ] color control
+- [ ] light scenes (versus group) with color
 - [ ] compatibilty with Hue apps
-- [ ] group lights
-- [ ] Sonoff - https://github.com/arendst/Sonoff-Tasmota/wiki/Commands
+- [ ] group lights, use hub groups
+- [ ] delete hub device when deleting hub
+- [ ] hub discovery, device discovery
 
 also see https://trello.com/b/C0Ao3HRg/home-automation for project status and TODO's
 

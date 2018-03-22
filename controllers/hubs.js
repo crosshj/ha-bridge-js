@@ -88,7 +88,6 @@ module.exports.actions = function *actions(hubName, deviceId, state) {
   var deviceName = hubName + ':' + deviceId;
   var allDevices = yield devicesFindThunk();
   var device = allDevices.find(x => x.name === deviceName);
-
   var hub = allHubs.find(x => x.name === hubName);
   var templates = yield getTemplatesThunk();
   var hubTemplate = templates.find(x => x.name === hub.type);
@@ -108,7 +107,6 @@ module.exports.actions = function *actions(hubName, deviceId, state) {
     var options = {url};
     response = yield request(options);
   }
-
   yield devicesUpdateThunk(device.uuid, 'status', state); //lightId, field.name, field.value
   //console.log(JSON.stringify({url, response}, null, '  ')); //{url, hub, hubTemplate, deviceId, state}, null, ' '));
   this.body = response;
