@@ -61,13 +61,20 @@ module.exports.getTemplatesThunk = getTemplatesThunk;
 module.exports.create = function *create() {
   var hub = this.request.body;
   try {
+    // create hub in database
     yield createThunk(hub);
+    
+    // get template from file system
     var templates = yield getTemplatesThunk();
     var hubTemplate = templates.find(x => x.name === hub.type);
+    
+    // get devices from template, may need to make async call
     var hubDevices = hubTemplate.getDevices && hubTemplate.getDevices();
     if (hubTemplate.getDevicesThunk){
       hubDevices = yield hubTemplate.getDevicesThunk(hub);
     }
+
+    // create devices in database
     for (var deviceId in hubDevices) {
       const device = {
         name: hub.name + ':' + deviceId,
@@ -76,6 +83,7 @@ module.exports.create = function *create() {
       };
       yield devicesCreateThunk(device);
     }
+    // done
     this.body = "hub created";
   } catch (error) {
     this.status = 400; //Bad request

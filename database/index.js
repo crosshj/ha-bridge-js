@@ -59,8 +59,8 @@ function createDevice(device, callback) {
     device.displayName || device.name || '',
     device.level || 100,
     device.deviceType || '',
-    device.offUrl || '',
-    device.onUrl || '',
+    device.offUrl || '',  //should be built and not stored ?
+    device.onUrl || '',   //should be built and not stored ?
     device.httpVerb || 'GET',
     device.contentType || '',
     device.contentBody || ''

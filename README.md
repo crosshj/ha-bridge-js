@@ -32,6 +32,11 @@ Ask Alexa to turn your device(s) on/off or change brightness
 - [ ] delete hub device when deleting hub
 - [ ] hub discovery, device discovery
 
+# discover devices
+```
+nmap 192.168.1.* -n -sP | grep report | awk '{print $5}'
+```
+
 also see https://trello.com/b/C0Ao3HRg/home-automation for project status and TODO's
 
 ## Docker / node / Ubuntu gotcha
