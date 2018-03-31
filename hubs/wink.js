@@ -1,3 +1,6 @@
+/*
+https://hackaday.io/project/4787-wink-hub-hacking/details
+*/
 
 const getDevices = () => [5];
 const updateUrl = url => url;
